@@ -290,6 +290,171 @@ print(f"Result: {result}")
                   </CardContent>
                 </Card>
               </TabsContent>
+
+              <TabsContent value="ai" className="px-4 pb-4 space-y-4">
+                {/* AI Controls */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Sparkles className="w-5 h-5 text-accent" />
+                      AI Assistant
+                    </CardTitle>
+                    <CardDescription>
+                      Get intelligent help with your coding practice
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={getAIHint}
+                          disabled={isLoadingAI}
+                          className="flex-1"
+                        >
+                          <Lightbulb className="w-4 h-4 mr-2" />
+                          Get Hint (Level {hintLevel})
+                        </Button>
+                        <select
+                          value={hintLevel}
+                          onChange={(e) => setHintLevel(Number(e.target.value))}
+                          className="px-2 py-1 text-sm border rounded"
+                        >
+                          <option value={1}>Easy</option>
+                          <option value={2}>Medium</option>
+                          <option value={3}>Detailed</option>
+                        </select>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={analyzeCode}
+                        disabled={isLoadingAI || !code.trim()}
+                        className="w-full"
+                      >
+                        <BarChart3 className="w-4 h-4 mr-2" />
+                        Analyze My Code
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* AI Hint */}
+                {aiHint && (
+                  <Card className="border-accent/50 bg-accent/5">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-accent">
+                        <Lightbulb className="w-5 h-5" />
+                        AI Hint
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <Alert>
+                          <HelpCircle className="h-4 w-4" />
+                          <AlertDescription>
+                            <strong>Hint:</strong> {aiHint.hint}
+                          </AlertDescription>
+                        </Alert>
+                        {aiHint.explanation && (
+                          <p className="text-sm text-muted-foreground">
+                            <strong>Why this helps:</strong> {aiHint.explanation}
+                          </p>
+                        )}
+                        {aiHint.next_step && (
+                          <p className="text-sm text-accent">
+                            <strong>Next step:</strong> {aiHint.next_step}
+                          </p>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* AI Analysis */}
+                {aiAnalysis && (
+                  <Card className="border-primary/50 bg-primary/5">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-primary">
+                        <Brain className="w-5 h-5" />
+                        Code Analysis
+                      </CardTitle>
+                      <CardDescription>
+                        AI-powered feedback on your solution
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {aiAnalysis.score && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium">Overall Score:</span>
+                            <Badge variant="secondary">{aiAnalysis.score}/100</Badge>
+                          </div>
+                        )}
+
+                        {aiAnalysis.feedback && (
+                          <div className="space-y-2">
+                            {aiAnalysis.feedback.correctness && (
+                              <div className="text-sm">
+                                <strong>Correctness:</strong> {aiAnalysis.feedback.correctness}
+                              </div>
+                            )}
+                            {aiAnalysis.feedback.efficiency && (
+                              <div className="text-sm">
+                                <strong>Efficiency:</strong> {aiAnalysis.feedback.efficiency}
+                              </div>
+                            )}
+                            {aiAnalysis.feedback.style && (
+                              <div className="text-sm">
+                                <strong>Style:</strong> {aiAnalysis.feedback.style}
+                              </div>
+                            )}
+                            {aiAnalysis.feedback.suggestions && (
+                              <div className="text-sm">
+                                <strong>Suggestions:</strong> {aiAnalysis.feedback.suggestions}
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {aiAnalysis.explanation && (
+                          <Alert>
+                            <AlertDescription>
+                              <strong>Code Explanation:</strong> {aiAnalysis.explanation}
+                            </AlertDescription>
+                          </Alert>
+                        )}
+
+                        {aiAnalysis.alternative_approaches && aiAnalysis.alternative_approaches.length > 0 && (
+                          <div>
+                            <h4 className="font-semibold text-sm mb-2">Alternative Approaches:</h4>
+                            <ul className="text-sm space-y-1">
+                              {aiAnalysis.alternative_approaches.map((approach: string, index: number) => (
+                                <li key={index} className="text-muted-foreground">• {approach}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {!aiHint && !aiAnalysis && (
+                  <Card className="border-dashed">
+                    <CardContent className="pt-6">
+                      <div className="text-center text-muted-foreground">
+                        <Brain className="w-12 h-12 mx-auto mb-3 text-muted-foreground/50" />
+                        <p className="font-medium mb-2">AI Assistant Ready</p>
+                        <p className="text-sm">
+                          Click "Get Hint" for guidance or "Analyze My Code" for detailed feedback
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </TabsContent>
             </Tabs>
           </div>
         )}
