@@ -188,6 +188,26 @@ export default function StudentDashboard() {
                   </Button>
                 </CardContent>
               </Card>
+
+              <Card className="hover:shadow-lg transition-shadow border-accent/50">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Brain className="w-5 h-5 text-accent" />
+                    AI Generator
+                  </CardTitle>
+                  <CardDescription>
+                    Create custom problems with AI
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Link to="/ai/question-generator" className="w-full">
+                    <Button variant="outline" className="w-full border-accent text-accent hover:bg-accent hover:text-accent-foreground">
+                      <Brain className="w-4 h-4 mr-2" />
+                      Generate Questions
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
             </div>
 
             {/* Recent Activity */}
