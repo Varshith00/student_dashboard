@@ -301,14 +301,52 @@ print(f"Result: {result}")
                   variant="outline"
                   size="sm"
                   onClick={resetCode}
-                  disabled={isRunning}
+                  disabled={isRunning || isLoadingAI}
                 >
                   <RotateCcw className="w-4 h-4 mr-2" />
                   Reset
                 </Button>
+
+                {/* AI Features */}
+                <div className="flex items-center gap-1 border-l pl-2 ml-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={getAIHint}
+                    disabled={isRunning || isLoadingAI}
+                    className="text-accent hover:text-accent"
+                  >
+                    {isLoadingAI ? (
+                      <div className="w-4 h-4 animate-spin border-2 border-accent border-t-transparent rounded-full mr-2" />
+                    ) : (
+                      <Lightbulb className="w-4 h-4 mr-2" />
+                    )}
+                    AI Hint
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={analyzeCode}
+                    disabled={isRunning || isLoadingAI || !code.trim()}
+                    className="text-primary hover:text-primary"
+                  >
+                    <Brain className="w-4 h-4 mr-2" />
+                    Analyze
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowAIPanel(!showAIPanel)}
+                    className={showAIPanel ? "bg-accent/10" : ""}
+                  >
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    AI Panel
+                  </Button>
+                </div>
+
                 <Button
                   onClick={runCode}
-                  disabled={isRunning}
+                  disabled={isRunning || isLoadingAI}
                   size="sm"
                   className="bg-success hover:bg-success/90"
                 >
