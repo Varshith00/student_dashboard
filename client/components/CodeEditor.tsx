@@ -220,9 +220,16 @@ print(f"Result: {result}")
         {problem && (
           <div className="w-1/3 border-r bg-muted/30 overflow-y-auto">
             <Tabs defaultValue="description" className="h-full">
-              <TabsList className="grid w-full grid-cols-2 m-4">
+              <TabsList className="grid w-full grid-cols-3 m-4">
                 <TabsTrigger value="description">Description</TabsTrigger>
                 <TabsTrigger value="examples">Examples</TabsTrigger>
+                <TabsTrigger value="ai" className="flex items-center gap-1">
+                  <Brain className="w-3 h-3" />
+                  AI Help
+                  {(aiHint || aiAnalysis) && (
+                    <div className="w-2 h-2 bg-accent rounded-full animate-pulse" />
+                  )}
+                </TabsTrigger>
               </TabsList>
               
               <TabsContent value="description" className="px-4 pb-4">
