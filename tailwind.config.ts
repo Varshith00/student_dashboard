@@ -47,6 +47,15 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // Learning platform specific colors
+        success: {
+          DEFAULT: "hsl(140 95% 50%)",
+          foreground: "hsl(140 100% 10%)",
+        },
+        warning: {
+          DEFAULT: "hsl(45 95% 50%)",
+          foreground: "hsl(45 100% 10%)",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
