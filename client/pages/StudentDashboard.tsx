@@ -230,54 +230,53 @@ export default function StudentDashboard() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid gap-6">
-                  <div className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                        <Target className="w-6 h-6 text-primary" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold">Two Sum Problem</h3>
-                        <p className="text-sm text-muted-foreground">Array manipulation and hash maps</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Badge variant="secondary">Easy</Badge>
-                      <Button>Solve</Button>
-                    </div>
-                  </div>
+                <div className="grid gap-4">
+                  {problems.map((problem) => {
+                    const getDifficultyColor = () => {
+                      switch (problem.difficulty) {
+                        case 'Easy': return 'bg-success text-success-foreground';
+                        case 'Medium': return 'bg-warning text-warning-foreground';
+                        case 'Hard': return 'bg-destructive text-destructive-foreground';
+                        default: return 'bg-secondary text-secondary-foreground';
+                      }
+                    };
 
-                  <div className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center">
-                        <Target className="w-6 h-6 text-accent" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold">Binary Tree Traversal</h3>
-                        <p className="text-sm text-muted-foreground">Tree data structures and recursion</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Badge className="bg-warning text-warning-foreground">Medium</Badge>
-                      <Button>Solve</Button>
-                    </div>
-                  </div>
+                    const getIconColor = () => {
+                      switch (problem.difficulty) {
+                        case 'Easy': return 'text-success';
+                        case 'Medium': return 'text-warning';
+                        case 'Hard': return 'text-destructive';
+                        default: return 'text-primary';
+                      }
+                    };
 
-                  <div className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-destructive/10 rounded-lg flex items-center justify-center">
-                        <Target className="w-6 h-6 text-destructive" />
+                    return (
+                      <div key={problem.id} className="flex items-center justify-between p-4 border rounded-lg hover:border-primary/50 transition-colors">
+                        <div className="flex items-center gap-4">
+                          <div className={`w-12 h-12 bg-${problem.difficulty === 'Easy' ? 'success' : problem.difficulty === 'Medium' ? 'warning' : 'destructive'}/10 rounded-lg flex items-center justify-center`}>
+                            <Target className={`w-6 h-6 ${getIconColor()}`} />
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-semibold">{problem.title}</h3>
+                            <p className="text-sm text-muted-foreground line-clamp-1">
+                              {problem.tags.join(', ')}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <Badge className={getDifficultyColor()}>
+                            {problem.difficulty}
+                          </Badge>
+                          <Link to={`/student/coding/${problem.id}`}>
+                            <Button>
+                              <Play className="w-4 h-4 mr-2" />
+                              Solve
+                            </Button>
+                          </Link>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="font-semibold">Dynamic Programming Challenge</h3>
-                        <p className="text-sm text-muted-foreground">Advanced optimization techniques</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Badge variant="destructive">Hard</Badge>
-                      <Button variant="outline">Solve</Button>
-                    </div>
-                  </div>
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
