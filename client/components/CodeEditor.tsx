@@ -55,6 +55,13 @@ print(f"Result: {result}")
   const [executionTime, setExecutionTime] = useState<number | null>(null);
   const [hasError, setHasError] = useState(false);
 
+  // AI Features State
+  const [aiHint, setAiHint] = useState<string | null>(null);
+  const [aiAnalysis, setAiAnalysis] = useState<any | null>(null);
+  const [isLoadingAI, setIsLoadingAI] = useState(false);
+  const [hintLevel, setHintLevel] = useState(1);
+  const [showAIPanel, setShowAIPanel] = useState(false);
+
   const runCode = async () => {
     setIsRunning(true);
     setOutput('');
