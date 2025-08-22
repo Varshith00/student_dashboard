@@ -119,6 +119,67 @@ print(f"Result: {result}")
     setOutput('');
     setHasError(false);
     setExecutionTime(null);
+    setAiHint(null);
+    setAiAnalysis(null);
+  };
+
+  const getAIHint = async () => {
+    setIsLoadingAI(true);
+    try {
+      const response = await fetch('/api/ai/get-hint', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          code,
+          problem_description: problem?.description || 'General coding practice',
+          hint_level: hintLevel
+        }),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        setAiHint(result.hint);
+        setShowAIPanel(true);
+      } else {
+        setOutput(`AI Hint Error: ${result.error}`);
+        setHasError(true);
+      }
+    } catch (error) {
+      setOutput(`AI Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setHasError(true);
+    }
+    setIsLoadingAI(false);
+  };
+
+  const analyzeCode = async () => {
+    setIsLoadingAI(true);
+    try {
+      const response = await fetch('/api/ai/analyze-code', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          code,
+          problem_description: problem?.description || 'General code analysis'
+        }),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        setAiAnalysis(result.analysis);
+        setShowAIPanel(true);
+      } else {
+        setOutput(`AI Analysis Error: ${result.error}`);
+        setHasError(true);
+      }
+    } catch (error) {
+      setOutput(`AI Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setHasError(true);
+    }
+    setIsLoadingAI(false);
   };
 
   const handleEditorDidMount = (editor: any) => {
