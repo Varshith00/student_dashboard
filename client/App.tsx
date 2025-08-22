@@ -28,17 +28,10 @@ const App = () => (
           <Route path="/student/dashboard" element={<StudentDashboard />} />
           <Route path="/professor/dashboard" element={<ProfessorDashboard />} />
 
+          {/* Coding practice with real Python editor */}
+          <Route path="/student/coding/:problemId" element={<CodingProblem />} />
+
           {/* Placeholder routes for future features */}
-          <Route
-            path="/student/coding/:problemId"
-            element={
-              <Placeholder
-                title="Coding Environment"
-                description="Interactive coding environment with live execution coming soon."
-                feature="a full-featured code editor with Python execution"
-              />
-            }
-          />
           <Route
             path="/student/interview"
             element={
