@@ -124,7 +124,7 @@ export default function StudentDashboard() {
 
             {/* Quick Actions */}
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setActiveTab('coding')}>
+              <Card className="hover:shadow-lg transition-shadow">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <Code className="w-5 h-5 text-primary" />
@@ -135,10 +135,21 @@ export default function StudentDashboard() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Button className="w-full">
-                    <Play className="w-4 h-4 mr-2" />
-                    Solve Problems
-                  </Button>
+                  <div className="space-y-2">
+                    <Link to="/student/coding/two-sum" className="w-full">
+                      <Button className="w-full">
+                        <Play className="w-4 h-4 mr-2" />
+                        Solve Two Sum
+                      </Button>
+                    </Link>
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => setActiveTab('coding')}
+                    >
+                      View All Problems
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
 
