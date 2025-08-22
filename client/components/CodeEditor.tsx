@@ -4,16 +4,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Play, 
-  Square, 
-  RotateCcw, 
-  CheckCircle, 
-  XCircle, 
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Play,
+  Square,
+  RotateCcw,
+  CheckCircle,
+  XCircle,
   Clock,
   Terminal,
   Code,
-  Lightbulb
+  Lightbulb,
+  Brain,
+  Sparkles,
+  HelpCircle,
+  BarChart3
 } from "lucide-react";
 
 interface CodeEditorProps {
