@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import StudentDashboard from "./pages/StudentDashboard";
 import ProfessorDashboard from "./pages/ProfessorDashboard";
+import CodingProblem from "./pages/CodingProblem";
 import Placeholder from "./pages/Placeholder";
 import NotFound from "./pages/NotFound";
 
