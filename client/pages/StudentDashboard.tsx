@@ -3,11 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { 
-  Code, 
-  Brain, 
-  Trophy, 
-  Clock, 
+import {
+  Code,
+  Brain,
+  Trophy,
+  Clock,
   Target,
   BookOpen,
   BarChart3,
@@ -20,6 +20,7 @@ import {
   TrendingUp
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { problems } from "@/data/problems";
 
 export default function StudentDashboard() {
   const navigate = useNavigate();
