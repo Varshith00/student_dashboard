@@ -32,6 +32,9 @@ const App = () => (
           {/* Coding practice with real Python editor */}
           <Route path="/student/coding/:problemId" element={<CodingProblem />} />
 
+          {/* AI Question Generator */}
+          <Route path="/ai/question-generator" element={<AIQuestionGenerator />} />
+
           {/* Placeholder routes for future features */}
           <Route
             path="/student/interview"
