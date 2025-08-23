@@ -30,5 +30,21 @@
     "name": "vishnu",
     "role": "student",
     "createdAt": "2025-08-23T10:03:08.211Z"
+  },
+  {
+    "id": "demo-student-001",
+    "email": "student@demo.com",
+    "password": "$2a$10$YourHashedPasswordHere.Student123.ForDemoAccount",
+    "name": "Demo Student",
+    "role": "student",
+    "createdAt": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "demo-professor-001",
+    "email": "professor@demo.com",
+    "password": "$2a$10$YourHashedPasswordHere.Professor123.ForDemoAccount",
+    "name": "Demo Professor",
+    "role": "professor",
+    "createdAt": "2025-01-01T00:00:00.000Z"
   }
 ]
