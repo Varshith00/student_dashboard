@@ -4,6 +4,7 @@ import cors from "cors";
 import { handleDemo } from "./routes/demo";
 import { handleExecutePython } from "./routes/execute-python";
 import { handleGenerateQuestion, handleAnalyzeCode, handleGetHint } from "./routes/ai-questions";
+import { handleRegister, handleLogin, handleGetUser, authMiddleware } from "./routes/auth";
 
 export function createServer() {
   const app = express();
@@ -21,13 +22,16 @@ export function createServer() {
 
   app.get("/api/demo", handleDemo);
 
-  // Python code execution endpoint
-  app.post("/api/execute-python", handleExecutePython);
+  // Authentication routes
+  app.post("/api/auth/register", handleRegister);
+  app.post("/api/auth/login", handleLogin);
+  app.get("/api/auth/user", authMiddleware, handleGetUser);
 
-  // AI-powered endpoints using Gemini
-  app.post("/api/ai/generate-question", handleGenerateQuestion);
-  app.post("/api/ai/analyze-code", handleAnalyzeCode);
-  app.post("/api/ai/get-hint", handleGetHint);
+  // Protected routes (require authentication)
+  app.post("/api/execute-python", authMiddleware, handleExecutePython);
+  app.post("/api/ai/generate-question", authMiddleware, handleGenerateQuestion);
+  app.post("/api/ai/analyze-code", authMiddleware, handleAnalyzeCode);
+  app.post("/api/ai/get-hint", authMiddleware, handleGetHint);
 
   return app;
 }
