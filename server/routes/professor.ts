@@ -165,10 +165,10 @@ export const handleGetStudents: RequestHandler = async (req, res) => {
       });
     }
 
-    // Load all users and filter students mapped to this professor
+    // Load all users and filter students mapped to this professor by email
     const allUsers = loadUsers();
     const mappedStudents = allUsers.filter(
-      user => user.role === 'student' && user.professorId === professor.id
+      user => user.role === 'student' && user.professorId === professor.email
     );
 
     // Process each student's data
