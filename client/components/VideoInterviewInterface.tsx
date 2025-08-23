@@ -63,20 +63,29 @@ export default function VideoInterviewInterface({
         // Check if getUserMedia is supported
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
           setMediaError(
-            "Camera/microphone access is not supported in this browser.",
+            "Camera/microphone access is not supported in this browser. Please use a modern browser like Chrome, Firefox, or Safari.",
           );
           return;
         }
 
+        // Check if we're running on HTTP (not HTTPS)
+        if (location.protocol === 'http:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+          setMediaError(
+            "Camera/microphone access requires HTTPS. This demo may not work on HTTP connections. Please note: In a production environment, ensure your site is served over HTTPS.",
+          );
+          // Continue anyway for localhost development
+        }
+
         const stream = await navigator.mediaDevices.getUserMedia({
           video: {
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
+            width: { ideal: 1280, max: 1920 },
+            height: { ideal: 720, max: 1080 },
             facingMode: "user",
           },
           audio: {
             echoCancellation: true,
             noiseSuppression: true,
+            autoGainControl: true,
             sampleRate: 44100,
           },
         });
@@ -90,34 +99,53 @@ export default function VideoInterviewInterface({
           // Ensure video plays
           videoRef.current.play().catch((e) => {
             console.log("Video autoplay prevented:", e);
+            // Try to play again after user interaction
+            videoRef.current?.addEventListener('click', () => {
+              videoRef.current?.play();
+            }, { once: true });
           });
         }
       } catch (error: any) {
         console.error("Error accessing camera/microphone:", error);
         let errorMessage = "Unable to access camera/microphone. ";
+        let suggestion = "";
 
         switch (error.name) {
           case "NotAllowedError":
           case "PermissionDeniedError":
             errorMessage +=
-              "Please allow camera and microphone permissions and refresh the page.";
+              "Camera and microphone permissions were denied.";
+            suggestion = "Please click the camera icon in your browser's address bar and allow permissions, then refresh the page.";
             break;
           case "NotFoundError":
           case "DevicesNotFoundError":
             errorMessage +=
-              "No camera or microphone found. Please check your devices.";
+              "No camera or microphone found.";
+            suggestion = "Please connect a camera and microphone to your device and refresh the page.";
             break;
           case "NotSupportedError":
             errorMessage +=
               "Camera/microphone access is not supported in this browser.";
+            suggestion = "Please use a modern browser like Chrome, Firefox, or Safari.";
             break;
           case "NotReadableError":
           case "TrackStartError":
             errorMessage +=
               "Camera/microphone is already in use by another application.";
+            suggestion = "Please close other applications that might be using your camera/microphone and refresh the page.";
+            break;
+          case "OverconstrainedError":
+            errorMessage +=
+              "Your camera/microphone doesn't support the required settings.";
+            suggestion = "Your device may not support the video/audio quality requirements.";
             break;
           default:
-            errorMessage += "Please check your device settings and try again.";
+            errorMessage += "An unexpected error occurred.";
+            suggestion = "Please check your device settings, ensure your camera and microphone are working, and try again.";
+        }
+
+        if (suggestion) {
+          errorMessage += " " + suggestion;
         }
 
         setMediaError(errorMessage);
