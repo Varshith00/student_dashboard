@@ -1,13 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { 
-  Users, 
-  BarChart3, 
-  TrendingUp, 
-  Clock, 
+import {
+  Users,
+  BarChart3,
+  TrendingUp,
+  Clock,
   Target,
   BookOpen,
   Brain,
@@ -23,15 +23,37 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function ProfessorDashboard() {
   const navigate = useNavigate();
+  const { user, logout, isLoading } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Redirect if not logged in or not a professor
+  useEffect(() => {
+    if (!isLoading && (!user || user.role !== 'professor')) {
+      navigate('/login');
+    }
+  }, [user, isLoading, navigate]);
+
   const handleLogout = () => {
+    logout();
     navigate('/');
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
+
+  if (!user || user.role !== 'professor') {
+    return null;
+  }
 
   // Mock student data
   const students = [
