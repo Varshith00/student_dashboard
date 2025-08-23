@@ -124,11 +124,8 @@ print(f"Result: {result}")
   const getAIHint = async () => {
     setIsLoadingAI(true);
     try {
-      const response = await fetch('/api/ai/get-hint', {
+      const response = await authFetch('/api/ai/get-hint', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({
           code,
           problem_description: problem?.description || 'General coding practice',
