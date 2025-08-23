@@ -197,56 +197,67 @@ export default function StudentDashboard() {
 
       <div className="container mx-auto px-4 py-8">
         {/* Navigation Tabs */}
-        <div className="flex gap-2 mb-8 overflow-x-auto">
+        <div className="flex gap-1 sm:gap-2 mb-6 lg:mb-8 overflow-x-auto pb-2 scrollbar-hide">
           <Button
             variant={activeTab === "overview" ? "default" : "outline"}
             onClick={() => setActiveTab("overview")}
-            className="whitespace-nowrap"
+            className="whitespace-nowrap text-xs sm:text-sm px-2 sm:px-3"
+            size="sm"
           >
-            <BarChart3 className="w-4 h-4 mr-2" />
-            Overview
+            <BarChart3 className="w-4 h-4 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">Overview</span>
+            <span className="sm:hidden">Home</span>
           </Button>
           <Button
             variant={activeTab === "coding" ? "default" : "outline"}
             onClick={() => setActiveTab("coding")}
-            className="whitespace-nowrap"
+            className="whitespace-nowrap text-xs sm:text-sm px-2 sm:px-3"
+            size="sm"
           >
-            <Code className="w-4 h-4 mr-2" />
-            Coding Practice
+            <Code className="w-4 h-4 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">Coding Practice</span>
+            <span className="sm:hidden">Code</span>
           </Button>
           <Button
             variant={activeTab === "interviews" ? "default" : "outline"}
             onClick={() => setActiveTab("interviews")}
-            className="whitespace-nowrap"
+            className="whitespace-nowrap text-xs sm:text-sm px-2 sm:px-3"
+            size="sm"
           >
-            <Brain className="w-4 h-4 mr-2" />
-            Mock Interviews
+            <Brain className="w-4 h-4 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">Mock Interviews</span>
+            <span className="sm:hidden">Interview</span>
           </Button>
           <Button
             variant={activeTab === "progress" ? "default" : "outline"}
             onClick={() => setActiveTab("progress")}
-            className="whitespace-nowrap"
+            className="whitespace-nowrap text-xs sm:text-sm px-2 sm:px-3"
+            size="sm"
           >
-            <TrendingUp className="w-4 h-4 mr-2" />
+            <TrendingUp className="w-4 h-4 mr-1 sm:mr-2" />
             Progress
           </Button>
           <Button
             variant={activeTab === "pair-programming" ? "default" : "outline"}
             onClick={() => setActiveTab("pair-programming")}
-            className="whitespace-nowrap"
+            className="whitespace-nowrap text-xs sm:text-sm px-2 sm:px-3"
+            size="sm"
           >
-            <Users2 className="w-4 h-4 mr-2" />
-            Pair Programming
+            <Users2 className="w-4 h-4 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">Pair Programming</span>
+            <span className="sm:hidden">Pair</span>
           </Button>
           <Button
             variant={activeTab === "assignments" ? "default" : "outline"}
             onClick={() => setActiveTab("assignments")}
-            className="whitespace-nowrap relative"
+            className="whitespace-nowrap relative text-xs sm:text-sm px-2 sm:px-3"
+            size="sm"
           >
-            <FileText className="w-4 h-4 mr-2" />
-            Assignments
+            <FileText className="w-4 h-4 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">Assignments</span>
+            <span className="sm:hidden">Tasks</span>
             {assignmentSummary.pending + assignmentSummary.overdue > 0 && (
-              <Badge className="ml-1 h-5 w-5 p-0 text-xs" variant="destructive">
+              <Badge className="ml-1 h-4 w-4 p-0 text-xs sm:h-5 sm:w-5" variant="destructive">
                 {assignmentSummary.pending + assignmentSummary.overdue}
               </Badge>
             )}
@@ -254,10 +265,12 @@ export default function StudentDashboard() {
           <Button
             variant={activeTab === "web-editor" ? "default" : "outline"}
             onClick={() => setActiveTab("web-editor")}
-            className="whitespace-nowrap"
+            className="whitespace-nowrap text-xs sm:text-sm px-2 sm:px-3"
+            size="sm"
           >
-            <Monitor className="w-4 h-4 mr-2" />
-            Web Editor
+            <Monitor className="w-4 h-4 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">Web Editor</span>
+            <span className="sm:hidden">Editor</span>
           </Button>
         </div>
 
@@ -313,7 +326,7 @@ export default function StudentDashboard() {
             </Card>
 
             {/* Quick Actions */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
               <Card className="hover:shadow-lg transition-shadow">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-lg">
