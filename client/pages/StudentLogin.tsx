@@ -20,7 +20,7 @@ export default function StudentLogin() {
   const [showPassword, setShowPassword] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [professorId, setProfessorId] = useState("");
+  const [professorEmail, setProfessorEmail] = useState("");
   const [professorInfo, setProfessorInfo] = useState<ProfessorInfo | null>(null);
   const [isProfessorVerified, setIsProfessorVerified] = useState(false);
   const [isVerifyingProfessor, setIsVerifyingProfessor] = useState(false);
