@@ -442,26 +442,62 @@ export const handleEndBehavioralInterview: RequestHandler = async (req, res) => 
       `${msg.role === 'user' ? 'Candidate' : 'Interviewer'}: ${msg.content}`
     ).join('\n\n');
 
-    const evaluationPrompt = `
-Evaluate this behavioral interview focused on critical thinking and aptitude:
+    // Parse conversation to extract question-answer pairs
+    const qaPairs = [];
+    let currentQuestion = '';
+    let currentAnswer = '';
 
-${conversationHistory}
+    for (let i = 0; i < messageHistory.length; i++) {
+      const msg = messageHistory[i];
+      if (msg.role === 'interviewer') {
+        // If we have a previous question-answer pair, save it
+        if (currentQuestion && currentAnswer) {
+          qaPairs.push({ question: currentQuestion, answer: currentAnswer });
+        }
+        currentQuestion = msg.content;
+        currentAnswer = '';
+      } else if (msg.role === 'user') {
+        currentAnswer = msg.content;
+      }
+    }
+
+    // Add the last pair if exists
+    if (currentQuestion && currentAnswer) {
+      qaPairs.push({ question: currentQuestion, answer: currentAnswer });
+    }
+
+    const evaluationPrompt = `
+Analyze this behavioral interview focused on critical thinking and aptitude and provide detailed feedback for each question-answer pair.
+
+Question-Answer pairs:
+${qaPairs.map((qa, index) => `
+Q${index + 1}: ${qa.question}
+A${index + 1}: ${qa.answer}
+`).join('\n')}
 
 Provide a JSON response with this structure:
 {
-  "score": "Number from 0-100",
-  "feedback": "Detailed feedback covering: critical thinking skills, problem-solving approach, communication clarity, decision-making process, situational awareness, and areas for improvement. Be constructive and specific."
+  "questionFeedback": [
+    {
+      "question": "The exact question asked",
+      "answer": "The candidate's response",
+      "feedback": "Detailed analysis of the response covering critical thinking, problem-solving approach, and communication",
+      "strengths": ["specific strength 1", "specific strength 2"],
+      "improvements": ["specific area for improvement 1", "specific area for improvement 2"]
+    }
+  ],
+  "overallFeedback": "Brief summary of overall performance and key takeaways for improvement"
 }
 
-Evaluation criteria:
+For each question-answer pair, evaluate:
 - Critical thinking and analytical skills
-- Problem-solving methodology
+- Problem-solving methodology and approach
 - Communication clarity and structure
 - Decision-making process and reasoning
-- Situational awareness and adaptability
 - Use of examples and concrete details (STAR method)
+- Situational awareness and adaptability
 
-Provide actionable feedback to help them improve.
+Be constructive, specific, and actionable in your feedback.
 `;
 
     const result = await model.generateContent(evaluationPrompt);
@@ -469,14 +505,14 @@ Provide actionable feedback to help them improve.
     const evaluationText = response.text();
 
     const jsonMatch = evaluationText.match(/\{[\s\S]*\}/);
-    let score = 75;
-    let feedback = "Good behavioral interview performance with solid critical thinking skills.";
-    
+    let questionFeedback: QuestionFeedback[] = [];
+    let overallFeedback = "Good behavioral interview performance with solid critical thinking skills.";
+
     if (jsonMatch) {
       try {
         const evaluation = JSON.parse(jsonMatch[0]);
-        score = parseInt(evaluation.score) || 75;
-        feedback = evaluation.feedback || feedback;
+        questionFeedback = evaluation.questionFeedback || [];
+        overallFeedback = evaluation.overallFeedback || overallFeedback;
       } catch (e) {
         console.warn('Failed to parse evaluation JSON:', e);
       }
@@ -484,15 +520,15 @@ Provide actionable feedback to help them improve.
 
     session.status = 'completed';
     session.endTime = new Date().toISOString();
-    session.score = score;
-    session.feedback = feedback;
+    session.questionFeedback = questionFeedback;
+    session.overallFeedback = overallFeedback;
 
     activeSessions.set(sessionId, session);
 
     res.json({
       success: true,
-      score,
-      feedback
+      questionFeedback,
+      overallFeedback
     });
 
   } catch (error) {
