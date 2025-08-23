@@ -52,18 +52,44 @@ export default function Login() {
     }
   };
 
-  const LoginForm = ({ userType }: { userType: 'student' | 'professor' }) => {
+  const AuthForm = ({ userType }: { userType: 'student' | 'professor' }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [name, setName] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+
+    const handleSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+
+      if (isRegistering && password !== confirmPassword) {
+        setError('Passwords do not match');
+        return;
+      }
+
+      if (isRegistering && password.length < 6) {
+        setError('Password must be at least 6 characters long');
+        return;
+      }
+
+      handleAuth(userType, email, password, isRegistering ? name : undefined);
+    };
 
     return (
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          handleLogin(userType, email, password);
-        }}
-        className="space-y-4"
-      >
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {isRegistering && (
+          <div className="space-y-2">
+            <Label htmlFor={`${userType}-name`}>Full Name</Label>
+            <Input
+              id={`${userType}-name`}
+              type="text"
+              placeholder="Enter your full name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+          </div>
+        )}
+
         <div className="space-y-2">
           <Label htmlFor={`${userType}-email`}>Email</Label>
           <Input
@@ -75,13 +101,14 @@ export default function Login() {
             required
           />
         </div>
+
         <div className="space-y-2">
           <Label htmlFor={`${userType}-password`}>Password</Label>
           <div className="relative">
             <Input
               id={`${userType}-password`}
               type={showPassword ? "text" : "password"}
-              placeholder="Enter your password"
+              placeholder={isRegistering ? "Create a password (min 6 characters)" : "Enter your password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -101,13 +128,48 @@ export default function Login() {
             </Button>
           </div>
         </div>
-        <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? "Signing in..." : `Sign in as ${userType === 'student' ? 'Student' : 'Professor'}`}
+
+        {isRegistering && (
+          <div className="space-y-2">
+            <Label htmlFor={`${userType}-confirm-password`}>Confirm Password</Label>
+            <Input
+              id={`${userType}-confirm-password`}
+              type={showPassword ? "text" : "password"}
+              placeholder="Confirm your password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+            />
+          </div>
+        )}
+
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        <Button type="submit" className="w-full" disabled={isLoading}>
+          {isLoading ? (
+            isRegistering ? "Creating account..." : "Signing in..."
+          ) : (
+            isRegistering
+              ? `Create ${userType === 'student' ? 'Student' : 'Professor'} Account`
+              : `Sign in as ${userType === 'student' ? 'Student' : 'Professor'}`
+          )}
         </Button>
+
         <div className="text-center text-sm text-muted-foreground">
-          Don't have an account?{" "}
-          <Button variant="link" className="p-0 h-auto">
-            Contact your institution
+          {isRegistering ? "Already have an account?" : "Don't have an account?"}{" "}
+          <Button
+            variant="link"
+            className="p-0 h-auto"
+            onClick={() => {
+              setIsRegistering(!isRegistering);
+              setError(null);
+            }}
+          >
+            {isRegistering ? "Sign in here" : "Create account"}
           </Button>
         </div>
       </form>
