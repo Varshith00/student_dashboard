@@ -35,6 +35,7 @@ interface GeneratedQuestion {
 
 export default function AIQuestionGenerator() {
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const [difficulty, setDifficulty] = useState<'Easy' | 'Medium' | 'Hard'>('Medium');
   const [topic, setTopic] = useState('algorithms');
   const [customTopic, setCustomTopic] = useState('');
