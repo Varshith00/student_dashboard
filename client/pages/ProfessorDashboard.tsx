@@ -556,6 +556,127 @@ export default function ProfessorDashboard() {
           </div>
         )}
 
+        {activeTab === 'assignments' && (
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Calendar className="w-6 h-6 text-primary" />
+                      Assignment Management
+                    </CardTitle>
+                    <CardDescription>
+                      Create and manage coding problem assignments for your students
+                    </CardDescription>
+                  </div>
+                  <AssignProblemModal
+                    students={students}
+                    onAssignmentCreated={loadAllData}
+                  />
+                </div>
+              </CardHeader>
+              <CardContent>
+                {/* Assignment Statistics */}
+                <div className="grid md:grid-cols-4 gap-4 mb-6">
+                  <div className="text-center p-4 bg-primary/5 rounded-lg">
+                    <div className="text-2xl font-bold text-primary">{assignments.length}</div>
+                    <div className="text-sm text-muted-foreground">Total Assignments</div>
+                  </div>
+                  <div className="text-center p-4 bg-success/5 rounded-lg">
+                    <div className="text-2xl font-bold text-success">
+                      {assignments.filter(a => a.status === 'completed').length}
+                    </div>
+                    <div className="text-sm text-muted-foreground">Completed</div>
+                  </div>
+                  <div className="text-center p-4 bg-warning/5 rounded-lg">
+                    <div className="text-2xl font-bold text-warning">
+                      {assignments.filter(a => a.status === 'in_progress').length}
+                    </div>
+                    <div className="text-sm text-muted-foreground">In Progress</div>
+                  </div>
+                  <div className="text-center p-4 bg-destructive/5 rounded-lg">
+                    <div className="text-2xl font-bold text-destructive">
+                      {assignments.filter(a =>
+                        a.status !== 'completed' && a.dueDate && new Date(a.dueDate) < new Date()
+                      ).length}
+                    </div>
+                    <div className="text-sm text-muted-foreground">Overdue</div>
+                  </div>
+                </div>
+
+                {/* Assignment List */}
+                <div className="space-y-4">
+                  {assignments.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p>No assignments created yet.</p>
+                      <p className="text-sm">Create your first assignment to get started!</p>
+                    </div>
+                  ) : (
+                    assignments.map((assignment) => (
+                      <Card key={assignment.id} className="border-2">
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                                <Code className="w-6 h-6 text-primary" />
+                              </div>
+                              <div>
+                                <h3 className="font-semibold text-lg">
+                                  {assignment.problemId.split('-').map((word: string) =>
+                                    word.charAt(0).toUpperCase() + word.slice(1)
+                                  ).join(' ')}
+                                </h3>
+                                <p className="text-sm text-muted-foreground">
+                                  Assigned to: {assignment.studentName}
+                                </p>
+                                <div className="flex items-center gap-4 mt-1 text-xs text-muted-foreground">
+                                  <span>Assigned: {new Date(assignment.assignedDate).toLocaleDateString()}</span>
+                                  {assignment.dueDate && (
+                                    <span>Due: {new Date(assignment.dueDate).toLocaleDateString()}</span>
+                                  )}
+                                  <span>Attempts: {assignment.attempts}</span>
+                                  <span>Time: {assignment.timeSpent}min</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                              <div className="text-center">
+                                {assignment.status === 'completed' && assignment.score && (
+                                  <>
+                                    <div className="text-lg font-bold text-success">{assignment.score}%</div>
+                                    <div className="text-xs text-muted-foreground">Score</div>
+                                  </>
+                                )}
+                              </div>
+                              <Badge variant={
+                                assignment.status === 'completed' ? 'default' :
+                                assignment.status === 'in_progress' ? 'secondary' :
+                                assignment.dueDate && new Date(assignment.dueDate) < new Date() ? 'destructive' :
+                                'outline'
+                              }>
+                                {assignment.status === 'completed' ? 'Completed' :
+                                 assignment.status === 'in_progress' ? 'In Progress' :
+                                 assignment.dueDate && new Date(assignment.dueDate) < new Date() ? 'Overdue' :
+                                 'Assigned'}
+                              </Badge>
+                              <Button variant="outline" size="sm">
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         {activeTab === 'problems' && (
           <div className="space-y-6">
             <Card>
