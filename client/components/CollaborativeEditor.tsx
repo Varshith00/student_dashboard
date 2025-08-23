@@ -22,10 +22,6 @@ import {
   Copy,
   Share,
   Users,
-  Mic,
-  MicOff,
-  Video,
-  VideoOff,
   Settings,
   UserPlus,
   Terminal,
@@ -68,9 +64,6 @@ export default function CollaborativeEditor({
   const [isLoading, setIsLoading] = useState(true);
   const [permission, setPermission] = useState<"write" | "read">("write");
 
-  // Communication state
-  const [isMicOn, setIsMicOn] = useState(false);
-  const [isVideoOn, setIsVideoOn] = useState(false);
 
   // Join session state
   const [joinSessionId, setJoinSessionId] = useState("");
@@ -527,33 +520,6 @@ console.log(\`Result: \${result}\`);
               </Button>
             </div>
 
-            {/* Communication */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsMicOn(!isMicOn)}
-              className={isMicOn ? "bg-success/10 border-success" : ""}
-              title={isMicOn ? "Mute microphone" : "Unmute microphone"}
-            >
-              {isMicOn ? (
-                <Mic className="w-4 h-4" />
-              ) : (
-                <MicOff className="w-4 h-4" />
-              )}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsVideoOn(!isVideoOn)}
-              className={isVideoOn ? "bg-success/10 border-success" : ""}
-              title={isVideoOn ? "Turn off video" : "Turn on video"}
-            >
-              {isVideoOn ? (
-                <Video className="w-4 h-4" />
-              ) : (
-                <VideoOff className="w-4 h-4" />
-              )}
-            </Button>
 
             <Button variant="outline" size="sm" onClick={copySessionLink}>
               <Share className="w-4 h-4 mr-2" />
