@@ -39,6 +39,13 @@ import {
   handleDeleteAssignment,
   handleGetStudentAssignments,
 } from "./routes/professor";
+import {
+  createSession,
+  joinSession,
+  updateCode,
+  getSession,
+  leaveSession,
+} from "./routes/collaboration";
 
 export function createServer() {
   const app = express();
