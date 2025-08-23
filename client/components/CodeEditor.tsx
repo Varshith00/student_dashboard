@@ -72,11 +72,8 @@ print(f"Result: {result}")
     const startTime = Date.now();
 
     try {
-      const response = await fetch('/api/execute-python', {
+      const response = await authFetch('/api/execute-python', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({ code }),
       });
 
