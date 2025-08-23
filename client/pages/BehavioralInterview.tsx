@@ -206,6 +206,11 @@ export default function BehavioralInterview() {
               }
             : null,
         );
+
+        // Show results for a moment, then redirect
+        setTimeout(() => {
+          navigate("/student/dashboard");
+        }, 3000);
       }
     } catch (error) {
       console.error("End interview error:", error);
@@ -651,6 +656,11 @@ export default function BehavioralInterview() {
                       >
                         Start New Interview
                       </Button>
+                    </div>
+                    <div className="text-center mt-2">
+                      <p className="text-sm text-muted-foreground">
+                        You will be automatically redirected to the dashboard in a few seconds...
+                      </p>
                     </div>
                   </CardContent>
                 </Card>
