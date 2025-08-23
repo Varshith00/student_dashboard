@@ -476,7 +476,7 @@ export const handleGetStudentDetails: RequestHandler = async (req, res) => {
     // Load all users to find the student
     const allUsers = loadUsers();
     const student = allUsers.find(
-      (user) => user.id === studentId && user.role === 'student' && user.professorId === professor.id
+      (user) => user.id === studentId && user.role === 'student' && user.professorId === professor.email
     );
 
     if (!student) {
