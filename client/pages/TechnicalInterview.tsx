@@ -456,13 +456,13 @@ export default function TechnicalInterview() {
                 <Clock className="w-3 h-3" />
                 {session.status === "active" ? "In Progress" : "Completed"}
               </Badge>
-              {session.status === "completed" && session.score && (
+              {session.status === "completed" && (
                 <Badge
                   variant="secondary"
                   className="flex items-center gap-1 text-xs"
                 >
-                  <Star className="w-3 h-3" />
-                  {session.score}/100
+                  <CheckCircle className="w-3 h-3" />
+                  Completed
                 </Badge>
               )}
               {session.status === "active" && (
