@@ -151,38 +151,7 @@ const assignments: Assignment[] = [
   },
 ];
 
-const studentProfiles = [
-  {
-    id: "17559437070308qm4bodu", // demostudent@demo.com actual ID
-    name: "Demo Student",
-    email: "demostudent@demo.com",
-    lastActive: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30 minutes ago
-  },
-  {
-    id: "student_1",
-    name: "Alex Johnson",
-    email: "alex.johnson@university.edu",
-    lastActive: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
-  },
-  {
-    id: "student_2",
-    name: "Sarah Chen",
-    email: "sarah.chen@university.edu",
-    lastActive: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
-  },
-  {
-    id: "student_3",
-    name: "Michael Rodriguez",
-    email: "michael.r@university.edu",
-    lastActive: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30 minutes ago
-  },
-  {
-    id: "student_4",
-    name: "Emily Davis",
-    email: "emily.davis@university.edu",
-    lastActive: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(), // 3 hours ago
-  },
-];
+// Removed old mock student profiles - now using real user data from users.json
 
 // Get all students for a professor
 export const handleGetStudents: RequestHandler = async (req, res) => {
