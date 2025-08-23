@@ -34,7 +34,7 @@
   {
     "id": "demo-student-001",
     "email": "student@demo.com",
-    "password": "$2a$10$YourHashedPasswordHere.Student123.ForDemoAccount",
+    "password": "$2b$10$K8U9r0X9Y3nX9Y3nX9Y3n.G7eX9Y3nX9Y3nX9Y3nX9Y3nX9Y3nX9Y",
     "name": "Demo Student",
     "role": "student",
     "createdAt": "2025-01-01T00:00:00.000Z"
@@ -42,7 +42,7 @@
   {
     "id": "demo-professor-001",
     "email": "professor@demo.com",
-    "password": "$2a$10$YourHashedPasswordHere.Professor123.ForDemoAccount",
+    "password": "$2b$10$L9V0s1Y0Z4oY0Z4oY0Z4o.H8fY0Z4oY0Z4oY0Z4oY0Z4oY0Z4oY0Z4o",
     "name": "Demo Professor",
     "role": "professor",
     "createdAt": "2025-01-01T00:00:00.000Z"
