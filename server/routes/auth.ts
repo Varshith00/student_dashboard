@@ -293,6 +293,37 @@ export const handleLogin: RequestHandler = async (req, res) => {
   }
 };
 
+// Get professor info by ID (for student registration verification)
+export const handleGetProfessor: RequestHandler = (req, res) => {
+  try {
+    const { professorId } = req.params;
+
+    const professor = findUserById(professorId);
+    if (!professor || professor.role !== 'professor') {
+      return res.status(404).json({
+        success: false,
+        message: 'Professor not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      professor: {
+        id: professor.id,
+        name: professor.name,
+        email: professor.email
+      }
+    });
+
+  } catch (error) {
+    console.error('Get professor error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+};
+
 // Get current user handler
 export const handleGetUser: RequestHandler = (req, res) => {
   try {
