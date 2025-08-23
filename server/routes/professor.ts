@@ -127,7 +127,7 @@ const assignments: Assignment[] = [
   },
   {
     id: "assign_6",
-    professorId: "prof1@gmail.com-id",
+    professorId: "prof1@gmail.com",
     studentId: "demo-student-004", // Priya Patel
     problemId: "merge-sorted-arrays",
     assignedDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
@@ -140,7 +140,7 @@ const assignments: Assignment[] = [
   },
   {
     id: "assign_7",
-    professorId: "prof1@gmail.com-id",
+    professorId: "prof1@gmail.com",
     studentId: "demo-student-005", // Marcus Williams
     problemId: "fibonacci-sequence",
     assignedDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
