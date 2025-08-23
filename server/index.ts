@@ -23,6 +23,11 @@ import {
   handleBehavioralInterviewMessage,
   handleEndBehavioralInterview,
 } from "./routes/interview";
+import {
+  handleAudioTranscription,
+  handleAnswerAnalysis,
+  handleBatchAnswerAnalysis,
+} from "./routes/audio-transcription";
 
 export function createServer() {
   const app = express();
