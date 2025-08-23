@@ -409,22 +409,74 @@ export default function VideoInterviewInterface({
             {/* Submit Button */}
             <Button
               onClick={submitAnswer}
-              disabled={!transcribedText.trim() || disabled || isLoading || isRecording}
+              disabled={!transcribedText.trim() || disabled || isLoading || isRecording || isAnalyzing}
               className="w-full"
               size="lg"
             >
-              {isLoading ? (
+              {isLoading || isAnalyzing ? (
                 <>
                   <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-2" />
-                  Processing Answer...
+                  {isAnalyzing ? 'Analyzing with AI...' : 'Processing Answer...'}
                 </>
               ) : (
                 <>
                   <Send className="w-4 h-4 mr-2" />
-                  Submit Answer for Analysis
+                  Submit Answer for AI Analysis
                 </>
               )}
             </Button>
+
+            {/* Analysis Results */}
+            {analysisResult && (
+              <Card className="mt-4 border-accent/20 bg-accent/5">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Brain className="w-5 h-5 text-accent" />
+                    <h5 className="font-semibold">AI Analysis Results</h5>
+                    <Badge variant="secondary" className="ml-auto">
+                      Score: {analysisResult.score}/100
+                    </Badge>
+                  </div>
+
+                  {analysisResult.feedback && (
+                    <div className="space-y-2">
+                      <h6 className="font-medium text-sm">Feedback:</h6>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {analysisResult.feedback}
+                      </p>
+                    </div>
+                  )}
+
+                  {analysisResult.suggestions && analysisResult.suggestions.length > 0 && (
+                    <div className="space-y-2 mt-3">
+                      <h6 className="font-medium text-sm">Suggestions for Improvement:</h6>
+                      <ul className="text-sm text-muted-foreground space-y-1">
+                        {analysisResult.suggestions.map((suggestion: string, index: number) => (
+                          <li key={index} className="flex items-start gap-2">
+                            <TrendingUp className="w-3 h-3 mt-0.5 text-accent" />
+                            {suggestion}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {analysisResult.strengths && analysisResult.strengths.length > 0 && (
+                    <div className="space-y-2 mt-3">
+                      <h6 className="font-medium text-sm text-success">Strengths:</h6>
+                      <ul className="text-sm text-muted-foreground space-y-1">
+                        {analysisResult.strengths.map((strength: string, index: number) => (
+                          <li key={index} className="flex items-start gap-2">
+                            <span className="w-1 h-1 rounded-full bg-success mt-2" />
+                            {strength}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
           </CardContent>
         </Card>
       </div>
