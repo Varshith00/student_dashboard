@@ -22,5 +22,13 @@
     "name": "gandhu",
     "role": "student",
     "createdAt": "2025-08-23T07:21:30.267Z"
+  },
+  {
+    "id": "1755943388211s2gm0c8ce",
+    "email": "gandu2@dsce.edu",
+    "password": "$2b$10$aeERXTmsRPP25YSzgakRqeLkxwXySZb5UTrNTGnhrJzkA5QwIXgfu",
+    "name": "vishnu",
+    "role": "student",
+    "createdAt": "2025-08-23T10:03:08.211Z"
   }
 ]
