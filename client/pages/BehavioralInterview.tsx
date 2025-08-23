@@ -24,6 +24,7 @@ import {
   Star,
   TrendingUp,
   CheckCircle,
+  AlertCircle,
   MessageCircle,
   Lightbulb,
   Target,
