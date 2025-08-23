@@ -159,6 +159,10 @@ export default function TechnicalInterview() {
         }),
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
 
       if (data.success) {
@@ -204,6 +208,10 @@ export default function TechnicalInterview() {
           messageHistory: session.messages,
         }),
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
       const data = await response.json();
 
