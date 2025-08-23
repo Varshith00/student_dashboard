@@ -12,7 +12,6 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { authFetch } from "@/contexts/AuthContext";
-import VideoInterviewInterface from "@/components/VideoInterviewInterface";
 import {
   Brain,
   Send,
@@ -57,7 +56,7 @@ export default function TechnicalInterview() {
   const [currentMessage, setCurrentMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
-  const [interviewMode, setInterviewMode] = useState<"chat" | "video">("video");
+  const [interviewMode, setInterviewMode] = useState<"chat" | "video">("chat");
   const [currentQuestion, setCurrentQuestion] = useState("");
   const [awaitingAnswer, setAwaitingAnswer] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -432,22 +431,12 @@ export default function TechnicalInterview() {
               {session.status === "active" && (
                 <div className="flex items-center gap-1">
                   <Button
-                    variant={interviewMode === "video" ? "default" : "outline"}
+                    variant="default"
                     size="sm"
-                    onClick={() => setInterviewMode("video")}
-                    className="h-7 text-xs px-2"
-                  >
-                    <Video className="w-3 h-3 mr-1" />
-                    <span className="hidden sm:inline">Video</span>
-                  </Button>
-                  <Button
-                    variant={interviewMode === "chat" ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setInterviewMode("chat")}
                     className="h-7 text-xs px-2"
                   >
                     <MessageSquare className="w-3 h-3 mr-1" />
-                    <span className="hidden sm:inline">Chat</span>
+                    <span className="hidden sm:inline">Chat Interview</span>
                   </Button>
                 </div>
               )}
@@ -485,19 +474,6 @@ export default function TechnicalInterview() {
       <div className="flex-1 flex flex-col">
         <div className="flex-1 p-4">
           <div className="max-w-6xl mx-auto h-full flex flex-col">
-            {session.status === "active" &&
-              interviewMode === "video" &&
-              currentQuestion && (
-                <VideoInterviewInterface
-                  question={currentQuestion}
-                  onAnswerSubmit={handleVideoAnswer}
-                  isLoading={isLoading}
-                  disabled={!awaitingAnswer}
-                  interviewType="technical"
-                  difficulty={session.difficulty}
-                  focus={session.focus}
-                />
-              )}
 
             {(interviewMode === "chat" || session.status === "completed") && (
               <>
