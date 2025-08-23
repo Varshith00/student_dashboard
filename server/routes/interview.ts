@@ -3,6 +3,14 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
+interface QuestionFeedback {
+  question: string;
+  answer: string;
+  feedback: string;
+  strengths: string[];
+  improvements: string[];
+}
+
 interface InterviewSession {
   id: string;
   userId: string;
@@ -13,8 +21,8 @@ interface InterviewSession {
   endTime?: string;
   status: 'active' | 'completed';
   messages: Message[];
-  score?: number;
-  feedback?: string;
+  questionFeedback?: QuestionFeedback[];
+  overallFeedback?: string;
 }
 
 interface Message {
