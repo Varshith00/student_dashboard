@@ -70,7 +70,11 @@ const App = () => (
               element={<BehavioralInterview />}
             />
 
-            {/* Collaborative Programming routes */}
+            {/* Pair Programming routes */}
+            <Route
+              path="/student/pair-programming"
+              element={<PairProgramming />}
+            />
             <Route
               path="/student/collaboration/new"
               element={<CollaborationPage />}
