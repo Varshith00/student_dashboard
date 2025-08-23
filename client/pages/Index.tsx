@@ -220,7 +220,7 @@ export default function Index() {
                     <span>Progress visualizations</span>
                   </div>
                 </div>
-                <Link to="/login" className="w-full">
+                <Link to="/professor/login" className="w-full">
                   <Button variant="outline" className="w-full border-accent text-accent hover:bg-accent hover:text-accent-foreground">
                     Professor Login
                   </Button>
