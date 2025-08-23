@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Editor } from "@monaco-editor/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,6 +6,11 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { authFetch } from "@/contexts/AuthContext";
+import {
+  SafeResizeObserver,
+  createMonacoResizeObserverConfig,
+  createResizeSafeContainer
+} from "@/lib/resizeObserverErrorHandler";
 import {
   Play,
   Square,
@@ -54,6 +59,8 @@ interface AICompletion {
 
 export default function EnhancedWebEditor({ language = 'python', fileName }: EnhancedWebEditorProps) {
   const editorRef = useRef<any>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const resizeCleanupRef = useRef<(() => void) | null>(null);
   const [currentLanguage, setCurrentLanguage] = useState<'python' | 'javascript'>(language);
   const [code, setCode] = useState(getDefaultCode(currentLanguage));
   const [output, setOutput] = useState('');
@@ -326,24 +333,70 @@ class DataProcessor {
     URL.revokeObjectURL(url);
   };
 
-  const handleEditorDidMount = (editor: any) => {
+  const handleEditorDidMount = useCallback((editor: any) => {
     editorRef.current = editor;
-    
-    // Add AI error markers
+
+    // Setup resize-safe container
+    if (containerRef.current && !resizeCleanupRef.current) {
+      resizeCleanupRef.current = createResizeSafeContainer(containerRef.current);
+
+      // Listen for custom resize events
+      containerRef.current.addEventListener('monaco-resize', () => {
+        try {
+          editor.layout();
+        } catch (error) {
+          console.warn('Editor layout error:', error);
+        }
+      });
+    }
+
+    // Manual layout trigger with debouncing
+    const layoutEditor = () => {
+      try {
+        if (editor && typeof editor.layout === 'function') {
+          // Use requestAnimationFrame to avoid ResizeObserver conflicts
+          requestAnimationFrame(() => {
+            editor.layout();
+          });
+        }
+      } catch (error) {
+        console.warn('Editor layout error:', error);
+      }
+    };
+
+    // Setup safe resize observer for manual layout
+    const resizeObserver = new SafeResizeObserver(() => {
+      layoutEditor();
+    }, 200);
+
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+
+    // Add AI error markers with safety
     setTimeout(() => {
-      if (aiErrors.length > 0) {
-        const markers = aiErrors.map(error => ({
-          startLineNumber: error.line,
-          endLineNumber: error.line,
-          startColumn: 1,
-          endColumn: 1000,
-          message: error.message,
-          severity: error.severity === 'error' ? 8 : error.severity === 'warning' ? 4 : 1
-        }));
-        editor.deltaDecorations([], markers);
+      try {
+        if (aiErrors.length > 0 && editor) {
+          const markers = aiErrors.map(error => ({
+            startLineNumber: error.line,
+            endLineNumber: error.line,
+            startColumn: 1,
+            endColumn: 1000,
+            message: error.message,
+            severity: error.severity === 'error' ? 8 : error.severity === 'warning' ? 4 : 1
+          }));
+          editor.deltaDecorations([], markers);
+        }
+      } catch (error) {
+        console.warn('Error setting editor markers:', error);
       }
     }, 1000);
-  };
+
+    // Cleanup function
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [aiErrors]);
 
   // Auto-save functionality
   useEffect(() => {
@@ -354,6 +407,16 @@ class DataProcessor {
       return () => clearTimeout(timer);
     }
   }, [code, autoSave, currentLanguage, currentFileName]);
+
+  // Cleanup resize observer on unmount
+  useEffect(() => {
+    return () => {
+      if (resizeCleanupRef.current) {
+        resizeCleanupRef.current();
+        resizeCleanupRef.current = null;
+      }
+    };
+  }, []);
 
   return (
     <div className="h-screen flex flex-col bg-background">
@@ -491,7 +554,7 @@ class DataProcessor {
           </div>
 
           {/* Editor */}
-          <div className="flex-1">
+          <div ref={containerRef} className="flex-1" style={{ width: '100%', height: '100%' }}>
             <Editor
               height="100%"
               language={currentLanguage}
@@ -500,12 +563,11 @@ class DataProcessor {
               onMount={handleEditorDidMount}
               theme={theme}
               options={{
+                ...createMonacoResizeObserverConfig(),
                 minimap: { enabled: showMinimap },
                 fontSize: fontSize,
                 lineNumbers: 'on',
                 roundedSelection: false,
-                scrollBeyondLastLine: false,
-                automaticLayout: true,
                 tabSize: currentLanguage === 'python' ? 4 : 2,
                 insertSpaces: true,
                 wordWrap: wordWrap,
