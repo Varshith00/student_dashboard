@@ -90,11 +90,11 @@ export default function StudentLogin() {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ 
-            email, 
-            password, 
-            name, 
-            professorId 
+          body: JSON.stringify({
+            email,
+            password,
+            name,
+            professorEmail
           }),
         });
 
