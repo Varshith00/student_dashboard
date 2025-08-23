@@ -449,11 +449,23 @@ export const handleGetStudentDetails: RequestHandler = async (req, res) => {
     const { studentId } = req.params;
     const professor = (req as any).user;
 
-    const student = studentProfiles.find((s) => s.id === studentId);
+    if (professor.role !== 'professor') {
+      return res.status(403).json({
+        success: false,
+        error: "Access denied. Only professors can view student details."
+      });
+    }
+
+    // Load all users to find the student
+    const allUsers = loadUsers();
+    const student = allUsers.find(
+      (user) => user.id === studentId && user.role === 'student' && user.professorId === professor.id
+    );
+
     if (!student) {
       return res.status(404).json({
         success: false,
-        error: "Student not found",
+        error: "Student not found or not assigned to you",
       });
     }
 
@@ -486,7 +498,10 @@ export const handleGetStudentDetails: RequestHandler = async (req, res) => {
     );
 
     const studentDetails = {
-      ...student,
+      id: student.id,
+      name: student.name,
+      email: student.email,
+      createdAt: student.createdAt,
       assignments: studentAssignments,
       stats: {
         totalAssignments: studentAssignments.length,
