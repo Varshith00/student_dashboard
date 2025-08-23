@@ -246,10 +246,7 @@ export default function TechnicalInterview() {
             : null,
         );
 
-        // Show results for a moment, then redirect
-        setTimeout(() => {
-          navigate("/student/dashboard");
-        }, 3000);
+        // Results are now shown until user manually navigates away
       }
     } catch (error) {
       console.error("End interview error:", error);
