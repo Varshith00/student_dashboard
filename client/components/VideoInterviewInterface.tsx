@@ -2,17 +2,20 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Mic, 
-  MicOff, 
-  Video, 
-  VideoOff, 
-  Send, 
-  Volume2, 
+import { authFetch } from "@/contexts/AuthContext";
+import {
+  Mic,
+  MicOff,
+  Video,
+  VideoOff,
+  Send,
+  Volume2,
   VolumeX,
   Play,
   Pause,
-  RotateCcw
+  RotateCcw,
+  Brain,
+  TrendingUp
 } from "lucide-react";
 
 interface VideoInterviewInterfaceProps {
