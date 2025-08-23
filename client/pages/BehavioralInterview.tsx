@@ -510,7 +510,7 @@ export default function BehavioralInterview() {
                               {message.content}
                             </p>
                             <p className="text-xs opacity-70 mt-2">
-                              {message.timestamp.toLocaleTimeString()}
+                              {new Date(message.timestamp).toLocaleTimeString()}
                             </p>
                           </div>
                         </div>
