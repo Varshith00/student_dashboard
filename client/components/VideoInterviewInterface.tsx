@@ -598,11 +598,11 @@ export default function VideoInterviewInterface({
                 {!isRecording ? (
                   <Button
                     onClick={startRecording}
-                    disabled={disabled || isLoading}
+                    disabled={disabled || isLoading || !hasMediaPermission}
                     className="flex-1"
                   >
                     <Mic className="w-4 h-4 mr-2" />
-                    Start Recording Answer
+                    {hasMediaPermission ? "Start Recording Answer" : "Camera/Mic Not Ready"}
                   </Button>
                 ) : (
                   <>
@@ -610,26 +610,37 @@ export default function VideoInterviewInterface({
                       onClick={pauseRecording}
                       variant="outline"
                       disabled={disabled}
+                      size="sm"
                     >
                       {isPaused ? (
-                        <Play className="w-4 h-4" />
+                        <>
+                          <Play className="w-4 h-4 mr-1" />
+                          Resume
+                        </>
                       ) : (
-                        <Pause className="w-4 h-4" />
+                        <>
+                          <Pause className="w-4 h-4 mr-1" />
+                          Pause
+                        </>
                       )}
                     </Button>
                     <Button
                       onClick={stopRecording}
                       variant="destructive"
                       disabled={disabled}
+                      size="sm"
                     >
-                      <MicOff className="w-4 h-4" />
+                      <MicOff className="w-4 h-4 mr-1" />
+                      Stop
                     </Button>
                     <Button
                       onClick={resetRecording}
                       variant="outline"
                       disabled={disabled}
+                      size="sm"
                     >
-                      <RotateCcw className="w-4 h-4" />
+                      <RotateCcw className="w-4 h-4 mr-1" />
+                      Reset
                     </Button>
                   </>
                 )}
@@ -687,6 +698,14 @@ export default function VideoInterviewInterface({
                 </>
               )}
             </Button>
+
+            {!hasMediaPermission && (
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground">
+                  💡 Tip: You can type your answer manually in the transcription box above if camera/microphone access isn't available
+                </p>
+              </div>
+            )}
 
             {/* Analysis Results */}
             {analysisResult && (
