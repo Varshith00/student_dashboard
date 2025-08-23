@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
 import { handleExecutePython } from "./routes/execute-python";
+import { handleExecuteJavaScript } from "./routes/execute-javascript";
 import { handleGenerateQuestion, handleAnalyzeCode, handleGetHint } from "./routes/ai-questions";
 import { handleRegister, handleLogin, handleGetUser, authMiddleware } from "./routes/auth";
 import {
