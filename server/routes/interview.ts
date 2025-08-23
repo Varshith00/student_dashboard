@@ -259,18 +259,18 @@ export const handleStartBehavioralInterview: RequestHandler = async (req, res) =
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `
-You are conducting a behavioral interview focused on critical thinking and aptitude assessment. 
+You are conducting a behavioral interview focused on critical thinking and aptitude assessment.
 
 Focus Areas: ${focus.join(', ')}
 
-Start with a professional greeting and your first behavioral question. Your questions should:
+Start with a casual "hey" greeting and your first behavioral question. Your questions should:
 1. Focus on critical thinking and problem-solving scenarios
 2. Include aptitude-based situational questions
 3. Test decision-making abilities
 4. Assess communication and reasoning skills
 5. Use the STAR method (Situation, Task, Action, Result) when appropriate
 
-Begin the interview with a greeting and first behavioral/aptitude question.
+Begin the interview with just "hey" as your greeting and first behavioral/aptitude question.
 `;
 
     const result = await model.generateContent(prompt);
