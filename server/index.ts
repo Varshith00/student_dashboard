@@ -153,5 +153,12 @@ export function createServer() {
     handleGetStudentAssignments,
   );
 
+  // Collaboration routes
+  app.post("/api/collaboration/create", authMiddleware, createSession);
+  app.post("/api/collaboration/join", authMiddleware, joinSession);
+  app.get("/api/collaboration/:sessionId", authMiddleware, getSession);
+  app.post("/api/collaboration/update", authMiddleware, updateCode);
+  app.post("/api/collaboration/leave", authMiddleware, leaveSession);
+
   return app;
 }
