@@ -30,7 +30,11 @@ function expressPlugin(): Plugin {
     name: "express-plugin",
     apply: "serve", // Only apply during development (serve mode)
     configureServer(server) {
-      const app = createServer();
+      const { app, httpServer, io } = createServer();
+
+      // For development, we need to attach socket.io to the Vite server
+      // Note: In development, socket.io will use the Vite dev server's HTTP server
+      io.attach(server.httpServer!);
 
       // Add Express app as middleware to Vite dev server
       server.middlewares.use(app);
