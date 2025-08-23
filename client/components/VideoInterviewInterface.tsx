@@ -490,7 +490,7 @@ export default function VideoInterviewInterface({
       </Card>
 
       {/* Video Interface */}
-      <div className="grid lg:grid-cols-2 gap-6">
+      <div className="grid lg:grid-cols-2 gap-4 lg:gap-6">
         {/* Video Feed */}
         <Card>
           <CardContent className="p-4">
@@ -592,35 +592,42 @@ export default function VideoInterviewInterface({
         <Card>
           <CardContent className="p-4 space-y-4">
             {/* Recording Controls */}
-            <div className="space-y-3">
-              <h4 className="font-semibold">Recording Controls</h4>
-              <div className="flex items-center gap-2">
+            <div className="space-y-2 lg:space-y-3">
+              <h4 className="font-semibold text-sm lg:text-base">Recording Controls</h4>
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                 {!isRecording ? (
                   <Button
                     onClick={startRecording}
                     disabled={disabled || isLoading || !hasMediaPermission}
-                    className="flex-1"
+                    className="w-full sm:flex-1"
+                    size="sm"
                   >
                     <Mic className="w-4 h-4 mr-2" />
-                    {hasMediaPermission ? "Start Recording Answer" : "Camera/Mic Not Ready"}
+                    <span className="hidden sm:inline">
+                      {hasMediaPermission ? "Start Recording Answer" : "Camera/Mic Not Ready"}
+                    </span>
+                    <span className="sm:hidden">
+                      {hasMediaPermission ? "Record" : "Not Ready"}
+                    </span>
                   </Button>
                 ) : (
-                  <>
+                  <div className="flex gap-2 w-full">
                     <Button
                       onClick={pauseRecording}
                       variant="outline"
                       disabled={disabled}
                       size="sm"
+                      className="flex-1"
                     >
                       {isPaused ? (
                         <>
-                          <Play className="w-4 h-4 mr-1" />
-                          Resume
+                          <Play className="w-4 h-4" />
+                          <span className="hidden sm:inline sm:ml-1">Resume</span>
                         </>
                       ) : (
                         <>
-                          <Pause className="w-4 h-4 mr-1" />
-                          Pause
+                          <Pause className="w-4 h-4" />
+                          <span className="hidden sm:inline sm:ml-1">Pause</span>
                         </>
                       )}
                     </Button>
@@ -629,20 +636,22 @@ export default function VideoInterviewInterface({
                       variant="destructive"
                       disabled={disabled}
                       size="sm"
+                      className="flex-1"
                     >
-                      <MicOff className="w-4 h-4 mr-1" />
-                      Stop
+                      <MicOff className="w-4 h-4" />
+                      <span className="hidden sm:inline sm:ml-1">Stop</span>
                     </Button>
                     <Button
                       onClick={resetRecording}
                       variant="outline"
                       disabled={disabled}
                       size="sm"
+                      className="flex-1"
                     >
-                      <RotateCcw className="w-4 h-4 mr-1" />
-                      Reset
+                      <RotateCcw className="w-4 h-4" />
+                      <span className="hidden sm:inline sm:ml-1">Reset</span>
                     </Button>
-                  </>
+                  </div>
                 )}
               </div>
             </div>
