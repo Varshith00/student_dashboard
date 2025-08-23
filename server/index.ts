@@ -116,5 +116,47 @@ export function createServer() {
     handleBatchAnswerAnalysis,
   );
 
+  // Professor routes
+  app.get(
+    "/api/professor/students",
+    authMiddleware,
+    handleGetStudents,
+  );
+  app.post(
+    "/api/professor/assign-problem",
+    authMiddleware,
+    handleAssignProblem,
+  );
+  app.post(
+    "/api/professor/bulk-assign-problem",
+    authMiddleware,
+    handleBulkAssignProblem,
+  );
+  app.get(
+    "/api/professor/assignments",
+    authMiddleware,
+    handleGetAssignments,
+  );
+  app.get(
+    "/api/professor/analytics",
+    authMiddleware,
+    handleGetClassAnalytics,
+  );
+  app.get(
+    "/api/professor/students/:studentId",
+    authMiddleware,
+    handleGetStudentDetails,
+  );
+  app.put(
+    "/api/professor/assignments/:assignmentId/progress",
+    authMiddleware,
+    handleUpdateAssignmentProgress,
+  );
+  app.delete(
+    "/api/professor/assignments/:assignmentId",
+    authMiddleware,
+    handleDeleteAssignment,
+  );
+
   return app;
 }
