@@ -54,5 +54,21 @@
     "name": "Test Student",
     "role": "student",
     "createdAt": "2025-08-23T10:08:17.209Z"
+  },
+  {
+    "id": "175594370703081qm4bodu",
+    "email": "demostudent@demo.com",
+    "password": "$2b$10$KypOa0lAIGmsZsstWhr7VeALv1CgXw1T7oCZ7vxj44JpbHedALtXS",
+    "name": "Demo Student",
+    "role": "student",
+    "createdAt": "2025-08-23T10:08:27.030Z"
+  },
+  {
+    "id": "1755943707150q9f1piref",
+    "email": "demoprofessor@demo.com",
+    "password": "$2b$10$8YQ/SMzD8GZQS4pGf.8I/eza5.eUQyvjqmL45FUCmCWnyCXLGWaX6",
+    "name": "Demo Professor",
+    "role": "professor",
+    "createdAt": "2025-08-23T10:08:27.150Z"
   }
 ]
