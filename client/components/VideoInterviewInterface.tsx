@@ -20,9 +20,12 @@ import {
 
 interface VideoInterviewInterfaceProps {
   question: string;
-  onAnswerSubmit: (transcribedText: string) => void;
+  onAnswerSubmit: (transcribedText: string, analysis?: any) => void;
   isLoading?: boolean;
   disabled?: boolean;
+  interviewType: 'technical' | 'behavioral';
+  difficulty?: string;
+  focus?: string[];
 }
 
 export default function VideoInterviewInterface({ 
