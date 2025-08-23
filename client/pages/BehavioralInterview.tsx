@@ -403,87 +403,100 @@ export default function BehavioralInterview() {
         </div>
       </header>
 
-      {/* Chat Interface */}
+      {/* Interview Interface */}
       <div className="flex-1 flex flex-col">
         <div className="flex-1 p-4">
-          <div className="max-w-4xl mx-auto h-full flex flex-col">
-            <ScrollArea className="flex-1 pr-4">
-              <div className="space-y-4">
-                {session.messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex gap-3 ${
-                      message.role === 'user' ? 'justify-end' : 'justify-start'
-                    }`}
-                  >
-                    <div
-                      className={`flex gap-3 max-w-[80%] ${
-                        message.role === 'user' ? 'flex-row-reverse' : 'flex-row'
-                      }`}
-                    >
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                        message.role === 'user' 
-                          ? 'bg-primary text-primary-foreground' 
-                          : 'bg-accent text-accent-foreground'
-                      }`}>
-                        {message.role === 'user' ? (
-                          <User className="w-4 h-4" />
-                        ) : (
-                          <Bot className="w-4 h-4" />
-                        )}
-                      </div>
+          <div className="max-w-6xl mx-auto h-full flex flex-col">
+            {session.status === 'active' && interviewMode === 'video' && currentQuestion && (
+              <VideoInterviewInterface
+                question={currentQuestion}
+                onAnswerSubmit={handleVideoAnswer}
+                isLoading={isLoading}
+                disabled={!awaitingAnswer}
+              />
+            )}
+
+            {(interviewMode === 'chat' || session.status === 'completed') && (
+              <>
+                <ScrollArea className="flex-1 pr-4">
+                  <div className="space-y-4">
+                    {session.messages.map((message) => (
                       <div
-                        className={`rounded-lg p-3 ${
-                          message.role === 'user'
-                            ? 'bg-primary text-primary-foreground'
-                            : 'bg-muted'
+                        key={message.id}
+                        className={`flex gap-3 ${
+                          message.role === 'user' ? 'justify-end' : 'justify-start'
                         }`}
                       >
-                        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                        <p className="text-xs opacity-70 mt-2">
-                          {message.timestamp.toLocaleTimeString()}
-                        </p>
+                        <div
+                          className={`flex gap-3 max-w-[80%] ${
+                            message.role === 'user' ? 'flex-row-reverse' : 'flex-row'
+                          }`}
+                        >
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                            message.role === 'user'
+                              ? 'bg-primary text-primary-foreground'
+                              : 'bg-accent text-accent-foreground'
+                          }`}>
+                            {message.role === 'user' ? (
+                              <User className="w-4 h-4" />
+                            ) : (
+                              <Bot className="w-4 h-4" />
+                            )}
+                          </div>
+                          <div
+                            className={`rounded-lg p-3 ${
+                              message.role === 'user'
+                                ? 'bg-primary text-primary-foreground'
+                                : 'bg-muted'
+                            }`}
+                          >
+                            <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                            <p className="text-xs opacity-70 mt-2">
+                              {message.timestamp.toLocaleTimeString()}
+                            </p>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                ))}
-                {isLoading && (
-                  <div className="flex gap-3 justify-start">
-                    <div className="w-8 h-8 rounded-full bg-accent text-accent-foreground flex items-center justify-center">
-                      <Bot className="w-4 h-4" />
-                    </div>
-                    <div className="bg-muted rounded-lg p-3">
-                      <div className="flex items-center gap-2">
-                        <div className="animate-spin w-4 h-4 border-2 border-accent border-t-transparent rounded-full"></div>
-                        <span className="text-sm">Interviewer is thinking...</span>
+                    ))}
+                    {isLoading && (
+                      <div className="flex gap-3 justify-start">
+                        <div className="w-8 h-8 rounded-full bg-accent text-accent-foreground flex items-center justify-center">
+                          <Bot className="w-4 h-4" />
+                        </div>
+                        <div className="bg-muted rounded-lg p-3">
+                          <div className="flex items-center gap-2">
+                            <div className="animate-spin w-4 h-4 border-2 border-accent border-t-transparent rounded-full"></div>
+                            <span className="text-sm">Interviewer is thinking...</span>
+                          </div>
+                        </div>
                       </div>
-                    </div>
+                    )}
+                    <div ref={messagesEndRef} />
                   </div>
-                )}
-                <div ref={messagesEndRef} />
-              </div>
-            </ScrollArea>
+                </ScrollArea>
 
-            {/* Input Area */}
-            {session.status === 'active' && (
-              <>
-                <Separator className="my-4" />
-                <div className="flex gap-2">
-                  <Input
-                    value={currentMessage}
-                    onChange={(e) => setCurrentMessage(e.target.value)}
-                    placeholder="Type your response using specific examples (STAR method)..."
-                    onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
-                    disabled={isLoading}
-                    className="flex-1"
-                  />
-                  <Button onClick={sendMessage} disabled={isLoading || !currentMessage.trim()}>
-                    <Send className="w-4 h-4" />
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Tip: Use the STAR method - Situation, Task, Action, Result
-                </p>
+                {/* Input Area */}
+                {session.status === 'active' && interviewMode === 'chat' && (
+                  <>
+                    <Separator className="my-4" />
+                    <div className="flex gap-2">
+                      <Input
+                        value={currentMessage}
+                        onChange={(e) => setCurrentMessage(e.target.value)}
+                        placeholder="Type your response using specific examples (STAR method)..."
+                        onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
+                        disabled={isLoading}
+                        className="flex-1"
+                      />
+                      <Button onClick={sendMessage} disabled={isLoading || !currentMessage.trim()}>
+                        <Send className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Tip: Use the STAR method - Situation, Task, Action, Result
+                    </p>
+                  </>
+                )}
               </>
             )}
 
