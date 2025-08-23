@@ -202,8 +202,8 @@ export default function BehavioralInterview() {
                 ...prev,
                 status: "completed",
                 endTime: new Date(),
-                score: data.score,
-                feedback: data.feedback,
+                questionFeedback: data.questionFeedback,
+                overallFeedback: data.overallFeedback,
               }
             : null,
         );
