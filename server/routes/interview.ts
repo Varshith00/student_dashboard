@@ -192,26 +192,61 @@ export const handleEndTechnicalInterview: RequestHandler = async (req, res) => {
       `${msg.role === 'user' ? 'Candidate' : 'Interviewer'}: ${msg.content}`
     ).join('\n\n');
 
-    const evaluationPrompt = `
-Evaluate this ${session.difficulty}-level technical interview:
+    // Parse conversation to extract question-answer pairs
+    const qaPairs = [];
+    let currentQuestion = '';
+    let currentAnswer = '';
 
-${conversationHistory}
+    for (let i = 0; i < messageHistory.length; i++) {
+      const msg = messageHistory[i];
+      if (msg.role === 'interviewer') {
+        // If we have a previous question-answer pair, save it
+        if (currentQuestion && currentAnswer) {
+          qaPairs.push({ question: currentQuestion, answer: currentAnswer });
+        }
+        currentQuestion = msg.content;
+        currentAnswer = '';
+      } else if (msg.role === 'user') {
+        currentAnswer = msg.content;
+      }
+    }
+
+    // Add the last pair if exists
+    if (currentQuestion && currentAnswer) {
+      qaPairs.push({ question: currentQuestion, answer: currentAnswer });
+    }
+
+    const evaluationPrompt = `
+Analyze this ${session.difficulty}-level technical interview and provide detailed feedback for each question-answer pair.
+
+Question-Answer pairs:
+${qaPairs.map((qa, index) => `
+Q${index + 1}: ${qa.question}
+A${index + 1}: ${qa.answer}
+`).join('\n')}
 
 Provide a JSON response with this structure:
 {
-  "score": "Number from 0-100",
-  "feedback": "Detailed feedback covering: technical knowledge, problem-solving approach, communication skills, areas for improvement, and specific strengths. Be constructive and encouraging."
+  "questionFeedback": [
+    {
+      "question": "The exact question asked",
+      "answer": "The candidate's response",
+      "feedback": "Detailed analysis of the response covering technical accuracy, approach, and communication",
+      "strengths": ["specific strength 1", "specific strength 2"],
+      "improvements": ["specific area for improvement 1", "specific area for improvement 2"]
+    }
+  ],
+  "overallFeedback": "Brief summary of overall performance and key takeaways for improvement"
 }
 
-Evaluation criteria for ${session.difficulty} level:
-- Technical knowledge depth
-- Problem-solving approach
-- Code quality and structure
-- Communication and explanation skills
+For each question-answer pair, evaluate:
+- Technical accuracy and depth of knowledge
+- Problem-solving approach and methodology
+- Communication clarity and structure
+- Code quality (if applicable)
 - Handling of follow-up questions
-- Time management
 
-Be fair but honest in your assessment. Provide actionable feedback.
+Be constructive, specific, and actionable in your feedback.
 `;
 
     const result = await model.generateContent(evaluationPrompt);
@@ -220,14 +255,14 @@ Be fair but honest in your assessment. Provide actionable feedback.
 
     // Extract JSON from response
     const jsonMatch = evaluationText.match(/\{[\s\S]*\}/);
-    let score = 75;
-    let feedback = "Good technical interview performance with room for improvement.";
-    
+    let questionFeedback: QuestionFeedback[] = [];
+    let overallFeedback = "Good technical interview performance with opportunities for improvement.";
+
     if (jsonMatch) {
       try {
         const evaluation = JSON.parse(jsonMatch[0]);
-        score = parseInt(evaluation.score) || 75;
-        feedback = evaluation.feedback || feedback;
+        questionFeedback = evaluation.questionFeedback || [];
+        overallFeedback = evaluation.overallFeedback || overallFeedback;
       } catch (e) {
         console.warn('Failed to parse evaluation JSON:', e);
       }
@@ -236,15 +271,15 @@ Be fair but honest in your assessment. Provide actionable feedback.
     // Update session
     session.status = 'completed';
     session.endTime = new Date().toISOString();
-    session.score = score;
-    session.feedback = feedback;
+    session.questionFeedback = questionFeedback;
+    session.overallFeedback = overallFeedback;
 
     activeSessions.set(sessionId, session);
 
     res.json({
       success: true,
-      score,
-      feedback
+      questionFeedback,
+      overallFeedback
     });
 
   } catch (error) {
