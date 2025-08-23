@@ -40,19 +40,19 @@ export const handleStartTechnicalInterview: RequestHandler = async (req, res) =>
 
     // Generate initial interview question
     const prompt = `
-You are a technical interviewer at a mid-tier technology company conducting a ${difficulty}-level technical interview. 
+You are a technical interviewer at a mid-tier technology company conducting a ${difficulty}-level technical interview.
 
 Interview Focus Areas: ${focus.join(', ')}
 Candidate Experience Level: ${difficulty}
 
-Start the interview with a professional greeting and first technical question. Your role is to:
+Start the interview with a casual "hey" greeting and first technical question. Your role is to:
 1. Ask progressively challenging technical questions
 2. Probe deeper based on candidate responses
 3. Test problem-solving approach, not just correct answers
 4. Maintain a friendly but professional tone
 5. Focus on thought process and communication
 
-Begin the interview now with a greeting and your first technical question. Keep it conversational and engaging.
+Begin the interview now with just "hey" as your greeting and your first technical question. Keep it conversational and engaging.
 `;
 
     const result = await model.generateContent(prompt);
