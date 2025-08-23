@@ -185,7 +185,11 @@ export default function TechnicalInterview() {
             ? {
                 ...prev,
                 messages: [...prev.messages, botMessage],
-                ...(data.sessionUpdate && data.sessionUpdate),
+                ...(data.sessionUpdate && {
+                  ...data.sessionUpdate,
+                  startTime: data.sessionUpdate.startTime ? new Date(data.sessionUpdate.startTime) : prev.startTime,
+                  endTime: data.sessionUpdate.endTime ? new Date(data.sessionUpdate.endTime) : prev.endTime
+                }),
               }
             : null,
         );
