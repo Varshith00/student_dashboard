@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -20,15 +20,37 @@ import {
   TrendingUp
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import { problems } from "@/data/problems";
 
 export default function StudentDashboard() {
   const navigate = useNavigate();
+  const { user, logout, isLoading } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
 
+  // Redirect if not logged in or not a student
+  useEffect(() => {
+    if (!isLoading && (!user || user.role !== 'student')) {
+      navigate('/login');
+    }
+  }, [user, isLoading, navigate]);
+
   const handleLogout = () => {
+    logout();
     navigate('/');
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
+
+  if (!user || user.role !== 'student') {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10">
