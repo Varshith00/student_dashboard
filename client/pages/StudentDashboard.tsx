@@ -275,7 +275,7 @@ export default function StudentDashboard() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid md:grid-cols-3 gap-6">
+                <div className="grid md:grid-cols-4 gap-6">
                   <div className="text-center p-4 bg-primary/5 rounded-lg">
                     <div className="text-3xl font-bold text-primary mb-2">
                       47
@@ -290,6 +290,14 @@ export default function StudentDashboard() {
                     </div>
                     <div className="text-sm text-muted-foreground">
                       Mock Interviews
+                    </div>
+                  </div>
+                  <div className="text-center p-4 bg-warning/10 rounded-lg">
+                    <div className="text-3xl font-bold text-warning mb-2">
+                      {assignmentSummary.pending + assignmentSummary.inProgress}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      Pending Assignments
                     </div>
                   </div>
                   <div className="text-center p-4 bg-success/5 rounded-lg">
