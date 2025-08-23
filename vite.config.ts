@@ -37,7 +37,8 @@ function expressPlugin(): Plugin {
       console.log('🔧 Development mode: Socket.io disabled to prevent conflicts');
 
       // Add Express app as middleware to Vite dev server
-      server.middlewares.use(app);
+      // Only handle API routes to avoid conflicts with Vite's own middleware
+      server.middlewares.use('/api', app);
     },
   };
 }
