@@ -30,15 +30,32 @@ function expressPlugin(): Plugin {
     name: "express-plugin",
     apply: "serve", // Only apply during development (serve mode)
     configureServer(server) {
+      // Create a development-specific Express configuration
       const { app } = createServer();
 
-      // In development, skip socket.io to avoid body stream conflicts
-      // Socket.io will work in production build
       console.log('🔧 Development mode: Socket.io disabled to prevent conflicts');
 
-      // Add Express app as middleware to Vite dev server
-      // Only handle API routes to avoid conflicts with Vite's own middleware
-      server.middlewares.use('/api', app);
+      // Use raw body parsing for development to avoid conflicts
+      server.middlewares.use('/api', (req, res, next) => {
+        if (req.method === 'POST' || req.method === 'PUT' || req.method === 'PATCH') {
+          let body = '';
+          req.on('data', chunk => {
+            body += chunk.toString();
+          });
+          req.on('end', () => {
+            if (body) {
+              try {
+                req.body = JSON.parse(body);
+              } catch (e) {
+                req.body = body;
+              }
+            }
+            app(req, res, next);
+          });
+        } else {
+          app(req, res, next);
+        }
+      });
     },
   };
 }
