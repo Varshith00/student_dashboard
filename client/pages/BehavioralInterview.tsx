@@ -6,11 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { authFetch } from "@/contexts/AuthContext";
-import { 
-  Brain, 
-  Send, 
-  ArrowLeft, 
-  GraduationCap, 
+import VideoInterviewInterface from "@/components/VideoInterviewInterface";
+import {
+  Brain,
+  Send,
+  ArrowLeft,
+  GraduationCap,
   LogOut,
   Clock,
   User,
@@ -20,7 +21,8 @@ import {
   CheckCircle,
   MessageCircle,
   Lightbulb,
-  Target
+  Target,
+  Video
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
