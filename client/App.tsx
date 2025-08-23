@@ -13,6 +13,8 @@ import StudentDashboard from "./pages/StudentDashboard";
 import ProfessorDashboard from "./pages/ProfessorDashboard";
 import CodingProblem from "./pages/CodingProblem";
 import AIQuestionGenerator from "./pages/AIQuestionGenerator";
+import TechnicalInterview from "./pages/TechnicalInterview";
+import BehavioralInterview from "./pages/BehavioralInterview";
 import Placeholder from "./pages/Placeholder";
 import NotFound from "./pages/NotFound";
 
