@@ -248,22 +248,50 @@ export function createDevServer() {
   // Custom body parser that works with Vite
   app.use('/api', (req, res, next) => {
     if (req.method === 'POST' || req.method === 'PUT' || req.method === 'PATCH') {
+      // Skip if body already parsed (to avoid double parsing)
+      if (req.body !== undefined) {
+        return next();
+      }
+
       let body = '';
-      req.on('data', chunk => {
-        body += chunk.toString();
-      });
-      req.on('end', () => {
+      let finished = false;
+
+      const finish = () => {
+        if (finished) return;
+        finished = true;
+
         if (body) {
           try {
             req.body = JSON.parse(body);
           } catch (e) {
-            req.body = {};
+            // If JSON parsing fails, try to handle as string or set empty object
+            req.body = body.length > 0 ? { raw: body } : {};
           }
         } else {
           req.body = {};
         }
         next();
+      };
+
+      req.on('data', chunk => {
+        body += chunk.toString();
       });
+
+      req.on('end', finish);
+      req.on('error', (err) => {
+        console.error('Body parsing error:', err);
+        req.body = {};
+        finish();
+      });
+
+      // Add timeout to prevent hanging
+      const timeout = setTimeout(() => {
+        console.warn('Body parsing timeout');
+        finish();
+      }, 10000); // 10 second timeout
+
+      req.on('end', () => clearTimeout(timeout));
+      req.on('error', () => clearTimeout(timeout));
     } else {
       next();
     }
