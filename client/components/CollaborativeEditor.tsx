@@ -65,7 +65,6 @@ export default function CollaborativeEditor({
   const [isLoading, setIsLoading] = useState(true);
   const [permission, setPermission] = useState<"write" | "read">("write");
 
-
   // Join session state
   const [joinSessionId, setJoinSessionId] = useState("");
   const [isJoining, setIsJoining] = useState(false);
@@ -76,7 +75,9 @@ export default function CollaborativeEditor({
 
   // Socket connection
   const socketRef = useRef<Socket | null>(null);
-  const [connectionStatus, setConnectionStatus] = useState<"connecting" | "connected" | "disconnected">("disconnected");
+  const [connectionStatus, setConnectionStatus] = useState<
+    "connecting" | "connected" | "disconnected"
+  >("disconnected");
 
   function getDefaultCode(lang: "python" | "javascript") {
     if (lang === "python") {
@@ -129,12 +130,12 @@ console.log(\`Result: \${result}\`);
     if (!session?.id) return;
 
     // Check if we're in production environment
-    const isProduction = process.env.NODE_ENV === 'production';
+    const isProduction = process.env.NODE_ENV === "production";
 
     if (!isProduction) {
       // In development, skip socket connection to avoid conflicts
       setConnectionStatus("disconnected");
-      console.log('🔧 Development mode: Real-time collaboration disabled');
+      console.log("🔧 Development mode: Real-time collaboration disabled");
       return;
     }
 
@@ -142,30 +143,35 @@ console.log(\`Result: \${result}\`);
 
     try {
       socketRef.current = io(window.location.origin, {
-        transports: ['websocket', 'polling']
+        transports: ["websocket", "polling"],
       });
 
       const socket = socketRef.current;
 
-      socket.on('connect', () => {
-        console.log('Connected to socket server');
+      socket.on("connect", () => {
+        console.log("Connected to socket server");
         setConnectionStatus("connected");
-        socket.emit('join-session', session.id);
+        socket.emit("join-session", session.id);
       });
 
-      socket.on('disconnect', () => {
-        console.log('Disconnected from socket server');
+      socket.on("disconnect", () => {
+        console.log("Disconnected from socket server");
         setConnectionStatus("disconnected");
       });
 
-      socket.on('connect_error', () => {
-        console.log('Socket connection failed');
+      socket.on("connect_error", () => {
+        console.log("Socket connection failed");
         setConnectionStatus("disconnected");
       });
 
       // Handle real-time code updates
-      socket.on('code-update', (data) => {
-        const { code: newCode, cursor, participantId: updateParticipantId, participantName } = data;
+      socket.on("code-update", (data) => {
+        const {
+          code: newCode,
+          cursor,
+          participantId: updateParticipantId,
+          participantName,
+        } = data;
         if (updateParticipantId !== participantId) {
           setCode(newCode);
           // Update the editor content
@@ -176,17 +182,21 @@ console.log(\`Result: \${result}\`);
       });
 
       // Handle participant updates
-      socket.on('participant-joined', (data) => {
+      socket.on("participant-joined", (data) => {
         const { participant, session: updatedSession } = data;
         setSession(updatedSession);
       });
 
-      socket.on('participant-left', (data) => {
-        const { participantId: leftParticipantId, participantName, session: updatedSession } = data;
+      socket.on("participant-left", (data) => {
+        const {
+          participantId: leftParticipantId,
+          participantName,
+          session: updatedSession,
+        } = data;
         setSession(updatedSession);
       });
 
-      socket.on('cursor-update', (data) => {
+      socket.on("cursor-update", (data) => {
         const { cursor, participantId: cursorParticipantId } = data;
         // Handle cursor position updates from other participants
         // Could be used to show cursors in the editor
@@ -194,12 +204,12 @@ console.log(\`Result: \${result}\`);
 
       return () => {
         if (socket) {
-          socket.emit('leave-session', session.id);
+          socket.emit("leave-session", session.id);
           socket.disconnect();
         }
       };
     } catch (error) {
-      console.error('Failed to initialize socket connection:', error);
+      console.error("Failed to initialize socket connection:", error);
       setConnectionStatus("disconnected");
     }
   }, [session?.id, participantId]);
@@ -315,11 +325,11 @@ console.log(\`Result: \${result}\`);
     try {
       // Emit real-time update via socket (only in production)
       if (socketRef.current && connectionStatus === "connected") {
-        socketRef.current.emit('code-change', {
+        socketRef.current.emit("code-change", {
           sessionId: session.id,
           participantId,
           code: newCode,
-          cursor: editorRef.current?.getPosition()
+          cursor: editorRef.current?.getPosition(),
         });
       }
 
@@ -584,17 +594,17 @@ console.log(\`Result: \${result}\`);
                   connectionStatus === "connected"
                     ? "secondary"
                     : connectionStatus === "connecting"
-                    ? "outline"
-                    : "destructive"
+                      ? "outline"
+                      : "destructive"
                 }
               >
                 {connectionStatus === "connected"
                   ? "Live Sync"
                   : connectionStatus === "connecting"
-                  ? "Connecting..."
-                  : process.env.NODE_ENV === 'production'
-                  ? "Disconnected"
-                  : "Dev Mode"}
+                    ? "Connecting..."
+                    : process.env.NODE_ENV === "production"
+                      ? "Disconnected"
+                      : "Dev Mode"}
               </Badge>
             </div>
             <div className="flex items-center gap-2">
@@ -628,7 +638,6 @@ console.log(\`Result: \${result}\`);
                 <UserPlus className="w-4 h-4" />
               </Button>
             </div>
-
 
             <Button variant="outline" size="sm" onClick={copySessionLink}>
               <Share className="w-4 h-4 mr-2" />

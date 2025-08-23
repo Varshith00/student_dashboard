@@ -30,7 +30,9 @@ function expressPlugin(): Plugin {
     name: "express-plugin",
     apply: "serve", // Only apply during development (serve mode)
     configureServer(server) {
-      console.log('🔧 Development mode: Using development server configuration');
+      console.log(
+        "🔧 Development mode: Using development server configuration",
+      );
 
       // Use a development-specific server configuration that avoids body parsing conflicts
       const { app } = createDevServer();

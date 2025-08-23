@@ -57,71 +57,71 @@ export function createServer() {
 
   // Only create socket.io in production to avoid development conflicts
   let io = null;
-  const isProduction = process.env.NODE_ENV === 'production';
+  const isProduction = process.env.NODE_ENV === "production";
 
   if (isProduction) {
     io = new Server(httpServer, {
       cors: {
         origin: "*",
-        methods: ["GET", "POST"]
-      }
+        methods: ["GET", "POST"],
+      },
     });
 
     // Socket.io connection handling
-    io.on('connection', (socket) => {
-      console.log('User connected:', socket.id);
+    io.on("connection", (socket) => {
+      console.log("User connected:", socket.id);
 
       // Join collaboration session
-      socket.on('join-session', (sessionId) => {
+      socket.on("join-session", (sessionId) => {
         socket.join(sessionId);
         console.log(`Socket ${socket.id} joined session ${sessionId}`);
       });
 
       // Leave collaboration session
-      socket.on('leave-session', (sessionId) => {
+      socket.on("leave-session", (sessionId) => {
         socket.leave(sessionId);
         console.log(`Socket ${socket.id} left session ${sessionId}`);
       });
 
       // Handle code changes
-      socket.on('code-change', (data) => {
+      socket.on("code-change", (data) => {
         const { sessionId, code, cursor, participantId } = data;
         // Broadcast to all other participants in the session
-        socket.to(sessionId).emit('code-update', {
+        socket.to(sessionId).emit("code-update", {
           code,
           cursor,
-          participantId
+          participantId,
         });
       });
 
       // Handle cursor position updates
-      socket.on('cursor-update', (data) => {
+      socket.on("cursor-update", (data) => {
         const { sessionId, cursor, participantId } = data;
-        socket.to(sessionId).emit('cursor-update', {
+        socket.to(sessionId).emit("cursor-update", {
           cursor,
-          participantId
+          participantId,
         });
       });
 
       // Handle participant status updates
-      socket.on('participant-update', (data) => {
+      socket.on("participant-update", (data) => {
         const { sessionId, participantId, status } = data;
-        socket.to(sessionId).emit('participant-update', {
+        socket.to(sessionId).emit("participant-update", {
           participantId,
-          status
+          status,
         });
       });
 
-      socket.on('disconnect', () => {
-        console.log('User disconnected:', socket.id);
+      socket.on("disconnect", () => {
+        console.log("User disconnected:", socket.id);
       });
     });
   } else {
-    console.log('🔧 Development mode: Socket.io disabled');
+    console.log("🔧 Development mode: Socket.io disabled");
   }
 
   // Make io instance available to routes (will be null in development)
-  app.set('io', io);
+  app.set("io", io);
 
   // Middleware
   app.use(cors());
@@ -246,14 +246,18 @@ export function createDevServer() {
   app.use(cors());
 
   // Custom body parser that works with Vite
-  app.use('/api', (req, res, next) => {
-    if (req.method === 'POST' || req.method === 'PUT' || req.method === 'PATCH') {
+  app.use("/api", (req, res, next) => {
+    if (
+      req.method === "POST" ||
+      req.method === "PUT" ||
+      req.method === "PATCH"
+    ) {
       // Skip if body already parsed (to avoid double parsing)
       if (req.body !== undefined) {
         return next();
       }
 
-      let body = '';
+      let body = "";
       let finished = false;
 
       const finish = () => {
@@ -273,25 +277,25 @@ export function createDevServer() {
         next();
       };
 
-      req.on('data', chunk => {
+      req.on("data", (chunk) => {
         body += chunk.toString();
       });
 
-      req.on('end', finish);
-      req.on('error', (err) => {
-        console.error('Body parsing error:', err);
+      req.on("end", finish);
+      req.on("error", (err) => {
+        console.error("Body parsing error:", err);
         req.body = {};
         finish();
       });
 
       // Add timeout to prevent hanging
       const timeout = setTimeout(() => {
-        console.warn('Body parsing timeout');
+        console.warn("Body parsing timeout");
         finish();
       }, 10000); // 10 second timeout
 
-      req.on('end', () => clearTimeout(timeout));
-      req.on('error', () => clearTimeout(timeout));
+      req.on("end", () => clearTimeout(timeout));
+      req.on("error", () => clearTimeout(timeout));
     } else {
       next();
     }

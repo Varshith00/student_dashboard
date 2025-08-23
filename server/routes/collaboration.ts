@@ -179,11 +179,13 @@ export const joinSession: RequestHandler = (req, res) => {
     activeSessions.set(sessionId, session);
 
     // Emit participant join event via socket.io
-    const io = (req as any).app?.get('io');
+    const io = (req as any).app?.get("io");
     if (io) {
-      io.to(sessionId).emit('participant-joined', {
-        participant: existingParticipant || session.participants[session.participants.length - 1],
-        session
+      io.to(sessionId).emit("participant-joined", {
+        participant:
+          existingParticipant ||
+          session.participants[session.participants.length - 1],
+        session,
       });
     }
 
@@ -271,13 +273,13 @@ export const updateCode: RequestHandler = (req, res) => {
     activeSessions.set(sessionId, session);
 
     // Emit real-time update via socket.io
-    const io = (req as any).app?.get('io');
+    const io = (req as any).app?.get("io");
     if (io) {
-      io.to(sessionId).emit('code-update', {
+      io.to(sessionId).emit("code-update", {
         code,
         cursor,
         participantId,
-        participantName: participant.name
+        participantName: participant.name,
       });
     }
 
@@ -382,12 +384,12 @@ export const leaveSession: RequestHandler = (req, res) => {
     activeSessions.set(sessionId, session);
 
     // Emit participant leave event via socket.io
-    const io = (req as any).app?.get('io');
+    const io = (req as any).app?.get("io");
     if (io) {
-      io.to(sessionId).emit('participant-left', {
+      io.to(sessionId).emit("participant-left", {
         participantId,
         participantName: participant?.name,
-        session
+        session,
       });
     }
 
