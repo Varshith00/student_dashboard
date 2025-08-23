@@ -115,54 +115,6 @@ export default function ProfessorDashboard() {
     return null;
   }
 
-  // Mock student data
-  const students = [
-    {
-      id: 1,
-      name: "Alex Johnson",
-      email: "alex.johnson@university.edu",
-      progress: 85,
-      problemsSolved: 47,
-      lastActive: "2 hours ago",
-      currentProblem: "Binary Search Tree",
-      interviewScore: 88,
-      status: "active"
-    },
-    {
-      id: 2,
-      name: "Sarah Chen",
-      email: "sarah.chen@university.edu",
-      progress: 72,
-      problemsSolved: 32,
-      lastActive: "1 day ago",
-      currentProblem: "Dynamic Programming",
-      interviewScore: 76,
-      status: "inactive"
-    },
-    {
-      id: 3,
-      name: "Michael Rodriguez",
-      email: "michael.r@university.edu",
-      progress: 91,
-      problemsSolved: 63,
-      lastActive: "30 minutes ago",
-      currentProblem: "Graph Algorithms",
-      interviewScore: 94,
-      status: "active"
-    },
-    {
-      id: 4,
-      name: "Emily Davis",
-      email: "emily.davis@university.edu",
-      progress: 68,
-      problemsSolved: 28,
-      lastActive: "3 hours ago",
-      currentProblem: "Array Manipulation",
-      interviewScore: 71,
-      status: "active"
-    }
-  ];
-
   const filteredStudents = students.filter(student =>
     student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     student.email.toLowerCase().includes(searchQuery.toLowerCase())
