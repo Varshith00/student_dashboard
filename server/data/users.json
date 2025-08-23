@@ -70,5 +70,13 @@
     "name": "Demo Professor",
     "role": "professor",
     "createdAt": "2025-08-23T10:08:27.150Z"
+  },
+  {
+    "id": "1755944725692lfm8jd2oz",
+    "email": "varun@gmail.com",
+    "password": "$2b$10$aYoAwz4E43KZFb/Ca97o6uTtCSTvqSmeuNev5lDJeI6P7Wt8s8KDi",
+    "name": "qwertyuiop",
+    "role": "professor",
+    "createdAt": "2025-08-23T10:25:25.692Z"
   }
 ]
