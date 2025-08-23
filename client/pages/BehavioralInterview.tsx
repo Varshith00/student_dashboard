@@ -1,0 +1,496 @@
+import { useState, useRef, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { authFetch } from "@/contexts/AuthContext";
+import { 
+  Brain, 
+  Send, 
+  ArrowLeft, 
+  GraduationCap, 
+  LogOut,
+  Clock,
+  User,
+  Bot,
+  Star,
+  TrendingUp,
+  CheckCircle,
+  MessageCircle,
+  Lightbulb,
+  Target
+} from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+
+interface Message {
+  id: string;
+  role: 'user' | 'interviewer';
+  content: string;
+  timestamp: Date;
+  type?: 'question' | 'follow-up' | 'evaluation' | 'final';
+}
+
+interface InterviewSession {
+  id: string;
+  startTime: Date;
+  endTime?: Date;
+  status: 'active' | 'completed';
+  type: 'behavioral';
+  focus: string[];
+  score?: number;
+  feedback?: string;
+  messages: Message[];
+}
+
+export default function BehavioralInterview() {
+  const navigate = useNavigate();
+  const [session, setSession] = useState<InterviewSession | null>(null);
+  const [currentMessage, setCurrentMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [isStarting, setIsStarting] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(scrollToBottom, [session?.messages]);
+
+  const startInterview = async (focus: string[]) => {
+    setIsStarting(true);
+    
+    try {
+      const response = await authFetch('/api/interview/behavioral/start', {
+        method: 'POST',
+        body: JSON.stringify({ focus }),
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        setSession(data.session);
+      } else {
+        console.error('Failed to start interview:', data.error);
+      }
+    } catch (error) {
+      console.error('Interview start error:', error);
+    }
+    
+    setIsStarting(false);
+  };
+
+  const sendMessage = async () => {
+    if (!currentMessage.trim() || !session || isLoading) return;
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: currentMessage,
+      timestamp: new Date()
+    };
+
+    setSession(prev => prev ? {
+      ...prev,
+      messages: [...prev.messages, userMessage]
+    } : null);
+
+    setCurrentMessage('');
+    setIsLoading(true);
+
+    try {
+      const response = await authFetch('/api/interview/behavioral/message', {
+        method: 'POST',
+        body: JSON.stringify({
+          sessionId: session.id,
+          message: currentMessage,
+          messageHistory: session.messages
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        const botMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'interviewer',
+          content: data.response,
+          timestamp: new Date(),
+          type: data.type
+        };
+
+        setSession(prev => prev ? {
+          ...prev,
+          messages: [...prev.messages, botMessage]
+        } : null);
+      }
+    } catch (error) {
+      console.error('Message send error:', error);
+    }
+    
+    setIsLoading(false);
+  };
+
+  const endInterview = async () => {
+    if (!session) return;
+
+    setIsLoading(true);
+    
+    try {
+      const response = await authFetch('/api/interview/behavioral/end', {
+        method: 'POST',
+        body: JSON.stringify({
+          sessionId: session.id,
+          messageHistory: session.messages
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        setSession(prev => prev ? {
+          ...prev,
+          status: 'completed',
+          endTime: new Date(),
+          score: data.score,
+          feedback: data.feedback
+        } : null);
+      }
+    } catch (error) {
+      console.error('End interview error:', error);
+    }
+    
+    setIsLoading(false);
+  };
+
+  const handleLogout = () => {
+    navigate('/');
+  };
+
+  if (!session) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/10">
+        {/* Header */}
+        <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div className="flex items-center gap-4">
+              <Link to="/student/dashboard" className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-accent rounded-lg flex items-center justify-center">
+                  <GraduationCap className="w-6 h-6 text-accent-foreground" />
+                </div>
+                <div>
+                  <h1 className="text-xl font-bold text-foreground">TechPrep</h1>
+                  <p className="text-sm text-muted-foreground">Behavioral Interview</p>
+                </div>
+              </Link>
+              
+              <div className="h-6 w-px bg-border" />
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/student/dashboard')}
+                className="flex items-center gap-2"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to Dashboard
+              </Button>
+            </div>
+            
+            <div className="flex items-center gap-4">
+              <Badge variant="secondary" className="flex items-center gap-1">
+                <MessageCircle className="w-3 h-3" />
+                AI Interviewer
+              </Badge>
+              <Button variant="outline" onClick={handleLogout}>
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </Button>
+            </div>
+          </div>
+        </header>
+
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-4xl mx-auto">
+            {/* Setup */}
+            <Card>
+              <CardHeader className="text-center">
+                <CardTitle className="flex items-center justify-center gap-2 text-2xl">
+                  <MessageCircle className="w-8 h-8 text-accent" />
+                  Behavioral Interview Setup
+                </CardTitle>
+                <CardDescription>
+                  Practice behavioral interviews focused on critical thinking, aptitude, and problem-solving scenarios
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-3 gap-6 mb-8">
+                  <Card 
+                    className="cursor-pointer border-2 hover:border-accent/50 transition-colors"
+                    onClick={() => startInterview(['critical-thinking', 'problem-solving', 'decision-making'])}
+                  >
+                    <CardHeader className="text-center">
+                      <Lightbulb className="w-12 h-12 text-accent mx-auto mb-2" />
+                      <CardTitle className="text-lg">Critical Thinking</CardTitle>
+                      <CardDescription>Analytical reasoning</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="text-sm space-y-1">
+                        <li>• Complex problem analysis</li>
+                        <li>• Decision-making processes</li>
+                        <li>• Logical reasoning</li>
+                        <li>• Situational judgment</li>
+                      </ul>
+                    </CardContent>
+                  </Card>
+
+                  <Card 
+                    className="cursor-pointer border-2 hover:border-accent/50 transition-colors"
+                    onClick={() => startInterview(['aptitude', 'logical-reasoning', 'pattern-recognition'])}
+                  >
+                    <CardHeader className="text-center">
+                      <Brain className="w-12 h-12 text-primary mx-auto mb-2" />
+                      <CardTitle className="text-lg">Aptitude & Logic</CardTitle>
+                      <CardDescription>Mental agility tests</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="text-sm space-y-1">
+                        <li>• Pattern recognition</li>
+                        <li>• Logical sequences</li>
+                        <li>• Mental mathematics</li>
+                        <li>• Abstract reasoning</li>
+                      </ul>
+                    </CardContent>
+                  </Card>
+
+                  <Card 
+                    className="cursor-pointer border-2 hover:border-accent/50 transition-colors"
+                    onClick={() => startInterview(['behavioral', 'communication', 'teamwork', 'leadership'])}
+                  >
+                    <CardHeader className="text-center">
+                      <Target className="w-12 h-12 text-success mx-auto mb-2" />
+                      <CardTitle className="text-lg">Behavioral Skills</CardTitle>
+                      <CardDescription>Soft skills assessment</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="text-sm space-y-1">
+                        <li>• Communication clarity</li>
+                        <li>• Teamwork scenarios</li>
+                        <li>• Leadership examples</li>
+                        <li>• Conflict resolution</li>
+                      </ul>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <div className="text-center">
+                  <p className="text-muted-foreground mb-4">
+                    The interview will last 20-30 minutes and include situational questions, logical puzzles, and behavioral scenarios using the STAR method.
+                  </p>
+                  <Badge variant="outline" className="mb-4">
+                    Click on your focus area to begin
+                  </Badge>
+                </div>
+
+                {isStarting && (
+                  <div className="text-center">
+                    <div className="inline-flex items-center gap-2 text-accent">
+                      <div className="animate-spin w-4 h-4 border-2 border-accent border-t-transparent rounded-full"></div>
+                      Preparing your behavioral interview...
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/10 flex flex-col">
+      {/* Header */}
+      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
+                <MessageCircle className="w-5 h-5 text-accent-foreground" />
+              </div>
+              <div>
+                <h1 className="text-lg font-bold text-foreground">Behavioral Interview</h1>
+                <p className="text-xs text-muted-foreground">
+                  {session.focus.map(f => f.replace('-', ' ')).join(', ')}
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="flex items-center gap-1">
+                <Clock className="w-3 h-3" />
+                {session.status === 'active' ? 'In Progress' : 'Completed'}
+              </Badge>
+              {session.status === 'completed' && session.score && (
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  <Star className="w-3 h-3" />
+                  {session.score}/100
+                </Badge>
+              )}
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            {session.status === 'active' && (
+              <Button variant="outline" size="sm" onClick={endInterview} disabled={isLoading}>
+                End Interview
+              </Button>
+            )}
+            <Button variant="outline" size="sm" onClick={() => navigate('/student/dashboard')}>
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Dashboard
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      {/* Chat Interface */}
+      <div className="flex-1 flex flex-col">
+        <div className="flex-1 p-4">
+          <div className="max-w-4xl mx-auto h-full flex flex-col">
+            <ScrollArea className="flex-1 pr-4">
+              <div className="space-y-4">
+                {session.messages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={`flex gap-3 ${
+                      message.role === 'user' ? 'justify-end' : 'justify-start'
+                    }`}
+                  >
+                    <div
+                      className={`flex gap-3 max-w-[80%] ${
+                        message.role === 'user' ? 'flex-row-reverse' : 'flex-row'
+                      }`}
+                    >
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                        message.role === 'user' 
+                          ? 'bg-primary text-primary-foreground' 
+                          : 'bg-accent text-accent-foreground'
+                      }`}>
+                        {message.role === 'user' ? (
+                          <User className="w-4 h-4" />
+                        ) : (
+                          <Bot className="w-4 h-4" />
+                        )}
+                      </div>
+                      <div
+                        className={`rounded-lg p-3 ${
+                          message.role === 'user'
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-muted'
+                        }`}
+                      >
+                        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                        <p className="text-xs opacity-70 mt-2">
+                          {message.timestamp.toLocaleTimeString()}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {isLoading && (
+                  <div className="flex gap-3 justify-start">
+                    <div className="w-8 h-8 rounded-full bg-accent text-accent-foreground flex items-center justify-center">
+                      <Bot className="w-4 h-4" />
+                    </div>
+                    <div className="bg-muted rounded-lg p-3">
+                      <div className="flex items-center gap-2">
+                        <div className="animate-spin w-4 h-4 border-2 border-accent border-t-transparent rounded-full"></div>
+                        <span className="text-sm">Interviewer is thinking...</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+            </ScrollArea>
+
+            {/* Input Area */}
+            {session.status === 'active' && (
+              <>
+                <Separator className="my-4" />
+                <div className="flex gap-2">
+                  <Input
+                    value={currentMessage}
+                    onChange={(e) => setCurrentMessage(e.target.value)}
+                    placeholder="Type your response using specific examples (STAR method)..."
+                    onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
+                    disabled={isLoading}
+                    className="flex-1"
+                  />
+                  <Button onClick={sendMessage} disabled={isLoading || !currentMessage.trim()}>
+                    <Send className="w-4 h-4" />
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Tip: Use the STAR method - Situation, Task, Action, Result
+                </p>
+              </>
+            )}
+
+            {/* Results */}
+            {session.status === 'completed' && (
+              <>
+                <Separator className="my-4" />
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <TrendingUp className="w-5 h-5 text-success" />
+                      Interview Complete
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div>
+                        <h4 className="font-semibold mb-2">Your Performance</h4>
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-2xl font-bold">{session.score}/100</span>
+                          <Badge variant={session.score && session.score >= 70 ? "default" : "secondary"}>
+                            {session.score && session.score >= 70 ? "Strong" : "Developing"}
+                          </Badge>
+                        </div>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold mb-2">Duration</h4>
+                        <p className="text-muted-foreground">
+                          {session.endTime && Math.round((session.endTime.getTime() - session.startTime.getTime()) / 60000)} minutes
+                        </p>
+                      </div>
+                    </div>
+                    {session.feedback && (
+                      <div className="mt-4">
+                        <h4 className="font-semibold mb-2">Detailed Feedback</h4>
+                        <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                          {session.feedback}
+                        </p>
+                      </div>
+                    )}
+                    <div className="flex gap-2 mt-4">
+                      <Button onClick={() => navigate('/student/dashboard')}>
+                        Back to Dashboard
+                      </Button>
+                      <Button variant="outline" onClick={() => window.location.reload()}>
+                        Start New Interview
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
