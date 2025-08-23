@@ -123,7 +123,7 @@ export default function ProfessorDashboard() {
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <Badge variant="secondary">Prof. Williams</Badge>
+            <Badge variant="secondary">{user.name}</Badge>
             <Button variant="outline" onClick={handleLogout}>
               <LogOut className="w-4 h-4 mr-2" />
               Logout
