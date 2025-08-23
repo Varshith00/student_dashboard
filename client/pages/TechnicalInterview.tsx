@@ -361,6 +361,28 @@ export default function TechnicalInterview() {
                   {session.score}/100
                 </Badge>
               )}
+              {session.status === 'active' && (
+                <div className="flex items-center gap-1 ml-2">
+                  <Button
+                    variant={interviewMode === 'video' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setInterviewMode('video')}
+                    className="h-8"
+                  >
+                    <Video className="w-3 h-3 mr-1" />
+                    Video
+                  </Button>
+                  <Button
+                    variant={interviewMode === 'chat' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setInterviewMode('chat')}
+                    className="h-8"
+                  >
+                    <MessageSquare className="w-3 h-3 mr-1" />
+                    Chat
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
           
