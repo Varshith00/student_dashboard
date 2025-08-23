@@ -348,19 +348,31 @@ export const handleGetClassAnalytics: RequestHandler = async (req, res) => {
   try {
     const professor = (req as any).user;
 
+    if (professor.role !== 'professor') {
+      return res.status(403).json({
+        success: false,
+        error: "Access denied. Only professors can view analytics."
+      });
+    }
+
+    // Get students mapped to this professor
+    const allUsers = loadUsers();
+    const mappedStudents = allUsers.filter(
+      user => user.role === 'student' && user.professorId === professor.id
+    );
+
     const professorAssignments = assignments.filter(
       (a) => a.professorId === professor.id,
     );
-    const uniqueStudents = [
-      ...new Set(professorAssignments.map((a) => a.studentId)),
-    ];
+
+    const completedAssignments = professorAssignments.filter(
+      (a) => a.status === "completed",
+    );
 
     const analytics = {
-      totalStudents: uniqueStudents.length,
+      totalStudents: mappedStudents.length,
       totalAssignments: professorAssignments.length,
-      completedAssignments: professorAssignments.filter(
-        (a) => a.status === "completed",
-      ).length,
+      completedAssignments: completedAssignments.length,
       inProgressAssignments: professorAssignments.filter(
         (a) => a.status === "in_progress",
       ).length,
@@ -370,40 +382,39 @@ export const handleGetClassAnalytics: RequestHandler = async (req, res) => {
           a.dueDate &&
           new Date(a.dueDate) < new Date(),
       ).length,
-      averageScore: professorAssignments
-        .filter((a) => a.score !== undefined)
-        .reduce((sum, a, _, arr) => sum + (a.score || 0) / arr.length, 0),
+      averageScore: completedAssignments.length > 0
+        ? completedAssignments.reduce((sum, a) => sum + (a.score || 0), 0) / completedAssignments.length
+        : 0,
       totalTimeSpent: professorAssignments.reduce(
         (sum, a) => sum + a.timeSpent,
         0,
       ),
-      studentProgress: uniqueStudents.map((studentId) => {
-        const student = studentProfiles.find((s) => s.id === studentId);
+      studentProgress: mappedStudents.map((student) => {
         const studentAssignments = professorAssignments.filter(
-          (a) => a.studentId === studentId,
+          (a) => a.studentId === student.id,
         );
-        const completedAssignments = studentAssignments.filter(
+        const studentCompletedAssignments = studentAssignments.filter(
           (a) => a.status === "completed",
         );
 
         return {
-          studentId,
-          studentName: student?.name || "Unknown",
-          studentEmail: student?.email || "Unknown",
+          studentId: student.id,
+          studentName: student.name,
+          studentEmail: student.email,
           totalAssignments: studentAssignments.length,
-          completedAssignments: completedAssignments.length,
+          completedAssignments: studentCompletedAssignments.length,
           averageScore:
-            completedAssignments.length > 0
-              ? completedAssignments.reduce(
+            studentCompletedAssignments.length > 0
+              ? studentCompletedAssignments.reduce(
                   (sum, a) => sum + (a.score || 0),
                   0,
-                ) / completedAssignments.length
+                ) / studentCompletedAssignments.length
               : 0,
           totalTimeSpent: studentAssignments.reduce(
             (sum, a) => sum + a.timeSpent,
             0,
           ),
-          lastActive: student?.lastActive || new Date().toISOString(),
+          lastActive: student.createdAt, // Using creation date for demo
         };
       }),
       problemStats: {},
