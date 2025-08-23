@@ -6,6 +6,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import StudentDashboard from "./pages/StudentDashboard";
@@ -20,57 +21,59 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/student/dashboard" element={<StudentDashboard />} />
-          <Route path="/professor/dashboard" element={<ProfessorDashboard />} />
+      <AuthProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/student/dashboard" element={<StudentDashboard />} />
+            <Route path="/professor/dashboard" element={<ProfessorDashboard />} />
 
-          {/* Coding practice with real Python editor */}
-          <Route path="/student/coding/:problemId" element={<CodingProblem />} />
+            {/* Coding practice with real Python editor */}
+            <Route path="/student/coding/:problemId" element={<CodingProblem />} />
 
-          {/* AI Question Generator */}
-          <Route path="/ai/question-generator" element={<AIQuestionGenerator />} />
+            {/* AI Question Generator */}
+            <Route path="/ai/question-generator" element={<AIQuestionGenerator />} />
 
-          {/* Placeholder routes for future features */}
-          <Route
-            path="/student/interview"
-            element={
-              <Placeholder
-                title="AI Mock Interviews"
-                description="AI-powered interview simulation coming soon."
-                feature="realistic interview practice with AI"
-              />
-            }
-          />
-          <Route
-            path="/student/collaboration"
-            element={
-              <Placeholder
-                title="Peer Collaboration"
-                description="Real-time collaborative coding sessions coming soon."
-                feature="pair programming and study groups"
-              />
-            }
-          />
-          <Route
-            path="/professor/reports"
-            element={
-              <Placeholder
-                title="Detailed Reports"
-                description="Comprehensive student progress reports coming soon."
-                feature="detailed analytics and exportable reports"
-              />
-            }
-          />
+            {/* Placeholder routes for future features */}
+            <Route
+              path="/student/interview"
+              element={
+                <Placeholder
+                  title="AI Mock Interviews"
+                  description="AI-powered interview simulation coming soon."
+                  feature="realistic interview practice with AI"
+                />
+              }
+            />
+            <Route
+              path="/student/collaboration"
+              element={
+                <Placeholder
+                  title="Peer Collaboration"
+                  description="Real-time collaborative coding sessions coming soon."
+                  feature="pair programming and study groups"
+                />
+              }
+            />
+            <Route
+              path="/professor/reports"
+              element={
+                <Placeholder
+                  title="Detailed Reports"
+                  description="Comprehensive student progress reports coming soon."
+                  feature="detailed analytics and exportable reports"
+                />
+              }
+            />
 
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
