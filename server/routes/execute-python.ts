@@ -59,6 +59,7 @@ export const handleExecutePython: RequestHandler = async (req, res) => {
       writeFileSync(tempFile, code, 'utf8');
 
       const startTime = Date.now();
+      let responsesSent = false;
 
       // Execute Python code
       const pythonProcess = spawn('python3', [tempFile], {
@@ -78,8 +79,11 @@ export const handleExecutePython: RequestHandler = async (req, res) => {
       });
 
       pythonProcess.on('close', (code) => {
+        if (responsesSent) return;
+        responsesSent = true;
+
         const executionTime = Date.now() - startTime;
-        
+
         // Clean up temporary file
         try {
           unlinkSync(tempFile);
@@ -103,6 +107,9 @@ export const handleExecutePython: RequestHandler = async (req, res) => {
       });
 
       pythonProcess.on('error', (error) => {
+        if (responsesSent) return;
+        responsesSent = true;
+
         // Clean up temporary file
         try {
           unlinkSync(tempFile);
@@ -118,14 +125,15 @@ export const handleExecutePython: RequestHandler = async (req, res) => {
 
       // Handle timeout
       setTimeout(() => {
-        if (!pythonProcess.killed) {
+        if (!responsesSent && !pythonProcess.killed) {
+          responsesSent = true;
           pythonProcess.kill('SIGTERM');
           try {
             unlinkSync(tempFile);
           } catch (e) {
             console.warn('Failed to clean up temp file:', tempFile);
           }
-          
+
           res.json({
             success: false,
             error: 'Code execution timed out (10 seconds limit)'
