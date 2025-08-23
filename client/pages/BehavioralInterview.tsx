@@ -108,7 +108,7 @@ export default function BehavioralInterview() {
       id: Date.now().toString(),
       role: "user",
       content: message,
-      timestamp: new Date(),
+      timestamp: new Date().toISOString(),
     };
 
     // Add user message immediately
@@ -141,7 +141,7 @@ export default function BehavioralInterview() {
           id: (Date.now() + 1).toString(),
           role: "interviewer",
           content: data.response,
-          timestamp: new Date(),
+          timestamp: new Date().toISOString(),
           type: data.type,
         };
 
