@@ -48,7 +48,7 @@
     "password": "$2b$10$K8U9r0X9Y3nX9Y3nX9Y3n.G7eX9Y3nX9Y3nX9Y3nX9Y3nX9Y3nX9Y",
     "name": "Priya Patel",
     "role": "student",
-    "professorId": "prof1@gmail.com-id",
+    "professorId": "prof1@gmail.com",
     "createdAt": "2025-01-16T13:00:00.000Z"
   },
   {
@@ -57,7 +57,7 @@
     "password": "$2b$10$K8U9r0X9Y3nX9Y3nX9Y3n.G7eX9Y3nX9Y3nX9Y3nX9Y3nX9Y3nX9Y",
     "name": "Marcus Williams",
     "role": "student",
-    "professorId": "prof1@gmail.com-id",
+    "professorId": "prof1@gmail.com",
     "createdAt": "2025-01-17T14:00:00.000Z"
   },
   {
