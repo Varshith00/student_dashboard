@@ -52,6 +52,9 @@ export default function BehavioralInterview() {
   const [currentMessage, setCurrentMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
+  const [interviewMode, setInterviewMode] = useState<'chat' | 'video'>('video');
+  const [currentQuestion, setCurrentQuestion] = useState('');
+  const [awaitingAnswer, setAwaitingAnswer] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
