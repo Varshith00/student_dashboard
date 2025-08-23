@@ -25,10 +25,13 @@ import {
 
 export default function StudentLogin() {
   const navigate = useNavigate();
-  const { user, login, setAuthData, isLoading } = useAuth();
+  const { user, login, register, setAuthData, isLoading } = useAuth();
+  const [isRegistering, setIsRegistering] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
+    confirmPassword: "",
+    name: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -56,26 +59,59 @@ export default function StudentLogin() {
     setIsSubmitting(true);
     setError("");
 
+    // Validation for registration
+    if (isRegistering) {
+      if (formData.password !== formData.confirmPassword) {
+        setError("Passwords do not match");
+        setIsSubmitting(false);
+        return;
+      }
+      if (formData.password.length < 6) {
+        setError("Password must be at least 6 characters long");
+        setIsSubmitting(false);
+        return;
+      }
+      if (!formData.name.trim()) {
+        setError("Name is required");
+        setIsSubmitting(false);
+        return;
+      }
+    }
+
     try {
-      const response = await authFetch("/api/auth/login", {
-        method: "POST",
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (data.success && data.user.role === "student") {
-        setAuthData(data.user, data.token);
-        navigate("/student/dashboard");
-      } else if (data.success && data.user.role !== "student") {
-        setError(
-          "This login is for students only. Please use the professor login.",
-        );
+      if (isRegistering) {
+        // Registration
+        const result = await register(formData.email, formData.password, formData.name, "student");
+        if (result.success) {
+          navigate("/student/dashboard");
+        } else {
+          setError(result.message || "Registration failed");
+        }
       } else {
-        setError(data.message || "Invalid credentials");
+        // Login
+        const response = await authFetch("/api/auth/login", {
+          method: "POST",
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (data.success && data.user.role === "student") {
+          setAuthData(data.user, data.token);
+          navigate("/student/dashboard");
+        } else if (data.success && data.user.role !== "student") {
+          setError(
+            "This login is for students only. Please use the professor login.",
+          );
+        } else {
+          setError(data.message || "Invalid credentials");
+        }
       }
     } catch (error) {
-      setError("Login failed. Please try again.");
+      setError(isRegistering ? "Registration failed. Please try again." : "Login failed. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -134,15 +170,33 @@ export default function StudentLogin() {
             <Card className="w-full max-w-md mx-auto lg:mx-0">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <User className="w-5 h-5 text-primary" />
-                  Student Login
-                </CardTitle>
-                <CardDescription>
-                  Access your learning dashboard and track your progress
-                </CardDescription>
+                <User className="w-5 h-5 text-primary" />
+                {isRegistering ? "Create Student Account" : "Student Login"}
+              </CardTitle>
+              <CardDescription>
+                {isRegistering
+                  ? "Join TechPrep and start your learning journey"
+                  : "Access your learning dashboard and track your progress"
+                }
+              </CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-4">
+                  {isRegistering && (
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Full Name</Label>
+                      <Input
+                        id="name"
+                        name="name"
+                        type="text"
+                        placeholder="Enter your full name"
+                        value={formData.name}
+                        onChange={handleInputChange}
+                        required
+                        disabled={isSubmitting}
+                      />
+                    </div>
+                  )}
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
                     <Input
@@ -162,13 +216,28 @@ export default function StudentLogin() {
                       id="password"
                       name="password"
                       type="password"
-                      placeholder="••••••••"
+                      placeholder={isRegistering ? "Create a password (min 6 characters)" : "••••••••"}
                       value={formData.password}
                       onChange={handleInputChange}
                       required
                       disabled={isSubmitting}
                     />
                   </div>
+                  {isRegistering && (
+                    <div className="space-y-2">
+                      <Label htmlFor="confirmPassword">Confirm Password</Label>
+                      <Input
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        type="password"
+                        placeholder="Confirm your password"
+                        value={formData.confirmPassword}
+                        onChange={handleInputChange}
+                        required
+                        disabled={isSubmitting}
+                      />
+                    </div>
+                  )}
 
                   {error && (
                     <div className="p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md">
@@ -184,11 +253,11 @@ export default function StudentLogin() {
                     {isSubmitting ? (
                       <>
                         <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-2" />
-                        Signing in...
+                        {isRegistering ? "Creating account..." : "Signing in..."}
                       </>
                     ) : (
                       <>
-                        Sign In
+                        {isRegistering ? "Create Account" : "Sign In"}
                         <ArrowRight className="w-4 h-4 ml-2" />
                       </>
                     )}
@@ -197,9 +266,18 @@ export default function StudentLogin() {
 
                 <div className="mt-6 text-center">
                   <p className="text-sm text-muted-foreground">
-                    Don't have an account?{" "}
-                    <Button variant="link" className="p-0 h-auto">
-                      Contact your professor
+                    {isRegistering ? "Already have an account?" : "Don't have an account?"}{" "}
+                    <Button
+                      variant="link"
+                      className="p-0 h-auto"
+                      onClick={() => {
+                        setIsRegistering(!isRegistering);
+                        setError("");
+                        setFormData({ email: "", password: "", confirmPassword: "", name: "" });
+                      }}
+                      type="button"
+                    >
+                      {isRegistering ? "Sign in here" : "Create account"}
                     </Button>
                   </p>
                 </div>
