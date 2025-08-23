@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Editor } from "@monaco-editor/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,6 +6,11 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { authFetch } from "@/contexts/AuthContext";
+import {
+  SafeResizeObserver,
+  createMonacoResizeObserverConfig,
+  createResizeSafeContainer
+} from "@/lib/resizeObserverErrorHandler";
 import {
   Play,
   Square,
@@ -38,6 +43,8 @@ interface CodeEditorProps {
 
 export default function CodeEditor({ problem }: CodeEditorProps) {
   const editorRef = useRef<any>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const resizeCleanupRef = useRef<(() => void) | null>(null);
   const [code, setCode] = useState(problem?.starter_code || `# Welcome to Python Practice!
 # Write your code below and click Run to execute
 
@@ -174,9 +181,51 @@ print(f"Result: {result}")
     setIsLoadingAI(false);
   };
 
-  const handleEditorDidMount = (editor: any) => {
+  const handleEditorDidMount = useCallback((editor: any) => {
     editorRef.current = editor;
-  };
+
+    // Setup resize-safe container
+    if (containerRef.current && !resizeCleanupRef.current) {
+      resizeCleanupRef.current = createResizeSafeContainer(containerRef.current);
+
+      // Listen for custom resize events
+      containerRef.current.addEventListener('monaco-resize', () => {
+        try {
+          editor.layout();
+        } catch (error) {
+          console.warn('Editor layout error:', error);
+        }
+      });
+    }
+
+    // Manual layout trigger with debouncing
+    const layoutEditor = () => {
+      try {
+        if (editor && typeof editor.layout === 'function') {
+          // Use requestAnimationFrame to avoid ResizeObserver conflicts
+          requestAnimationFrame(() => {
+            editor.layout();
+          });
+        }
+      } catch (error) {
+        console.warn('Editor layout error:', error);
+      }
+    };
+
+    // Setup safe resize observer for manual layout
+    const resizeObserver = new SafeResizeObserver(() => {
+      layoutEditor();
+    }, 200);
+
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+
+    // Cleanup function
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
@@ -186,6 +235,16 @@ print(f"Result: {result}")
       default: return 'bg-secondary text-secondary-foreground';
     }
   };
+
+  // Cleanup resize observer on unmount
+  useEffect(() => {
+    return () => {
+      if (resizeCleanupRef.current) {
+        resizeCleanupRef.current();
+        resizeCleanupRef.current = null;
+      }
+    };
+  }, []);
 
   return (
     <div className="h-screen flex flex-col">
@@ -532,7 +591,7 @@ print(f"Result: {result}")
 
           {/* Editor */}
           <div className="flex-1 flex flex-col">
-            <div className="flex-1">
+            <div ref={containerRef} className="flex-1" style={{ width: '100%', height: '100%' }}>
               <Editor
                 height="100%"
                 defaultLanguage="python"
@@ -541,12 +600,11 @@ print(f"Result: {result}")
                 onMount={handleEditorDidMount}
                 theme="vs-dark"
                 options={{
+                  ...createMonacoResizeObserverConfig(),
                   minimap: { enabled: false },
                   fontSize: 14,
                   lineNumbers: 'on',
                   roundedSelection: false,
-                  scrollBeyondLastLine: false,
-                  automaticLayout: true,
                   tabSize: 4,
                   insertSpaces: true,
                   wordWrap: 'on',
