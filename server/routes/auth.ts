@@ -22,6 +22,7 @@ interface AuthRequest {
   password: string;
   name?: string;
   role?: 'student' | 'professor';
+  professorId?: string;
 }
 
 interface AuthResponse {
