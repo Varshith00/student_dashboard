@@ -35,7 +35,7 @@ interface Message {
   id: string;
   role: "user" | "interviewer";
   content: string;
-  timestamp: Date;
+  timestamp: string; // ISO string from server
   type?: "question" | "follow-up" | "evaluation" | "final";
 }
 
