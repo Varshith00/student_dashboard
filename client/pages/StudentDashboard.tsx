@@ -802,6 +802,172 @@ export default function StudentDashboard() {
           </div>
         )}
 
+        {activeTab === "assignments" && (
+          <div className="space-y-6">
+            {/* Assignment Summary */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="w-6 h-6 text-primary" />
+                  My Assignments
+                </CardTitle>
+                <CardDescription>
+                  Problems assigned by your professors with due dates and progress tracking
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-5 gap-4 mb-6">
+                  <div className="text-center p-4 bg-muted/50 rounded-lg">
+                    <div className="text-2xl font-bold text-foreground mb-1">
+                      {assignmentSummary.total}
+                    </div>
+                    <div className="text-sm text-muted-foreground">Total</div>
+                  </div>
+                  <div className="text-center p-4 bg-secondary/50 rounded-lg">
+                    <div className="text-2xl font-bold text-secondary-foreground mb-1">
+                      {assignmentSummary.pending}
+                    </div>
+                    <div className="text-sm text-muted-foreground">New</div>
+                  </div>
+                  <div className="text-center p-4 bg-warning/20 rounded-lg">
+                    <div className="text-2xl font-bold text-warning mb-1">
+                      {assignmentSummary.inProgress}
+                    </div>
+                    <div className="text-sm text-muted-foreground">In Progress</div>
+                  </div>
+                  <div className="text-center p-4 bg-success/20 rounded-lg">
+                    <div className="text-2xl font-bold text-success mb-1">
+                      {assignmentSummary.completed}
+                    </div>
+                    <div className="text-sm text-muted-foreground">Completed</div>
+                  </div>
+                  <div className="text-center p-4 bg-destructive/20 rounded-lg">
+                    <div className="text-2xl font-bold text-destructive mb-1">
+                      {assignmentSummary.overdue}
+                    </div>
+                    <div className="text-sm text-muted-foreground">Overdue</div>
+                  </div>
+                </div>
+
+                {assignmentsLoading ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>
+                    <p className="text-muted-foreground">Loading assignments...</p>
+                  </div>
+                ) : assignments.length === 0 ? (
+                  <div className="text-center py-12">
+                    <FileText className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+                    <h3 className="text-lg font-semibold mb-2">No Assignments Yet</h3>
+                    <p className="text-muted-foreground">
+                      Your professors haven't assigned any problems yet. Check back later!
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {assignments.map((assignment) => {
+                      const problem = getProblemByIdFromList(assignment.problemId);
+                      const getDifficultyColor = () => {
+                        switch (problem.difficulty) {
+                          case "Easy":
+                            return "text-success";
+                          case "Medium":
+                            return "text-warning";
+                          case "Hard":
+                            return "text-destructive";
+                          default:
+                            return "text-muted-foreground";
+                        }
+                      };
+
+                      return (
+                        <Card key={assignment.id} className={`border ${assignment.isOverdue ? 'border-destructive/50' : 'border-border'} hover:border-primary/50 transition-colors`}>
+                          <CardContent className="p-4">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-3 mb-2">
+                                  <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                                    <Target className={`w-6 h-6 ${getDifficultyColor()}`} />
+                                  </div>
+                                  <div className="flex-1">
+                                    <h3 className="font-semibold text-lg">{problem.title}</h3>
+                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                      <User className="w-4 h-4" />
+                                      <span>Assigned by {assignment.professorName}</span>
+                                      <span>•</span>
+                                      <Clock className="w-4 h-4" />
+                                      <span>Assigned {new Date(assignment.assignedDate).toLocaleDateString()}</span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-4 text-sm">
+                                  <div className="flex items-center gap-1">
+                                    <span className="text-muted-foreground">Difficulty:</span>
+                                    <Badge variant="outline" className={getDifficultyColor()}>
+                                      {problem.difficulty}
+                                    </Badge>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <span className="text-muted-foreground">Attempts:</span>
+                                    <span className="font-medium">{assignment.attempts}</span>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <span className="text-muted-foreground">Time spent:</span>
+                                    <span className="font-medium">{assignment.timeSpent}m</span>
+                                  </div>
+                                  {assignment.score && (
+                                    <div className="flex items-center gap-1">
+                                      <span className="text-muted-foreground">Score:</span>
+                                      <span className="font-medium text-success">{assignment.score}%</span>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+
+                              <div className="flex flex-col items-end gap-2">
+                                <Badge variant={getStatusColor(assignment.status, assignment.isOverdue)}>
+                                  {assignment.isOverdue && <AlertCircle className="w-3 h-3 mr-1" />}
+                                  {getStatusText(assignment.status, assignment.isOverdue)}
+                                </Badge>
+
+                                {assignment.dueDate && (
+                                  <div className={`text-sm ${
+                                    assignment.isOverdue
+                                      ? 'text-destructive font-medium'
+                                      : 'text-muted-foreground'
+                                  }`}>
+                                    {formatDueDate(assignment.dueDate)}
+                                  </div>
+                                )}
+
+                                <Link to={`/student/coding/${assignment.problemId}`}>
+                                  <Button size="sm" className="mt-2">
+                                    {assignment.status === 'completed' ? (
+                                      <>
+                                        <CheckCircle className="w-4 h-4 mr-2" />
+                                        Review
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Play className="w-4 h-4 mr-2" />
+                                        {assignment.status === 'assigned' ? 'Start' : 'Continue'}
+                                      </>
+                                    )}
+                                  </Button>
+                                </Link>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         {activeTab === "web-editor" && (
           <div className="space-y-6">
             <Card>
