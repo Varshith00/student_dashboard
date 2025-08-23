@@ -79,7 +79,28 @@ export default function TechnicalInterview() {
         body: JSON.stringify({ difficulty, focus }),
       });
 
-      const data = await response.json();
+      // Check if response is ok before trying to read body
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Clone the response to avoid body stream already read error
+      const responseClone = response.clone();
+      let data;
+
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        console.error("Failed to parse JSON response:", jsonError);
+        // Try to get response text for debugging
+        try {
+          const text = await responseClone.text();
+          console.error("Response text:", text);
+        } catch (textError) {
+          console.error("Failed to read response text:", textError);
+        }
+        throw new Error("Invalid JSON response from server");
+      }
 
       if (data.success) {
         setSession(data.session);
@@ -91,9 +112,11 @@ export default function TechnicalInterview() {
         }
       } else {
         console.error("Failed to start interview:", data.error);
+        throw new Error(data.error || "Failed to start interview");
       }
     } catch (error) {
       console.error("Interview start error:", error);
+      // You might want to show an error message to the user here
     }
 
     setIsStarting(false);
@@ -135,6 +158,10 @@ export default function TechnicalInterview() {
           messageHistory: session!.messages,
         }),
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
       const data = await response.json();
 
@@ -181,6 +208,10 @@ export default function TechnicalInterview() {
           messageHistory: session.messages,
         }),
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
       const data = await response.json();
 

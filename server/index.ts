@@ -252,13 +252,28 @@ export function createDevServer() {
       req.method === "PUT" ||
       req.method === "PATCH"
     ) {
-      // Skip if body already parsed (to avoid double parsing)
-      if (req.body !== undefined) {
+      // Skip if body already parsed or if content-type is not JSON
+      if (
+        req.body !== undefined ||
+        req.body === null ||
+        (req as any)._bodyParsed
+      ) {
         return next();
       }
 
+      // Check if content-type is JSON
+      const contentType = req.headers["content-type"] || "";
+      if (!contentType.includes("application/json")) {
+        req.body = {};
+        return next();
+      }
+
+      // Mark as being parsed to prevent double parsing
+      (req as any)._bodyParsed = true;
+
       let body = "";
       let finished = false;
+      let hasListeners = false;
 
       const finish = () => {
         if (finished) return;
@@ -268,8 +283,8 @@ export function createDevServer() {
           try {
             req.body = JSON.parse(body);
           } catch (e) {
-            // If JSON parsing fails, try to handle as string or set empty object
-            req.body = body.length > 0 ? { raw: body } : {};
+            console.error("JSON parsing failed:", e);
+            req.body = {};
           }
         } else {
           req.body = {};
@@ -277,25 +292,47 @@ export function createDevServer() {
         next();
       };
 
-      req.on("data", (chunk) => {
-        body += chunk.toString();
-      });
-
-      req.on("end", finish);
-      req.on("error", (err) => {
-        console.error("Body parsing error:", err);
+      // Check if the request stream is already consumed
+      if (req.readableEnded || req.complete) {
         req.body = {};
-        finish();
-      });
+        return next();
+      }
 
-      // Add timeout to prevent hanging
-      const timeout = setTimeout(() => {
-        console.warn("Body parsing timeout");
-        finish();
-      }, 10000); // 10 second timeout
+      // Set up event listeners only if we haven't already
+      if (!hasListeners) {
+        hasListeners = true;
 
-      req.on("end", () => clearTimeout(timeout));
-      req.on("error", () => clearTimeout(timeout));
+        req.on("data", (chunk) => {
+          if (!finished) {
+            body += chunk.toString();
+          }
+        });
+
+        req.on("end", () => {
+          if (!finished) {
+            finish();
+          }
+        });
+
+        req.on("error", (err) => {
+          console.error("Body parsing error:", err);
+          if (!finished) {
+            req.body = {};
+            finish();
+          }
+        });
+
+        // Add timeout to prevent hanging
+        const timeout = setTimeout(() => {
+          if (!finished) {
+            console.warn("Body parsing timeout");
+            finish();
+          }
+        }, 10000); // 10 second timeout
+
+        req.on("end", () => clearTimeout(timeout));
+        req.on("error", () => clearTimeout(timeout));
+      }
     } else {
       next();
     }
