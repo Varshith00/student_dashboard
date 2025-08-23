@@ -38,6 +38,7 @@ export function createServer() {
 
   // Protected routes (require authentication)
   app.post("/api/execute-python", authMiddleware, handleExecutePython);
+  app.post("/api/execute-javascript", authMiddleware, handleExecuteJavaScript);
   app.post("/api/ai/generate-question", authMiddleware, handleGenerateQuestion);
   app.post("/api/ai/analyze-code", authMiddleware, handleAnalyzeCode);
   app.post("/api/ai/get-hint", authMiddleware, handleGetHint);
