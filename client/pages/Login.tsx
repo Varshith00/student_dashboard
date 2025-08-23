@@ -193,9 +193,21 @@ export default function Login() {
 
         <Card>
           <CardHeader className="pb-4">
-            <CardTitle className="text-center">Sign In</CardTitle>
+            <CardTitle className="text-center flex items-center justify-center gap-2">
+              {isRegistering ? (
+                <>
+                  <UserPlus className="w-5 h-5" />
+                  Create Account
+                </>
+              ) : (
+                "Sign In"
+              )}
+            </CardTitle>
             <CardDescription className="text-center">
-              Access your learning dashboard
+              {isRegistering
+                ? "Join TechPrep and start your learning journey"
+                : "Access your learning dashboard"
+              }
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -210,27 +222,33 @@ export default function Login() {
                   Professor
                 </TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="student" className="space-y-4">
                 <div className="text-center p-4 bg-primary/5 rounded-lg">
                   <Laptop className="w-12 h-12 text-primary mx-auto mb-2" />
                   <h3 className="font-semibold">Student Portal</h3>
                   <p className="text-sm text-muted-foreground">
-                    Access your coding practice, progress tracking, and mock interviews
+                    {isRegistering
+                      ? "Join thousands of students preparing for tech careers"
+                      : "Access your coding practice, progress tracking, and mock interviews"
+                    }
                   </p>
                 </div>
-                <LoginForm userType="student" />
+                <AuthForm userType="student" />
               </TabsContent>
-              
+
               <TabsContent value="professor" className="space-y-4">
                 <div className="text-center p-4 bg-accent/5 rounded-lg">
                   <GraduationCap className="w-12 h-12 text-accent mx-auto mb-2" />
                   <h3 className="font-semibold">Professor Portal</h3>
                   <p className="text-sm text-muted-foreground">
-                    Monitor student progress and access class analytics
+                    {isRegistering
+                      ? "Help your students succeed with comprehensive analytics"
+                      : "Monitor student progress and access class analytics"
+                    }
                   </p>
                 </div>
-                <LoginForm userType="professor" />
+                <AuthForm userType="professor" />
               </TabsContent>
             </Tabs>
           </CardContent>
