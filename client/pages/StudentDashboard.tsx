@@ -67,7 +67,7 @@ export default function StudentDashboard() {
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <Badge variant="secondary">Welcome back, Alex!</Badge>
+            <Badge variant="secondary">Welcome back, {user.name}!</Badge>
             <Button variant="outline" onClick={handleLogout}>
               <LogOut className="w-4 h-4 mr-2" />
               Logout
