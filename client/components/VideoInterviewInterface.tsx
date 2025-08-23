@@ -230,9 +230,39 @@ export default function VideoInterviewInterface({
     setTranscribedText("");
   };
 
-  const submitAnswer = () => {
-    if (transcribedText.trim()) {
+  const submitAnswer = async () => {
+    if (!transcribedText.trim()) return;
+
+    setIsAnalyzing(true);
+
+    try {
+      // Call AI analysis API
+      const response = await authFetch('/api/audio/analyze-answer', {
+        method: 'POST',
+        body: JSON.stringify({
+          transcription: transcribedText.trim(),
+          question: question,
+          interviewType: interviewType,
+          difficulty: difficulty,
+          focus: focus
+        }),
+      });
+
+      const analysisData = await response.json();
+
+      if (analysisData.success) {
+        setAnalysisResult(analysisData);
+        onAnswerSubmit(transcribedText.trim(), analysisData);
+      } else {
+        // Fallback to basic submission without analysis
+        onAnswerSubmit(transcribedText.trim());
+      }
+    } catch (error) {
+      console.error('Analysis error:', error);
+      // Fallback to basic submission without analysis
       onAnswerSubmit(transcribedText.trim());
+    } finally {
+      setIsAnalyzing(false);
       resetRecording();
     }
   };
