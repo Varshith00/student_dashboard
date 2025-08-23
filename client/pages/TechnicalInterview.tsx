@@ -34,7 +34,7 @@ interface Message {
   id: string;
   role: "user" | "interviewer";
   content: string;
-  timestamp: Date;
+  timestamp: string; // ISO string from server
   type?: "question" | "follow-up" | "evaluation" | "final";
 }
 
@@ -110,7 +110,7 @@ export default function TechnicalInterview() {
       id: Date.now().toString(),
       role: "user",
       content: message,
-      timestamp: new Date(),
+      timestamp: new Date().toISOString(),
     };
 
     // Add user message immediately
@@ -143,7 +143,7 @@ export default function TechnicalInterview() {
           id: (Date.now() + 1).toString(),
           role: "interviewer",
           content: data.response,
-          timestamp: new Date(),
+          timestamp: new Date().toISOString(),
           type: data.type,
         };
 
@@ -506,7 +506,7 @@ export default function TechnicalInterview() {
                               {message.content}
                             </p>
                             <p className="text-xs opacity-70 mt-2">
-                              {message.timestamp.toLocaleTimeString()}
+                              {new Date(message.timestamp).toLocaleTimeString()}
                             </p>
                           </div>
                         </div>

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Editor } from "@monaco-editor/react";
+import { io, Socket } from "socket.io-client";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -22,10 +23,6 @@ import {
   Copy,
   Share,
   Users,
-  Mic,
-  MicOff,
-  Video,
-  VideoOff,
   Settings,
   UserPlus,
   Terminal,
@@ -68,10 +65,6 @@ export default function CollaborativeEditor({
   const [isLoading, setIsLoading] = useState(true);
   const [permission, setPermission] = useState<"write" | "read">("write");
 
-  // Communication state
-  const [isMicOn, setIsMicOn] = useState(false);
-  const [isVideoOn, setIsVideoOn] = useState(false);
-
   // Join session state
   const [joinSessionId, setJoinSessionId] = useState("");
   const [isJoining, setIsJoining] = useState(false);
@@ -79,6 +72,12 @@ export default function CollaborativeEditor({
   // AI features state
   const [aiSuggestion, setAiSuggestion] = useState<string>("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  // Socket connection
+  const socketRef = useRef<Socket | null>(null);
+  const [connectionStatus, setConnectionStatus] = useState<
+    "connecting" | "connected" | "disconnected"
+  >("disconnected");
 
   function getDefaultCode(lang: "python" | "javascript") {
     if (lang === "python") {
@@ -125,6 +124,95 @@ console.log(\`Result: \${result}\`);
 `;
     }
   }
+
+  // Initialize socket connection (only in production)
+  useEffect(() => {
+    if (!session?.id) return;
+
+    // Check if we're in production environment
+    const isProduction = process.env.NODE_ENV === "production";
+
+    if (!isProduction) {
+      // In development, skip socket connection to avoid conflicts
+      setConnectionStatus("disconnected");
+      console.log("🔧 Development mode: Real-time collaboration disabled");
+      return;
+    }
+
+    setConnectionStatus("connecting");
+
+    try {
+      socketRef.current = io(window.location.origin, {
+        transports: ["websocket", "polling"],
+      });
+
+      const socket = socketRef.current;
+
+      socket.on("connect", () => {
+        console.log("Connected to socket server");
+        setConnectionStatus("connected");
+        socket.emit("join-session", session.id);
+      });
+
+      socket.on("disconnect", () => {
+        console.log("Disconnected from socket server");
+        setConnectionStatus("disconnected");
+      });
+
+      socket.on("connect_error", () => {
+        console.log("Socket connection failed");
+        setConnectionStatus("disconnected");
+      });
+
+      // Handle real-time code updates
+      socket.on("code-update", (data) => {
+        const {
+          code: newCode,
+          cursor,
+          participantId: updateParticipantId,
+          participantName,
+        } = data;
+        if (updateParticipantId !== participantId) {
+          setCode(newCode);
+          // Update the editor content
+          if (editorRef.current) {
+            editorRef.current.setValue(newCode);
+          }
+        }
+      });
+
+      // Handle participant updates
+      socket.on("participant-joined", (data) => {
+        const { participant, session: updatedSession } = data;
+        setSession(updatedSession);
+      });
+
+      socket.on("participant-left", (data) => {
+        const {
+          participantId: leftParticipantId,
+          participantName,
+          session: updatedSession,
+        } = data;
+        setSession(updatedSession);
+      });
+
+      socket.on("cursor-update", (data) => {
+        const { cursor, participantId: cursorParticipantId } = data;
+        // Handle cursor position updates from other participants
+        // Could be used to show cursors in the editor
+      });
+
+      return () => {
+        if (socket) {
+          socket.emit("leave-session", session.id);
+          socket.disconnect();
+        }
+      };
+    } catch (error) {
+      console.error("Failed to initialize socket connection:", error);
+      setConnectionStatus("disconnected");
+    }
+  }, [session?.id, participantId]);
 
   // Initialize session
   useEffect(() => {
@@ -235,6 +323,16 @@ console.log(\`Result: \${result}\`);
     if (!session || !participantId || permission === "read") return;
 
     try {
+      // Emit real-time update via socket (only in production)
+      if (socketRef.current && connectionStatus === "connected") {
+        socketRef.current.emit("code-change", {
+          sessionId: session.id,
+          participantId,
+          code: newCode,
+          cursor: editorRef.current?.getPosition(),
+        });
+      }
+
       const response = await authFetch("/api/collaboration/update", {
         method: "POST",
         body: JSON.stringify({
@@ -407,7 +505,7 @@ console.log(\`Result: \${result}\`);
       // Debounce the update to avoid too many API calls
       const timeoutId = setTimeout(() => {
         updateCode(value);
-      }, 1000);
+      }, 500); // Reduced debounce time for better real-time feel
       return () => clearTimeout(timeoutId);
     }
   };
@@ -491,8 +589,22 @@ console.log(\`Result: \${result}\`);
             <div className="flex items-center gap-2">
               <Users className="w-6 h-6 text-primary" />
               <h1 className="text-xl font-bold">Collaborative Session</h1>
-              <Badge variant={isConnected ? "secondary" : "destructive"}>
-                {isConnected ? "Connected" : "Disconnected"}
+              <Badge
+                variant={
+                  connectionStatus === "connected"
+                    ? "secondary"
+                    : connectionStatus === "connecting"
+                      ? "outline"
+                      : "destructive"
+                }
+              >
+                {connectionStatus === "connected"
+                  ? "Live Sync"
+                  : connectionStatus === "connecting"
+                    ? "Connecting..."
+                    : process.env.NODE_ENV === "production"
+                      ? "Disconnected"
+                      : "Dev Mode"}
               </Badge>
             </div>
             <div className="flex items-center gap-2">
@@ -526,34 +638,6 @@ console.log(\`Result: \${result}\`);
                 <UserPlus className="w-4 h-4" />
               </Button>
             </div>
-
-            {/* Communication */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsMicOn(!isMicOn)}
-              className={isMicOn ? "bg-success/10 border-success" : ""}
-              title={isMicOn ? "Mute microphone" : "Unmute microphone"}
-            >
-              {isMicOn ? (
-                <Mic className="w-4 h-4" />
-              ) : (
-                <MicOff className="w-4 h-4" />
-              )}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsVideoOn(!isVideoOn)}
-              className={isVideoOn ? "bg-success/10 border-success" : ""}
-              title={isVideoOn ? "Turn off video" : "Turn on video"}
-            >
-              {isVideoOn ? (
-                <Video className="w-4 h-4" />
-              ) : (
-                <VideoOff className="w-4 h-4" />
-              )}
-            </Button>
 
             <Button variant="outline" size="sm" onClick={copySessionLink}>
               <Share className="w-4 h-4 mr-2" />
