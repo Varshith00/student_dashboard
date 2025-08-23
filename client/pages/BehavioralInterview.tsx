@@ -39,6 +39,14 @@ interface Message {
   type?: "question" | "follow-up" | "evaluation" | "final";
 }
 
+interface QuestionFeedback {
+  question: string;
+  answer: string;
+  feedback: string;
+  strengths: string[];
+  improvements: string[];
+}
+
 interface InterviewSession {
   id: string;
   startTime: Date;
@@ -46,8 +54,8 @@ interface InterviewSession {
   status: "active" | "completed";
   type: "behavioral";
   focus: string[];
-  score?: number;
-  feedback?: string;
+  questionFeedback?: QuestionFeedback[];
+  overallFeedback?: string;
   messages: Message[];
 }
 
