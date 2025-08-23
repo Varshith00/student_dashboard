@@ -71,3 +71,55 @@ export interface SessionEvent {
   data: any;
   timestamp: string;
 }
+
+/**
+ * User management types
+ */
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  role: "student" | "professor";
+  professorId?: string; // For students - which professor they're mapped to
+  createdAt: string;
+}
+
+export interface StudentRegistrationRequest {
+  email: string;
+  password: string;
+  name: string;
+  professorId: string;
+}
+
+export interface StudentRegistrationResponse {
+  success: boolean;
+  message?: string;
+  token?: string;
+  user?: Omit<User, 'password'>;
+}
+
+export interface ProfessorStudent {
+  id: string;
+  name: string;
+  email: string;
+  joinedAt: string;
+  totalProblems: number;
+  completedProblems: number;
+  averageScore: number;
+  lastActive: string;
+}
+
+export interface Assignment {
+  id: string;
+  professorId: string;
+  studentId: string;
+  problemTitle: string;
+  problemDescription: string;
+  language: "python" | "javascript";
+  difficulty: "easy" | "medium" | "hard";
+  assignedAt: string;
+  dueDate?: string;
+  status: "pending" | "in_progress" | "completed";
+  score?: number;
+  submittedAt?: string;
+}
