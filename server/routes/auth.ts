@@ -87,13 +87,13 @@ const generateToken = (user: User): string => {
 // Student registration with professor mapping
 export const handleStudentRegister: RequestHandler = async (req, res) => {
   try {
-    const { email, password, name, professorId } = req.body as AuthRequest;
+    const { email, password, name, professorEmail } = req.body as AuthRequest;
 
     // Validation
-    if (!email || !password || !name || !professorId) {
+    if (!email || !password || !name || !professorEmail) {
       return res.status(400).json({
         success: false,
-        message: 'Email, password, name, and professor ID are required'
+        message: 'Email, password, name, and professor email are required'
       } as AuthResponse);
     }
 
@@ -113,12 +113,12 @@ export const handleStudentRegister: RequestHandler = async (req, res) => {
       } as AuthResponse);
     }
 
-    // Verify professor exists
-    const professor = findUserById(professorId);
+    // Verify professor exists by email
+    const professor = findUserByEmail(professorEmail);
     if (!professor || professor.role !== 'professor') {
       return res.status(400).json({
         success: false,
-        message: 'Invalid professor ID'
+        message: 'Invalid professor email address'
       } as AuthResponse);
     }
 
@@ -126,14 +126,14 @@ export const handleStudentRegister: RequestHandler = async (req, res) => {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    // Create new student
+    // Create new student with professor email as professorId
     const newUser: User = {
       id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
       email: email.toLowerCase(),
       password: hashedPassword,
       name,
       role: 'student',
-      professorId,
+      professorId: professor.email, // Use professor email as the ID
       createdAt: new Date().toISOString()
     };
 
