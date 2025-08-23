@@ -1,30 +1,55 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { GraduationCap, Laptop, Eye, EyeOff } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { GraduationCap, Laptop, Eye, EyeOff, UserPlus } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { login, register, user, isLoading } = useAuth();
 
-  const handleLogin = async (userType: 'student' | 'professor', email: string, password: string) => {
-    setLoading(true);
-    
-    // Simulate login process
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    if (userType === 'student') {
-      navigate('/student/dashboard');
-    } else {
-      navigate('/professor/dashboard');
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user && !isLoading) {
+      if (user.role === 'student') {
+        navigate('/student/dashboard');
+      } else {
+        navigate('/professor/dashboard');
+      }
     }
-    
-    setLoading(false);
+  }, [user, isLoading, navigate]);
+
+  const handleAuth = async (userType: 'student' | 'professor', email: string, password: string, name?: string) => {
+    setError(null);
+
+    try {
+      let result;
+      if (isRegistering) {
+        if (!name) {
+          setError('Name is required for registration');
+          return;
+        }
+        result = await register(email, password, name, userType);
+      } else {
+        result = await login(email, password);
+      }
+
+      if (result.success) {
+        // Navigation will be handled by the useEffect above
+      } else {
+        setError(result.message || 'Authentication failed');
+      }
+    } catch (error) {
+      setError('An unexpected error occurred');
+    }
   };
 
   const LoginForm = ({ userType }: { userType: 'student' | 'professor' }) => {
