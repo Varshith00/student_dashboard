@@ -333,42 +333,19 @@ export default function StudentDashboard() {
                   AI-Powered Mock Interviews
                 </CardTitle>
                 <CardDescription>
-                  Practice technical and behavioral interviews with AI
+                  Practice technical and behavioral interviews with AI that mimics real company processes
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid md:grid-cols-2 gap-6">
-                  <Card className="border-2">
+                  <Card className="border-2 hover:border-primary/50 transition-colors">
                     <CardHeader>
-                      <CardTitle className="text-lg">Technical Interview</CardTitle>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Brain className="w-5 h-5 text-primary" />
+                        Technical Interview
+                      </CardTitle>
                       <CardDescription>
-                        Algorithm and coding challenges
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3 mb-4">
-                        <div className="flex justify-between text-sm">
-                          <span>Duration:</span>
-                          <span>45-60 minutes</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span>Difficulty:</span>
-                          <span>Adaptive</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span>Focus:</span>
-                          <span>Python, Data Structures</span>
-                        </div>
-                      </div>
-                      <Button className="w-full">Start Technical Interview</Button>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="border-2">
-                    <CardHeader>
-                      <CardTitle className="text-lg">Behavioral Interview</CardTitle>
-                      <CardDescription>
-                        Soft skills and experience questions
+                        Live coding challenges and system design
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -378,17 +355,91 @@ export default function StudentDashboard() {
                           <span>30-45 minutes</span>
                         </div>
                         <div className="flex justify-between text-sm">
-                          <span>Questions:</span>
-                          <span>8-12</span>
+                          <span>Levels:</span>
+                          <span>Junior, Mid, Senior</span>
                         </div>
                         <div className="flex justify-between text-sm">
                           <span>Focus:</span>
-                          <span>STAR Method</span>
+                          <span>Algorithms, Problem Solving</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>Format:</span>
+                          <span>Interactive Chat</span>
                         </div>
                       </div>
-                      <Button variant="outline" className="w-full">Start Behavioral Interview</Button>
+                      <Link to="/student/interview/technical" className="w-full">
+                        <Button className="w-full">
+                          <Brain className="w-4 h-4 mr-2" />
+                          Start Technical Interview
+                        </Button>
+                      </Link>
                     </CardContent>
                   </Card>
+
+                  <Card className="border-2 hover:border-accent/50 transition-colors">
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Target className="w-5 h-5 text-accent" />
+                        Behavioral Interview
+                      </CardTitle>
+                      <CardDescription>
+                        Critical thinking and aptitude questions
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3 mb-4">
+                        <div className="flex justify-between text-sm">
+                          <span>Duration:</span>
+                          <span>20-30 minutes</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>Focus:</span>
+                          <span>Critical Thinking, Aptitude</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>Method:</span>
+                          <span>STAR Framework</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>Type:</span>
+                          <span>Scenario-based Questions</span>
+                        </div>
+                      </div>
+                      <Link to="/student/interview/behavioral" className="w-full">
+                        <Button variant="outline" className="w-full border-accent text-accent hover:bg-accent hover:text-accent-foreground">
+                          <Target className="w-4 h-4 mr-2" />
+                          Start Behavioral Interview
+                        </Button>
+                      </Link>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <div className="mt-6 p-4 bg-muted/50 rounded-lg">
+                  <h3 className="font-semibold mb-2 flex items-center gap-2">
+                    <CheckCircle className="w-5 h-5 text-success" />
+                    What to Expect
+                  </h3>
+                  <div className="grid md:grid-cols-2 gap-4 text-sm text-muted-foreground">
+                    <div>
+                      <h4 className="font-medium text-foreground mb-1">Technical Interview:</h4>
+                      <ul className="space-y-1">
+                        <li>• Real-time problem solving</li>
+                        <li>• Code explanation and optimization</li>
+                        <li>• System design discussions</li>
+                        <li>• Follow-up questions based on your answers</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-foreground mb-1">Behavioral Interview:</h4>
+                      <ul className="space-y-1">
+                        <li>• Situational and analytical questions</li>
+                        <li>• Critical thinking puzzles</li>
+                        <li>• Communication and reasoning assessment</li>
+                        <li>• Real-world scenario challenges</li>
+                      </ul>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
