@@ -308,8 +308,8 @@ export default function StudentLogin() {
           </Link>
           <h2 className="text-2xl font-semibold text-foreground">Student Portal</h2>
           <p className="text-muted-foreground">
-            {isRegistering 
-              ? "Join your professor's class and start learning" 
+            {isRegistering
+              ? "Enter your professor's email to join their class and start learning"
               : "Sign in to access your learning dashboard"
             }
           </p>
