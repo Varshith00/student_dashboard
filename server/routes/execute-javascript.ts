@@ -69,6 +69,7 @@ export const handleExecuteJavaScript: RequestHandler = async (req, res) => {
       writeFileSync(tempFile, code, 'utf8');
 
       const startTime = Date.now();
+      let responsesSent = false;
 
       // Execute JavaScript code with Node.js
       const nodeProcess = spawn('node', [tempFile], {
@@ -88,8 +89,11 @@ export const handleExecuteJavaScript: RequestHandler = async (req, res) => {
       });
 
       nodeProcess.on('close', (code) => {
+        if (responsesSent) return;
+        responsesSent = true;
+
         const executionTime = Date.now() - startTime;
-        
+
         // Clean up temporary file
         try {
           unlinkSync(tempFile);
@@ -113,6 +117,9 @@ export const handleExecuteJavaScript: RequestHandler = async (req, res) => {
       });
 
       nodeProcess.on('error', (error) => {
+        if (responsesSent) return;
+        responsesSent = true;
+
         // Clean up temporary file
         try {
           unlinkSync(tempFile);
@@ -128,14 +135,15 @@ export const handleExecuteJavaScript: RequestHandler = async (req, res) => {
 
       // Handle timeout
       setTimeout(() => {
-        if (!nodeProcess.killed) {
+        if (!responsesSent && !nodeProcess.killed) {
+          responsesSent = true;
           nodeProcess.kill('SIGTERM');
           try {
             unlinkSync(tempFile);
           } catch (e) {
             console.warn('Failed to clean up temp file:', tempFile);
           }
-          
+
           res.json({
             success: false,
             error: 'Code execution timed out (10 seconds limit)'
