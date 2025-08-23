@@ -85,5 +85,23 @@
     "role": "student",
     "professorId": "prof1@gmail.com",
     "createdAt": "2025-08-23T13:17:50.947Z"
+  },
+  {
+    "id": "1755967851697ts8tz111j",
+    "email": "adarsh@123",
+    "password": "$2b$10$Oen2n0.4dVSrAtuiuIZeSum/sXLRwZFV20JfqcQEOw8arG964gHDW",
+    "name": "adarsh",
+    "role": "student",
+    "professorId": "prof1@gmail.com",
+    "createdAt": "2025-08-23T16:50:51.697Z"
+  },
+  {
+    "id": "1755967873273hy7sxm27l",
+    "email": "dsce@123",
+    "password": "$2b$10$Q3hO8AvjM8LHRh6wYsaoCuutOh9idAXOwV4GZfa8Q4jaewgUiYpH.",
+    "name": "adarsh",
+    "role": "student",
+    "professorId": "prof1@gmail.com",
+    "createdAt": "2025-08-23T16:51:13.273Z"
   }
 ]
