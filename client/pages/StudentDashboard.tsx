@@ -29,15 +29,45 @@ import {
   Monitor,
   Sparkles,
   Award,
+  AlertCircle,
+  User,
+  FileText,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth, authFetch } from "@/contexts/AuthContext";
 import { problems } from "@/data/problems";
+
+interface Assignment {
+  id: string;
+  professorId: string;
+  professorName: string;
+  professorEmail: string;
+  problemId: string;
+  assignedDate: string;
+  dueDate?: string;
+  status: 'assigned' | 'in_progress' | 'completed' | 'overdue';
+  score?: number;
+  completedDate?: string;
+  attempts: number;
+  timeSpent: number;
+  isOverdue?: boolean;
+}
+
+interface AssignmentSummary {
+  total: number;
+  pending: number;
+  inProgress: number;
+  completed: number;
+  overdue: number;
+}
 
 export default function StudentDashboard() {
   const navigate = useNavigate();
   const { user, logout, isLoading } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
+  const [assignments, setAssignments] = useState<Assignment[]>([]);
+  const [assignmentSummary, setAssignmentSummary] = useState<AssignmentSummary>({ total: 0, pending: 0, inProgress: 0, completed: 0, overdue: 0 });
+  const [assignmentsLoading, setAssignmentsLoading] = useState(false);
 
   // Redirect if not logged in or not a student
   useEffect(() => {
@@ -45,6 +75,84 @@ export default function StudentDashboard() {
       navigate("/login");
     }
   }, [user, isLoading, navigate]);
+
+  // Fetch assignments when user is available
+  useEffect(() => {
+    if (user && user.role === "student") {
+      fetchAssignments();
+    }
+  }, [user]);
+
+  const fetchAssignments = async () => {
+    setAssignmentsLoading(true);
+    try {
+      const response = await authFetch('/api/student/assignments');
+      const data = await response.json();
+
+      if (data.success) {
+        setAssignments(data.assignments || []);
+        setAssignmentSummary(data.summary || { total: 0, pending: 0, inProgress: 0, completed: 0, overdue: 0 });
+      } else {
+        console.error('Failed to fetch assignments:', data.error);
+      }
+    } catch (error) {
+      console.error('Error fetching assignments:', error);
+    } finally {
+      setAssignmentsLoading(false);
+    }
+  };
+
+  const getProblemByIdFromList = (problemId: string) => {
+    return problems.find(p => p.id === problemId) || {
+      id: problemId,
+      title: problemId.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
+      difficulty: 'Medium' as const,
+      tags: ['Unknown'],
+      description: 'Problem description not available',
+      examples: [],
+      constraints: [],
+      starter_code: { python: '', javascript: '' },
+      solution: { python: '', javascript: '' },
+      test_cases: []
+    };
+  };
+
+  const formatDueDate = (dueDate: string) => {
+    const date = new Date(dueDate);
+    const now = new Date();
+    const diffTime = date.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) {
+      return `Overdue by ${Math.abs(diffDays)} day${Math.abs(diffDays) !== 1 ? 's' : ''}`;
+    } else if (diffDays === 0) {
+      return 'Due today';
+    } else if (diffDays === 1) {
+      return 'Due tomorrow';
+    } else {
+      return `Due in ${diffDays} days`;
+    }
+  };
+
+  const getStatusColor = (status: string, isOverdue?: boolean) => {
+    if (isOverdue) return 'destructive';
+    switch (status) {
+      case 'assigned': return 'secondary';
+      case 'in_progress': return 'warning';
+      case 'completed': return 'success';
+      default: return 'secondary';
+    }
+  };
+
+  const getStatusText = (status: string, isOverdue?: boolean) => {
+    if (isOverdue) return 'Overdue';
+    switch (status) {
+      case 'assigned': return 'New';
+      case 'in_progress': return 'In Progress';
+      case 'completed': return 'Completed';
+      default: return status;
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -129,6 +237,19 @@ export default function StudentDashboard() {
           >
             <Users2 className="w-4 h-4 mr-2" />
             Pair Programming
+          </Button>
+          <Button
+            variant={activeTab === "assignments" ? "default" : "outline"}
+            onClick={() => setActiveTab("assignments")}
+            className="whitespace-nowrap relative"
+          >
+            <FileText className="w-4 h-4 mr-2" />
+            Assignments
+            {assignmentSummary.pending + assignmentSummary.overdue > 0 && (
+              <Badge className="ml-1 h-5 w-5 p-0 text-xs" variant="destructive">
+                {assignmentSummary.pending + assignmentSummary.overdue}
+              </Badge>
+            )}
           </Button>
           <Button
             variant={activeTab === "web-editor" ? "default" : "outline"}
