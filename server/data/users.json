@@ -14,5 +14,13 @@
     "name": "gandu",
     "role": "student",
     "createdAt": "2025-08-23T04:03:27.649Z"
+  },
+  {
+    "id": "1755933690267y5p1pigck",
+    "email": "gandu@dsc.edu",
+    "password": "$2b$10$WpFHJ05uYY8VuESAriORHuZubAYkApGhLyMKMjdaiy2hPhx4kd/e6",
+    "name": "gandhu",
+    "role": "student",
+    "createdAt": "2025-08-23T07:21:30.267Z"
   }
 ]

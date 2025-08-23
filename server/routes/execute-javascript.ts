@@ -4,55 +4,67 @@ import { writeFileSync, unlinkSync } from "fs";
 import { join } from "path";
 import { randomBytes } from "crypto";
 
-interface ExecutePythonRequest {
+interface ExecuteJavaScriptRequest {
   code: string;
 }
 
-interface ExecutePythonResponse {
+interface ExecuteJavaScriptResponse {
   success: boolean;
   output?: string;
   error?: string;
   execution_time?: number;
 }
 
-export const handleExecutePython: RequestHandler = async (req, res) => {
+export const handleExecuteJavaScript: RequestHandler = async (req, res) => {
   try {
-    const { code } = req.body as ExecutePythonRequest;
+    const { code } = req.body as ExecuteJavaScriptRequest;
 
     if (!code || typeof code !== "string") {
       return res.status(400).json({
         success: false,
         error: "Code is required and must be a string",
-      } as ExecutePythonResponse);
+      } as ExecuteJavaScriptResponse);
     }
 
-    // Basic security checks
+    // Basic security checks for Node.js
     const forbidden = [
-      "import os",
-      "import subprocess",
-      "import sys",
-      "__import__",
-      "exec(",
+      'require("fs")',
+      'require("child_process")',
+      'require("os")',
+      'require("path")',
+      'require("net")',
+      'require("http")',
+      'require("https")',
+      'require("crypto")',
+      'require("cluster")',
+      "process.exit",
+      "process.kill",
+      "process.env",
+      "global.",
+      "__dirname",
+      "__filename",
       "eval(",
-      "open(",
-      "file(",
-      "input(",
-      "raw_input(",
+      "Function(",
+      "setTimeout(",
+      "setInterval(",
+      "setImmediate(",
     ];
 
-    const codeToCheck = code.toLowerCase();
+    const codeToCheck = code.toLowerCase().replace(/\s/g, "");
     for (const forbidden_item of forbidden) {
-      if (codeToCheck.includes(forbidden_item)) {
+      if (
+        codeToCheck.includes(forbidden_item.toLowerCase().replace(/\s/g, ""))
+      ) {
         return res.status(400).json({
           success: false,
           error: `Security violation: "${forbidden_item}" is not allowed`,
-        } as ExecutePythonResponse);
+        } as ExecuteJavaScriptResponse);
       }
     }
 
-    // Generate a random filename for the temporary Python file
+    // Generate a random filename for the temporary JavaScript file
     const tempId = randomBytes(16).toString("hex");
-    const tempFile = join(process.cwd(), `temp_${tempId}.py`);
+    const tempFile = join(process.cwd(), `temp_${tempId}.js`);
 
     try {
       // Write code to temporary file
@@ -61,8 +73,8 @@ export const handleExecutePython: RequestHandler = async (req, res) => {
       const startTime = Date.now();
       let responsesSent = false;
 
-      // Execute Python code
-      const pythonProcess = spawn("python3", [tempFile], {
+      // Execute JavaScript code with Node.js
+      const nodeProcess = spawn("node", [tempFile], {
         timeout: 10000, // 10 second timeout
         stdio: ["pipe", "pipe", "pipe"],
       });
@@ -70,15 +82,15 @@ export const handleExecutePython: RequestHandler = async (req, res) => {
       let output = "";
       let errorOutput = "";
 
-      pythonProcess.stdout.on("data", (data) => {
+      nodeProcess.stdout.on("data", (data) => {
         output += data.toString();
       });
 
-      pythonProcess.stderr.on("data", (data) => {
+      nodeProcess.stderr.on("data", (data) => {
         errorOutput += data.toString();
       });
 
-      pythonProcess.on("close", (code) => {
+      nodeProcess.on("close", (code) => {
         if (responsesSent) return;
         responsesSent = true;
 
@@ -96,17 +108,17 @@ export const handleExecutePython: RequestHandler = async (req, res) => {
             success: true,
             output: output.trim(),
             execution_time: executionTime,
-          } as ExecutePythonResponse);
+          } as ExecuteJavaScriptResponse);
         } else {
           res.json({
             success: false,
             error: errorOutput.trim() || `Process exited with code ${code}`,
             execution_time: executionTime,
-          } as ExecutePythonResponse);
+          } as ExecuteJavaScriptResponse);
         }
       });
 
-      pythonProcess.on("error", (error) => {
+      nodeProcess.on("error", (error) => {
         if (responsesSent) return;
         responsesSent = true;
 
@@ -119,15 +131,15 @@ export const handleExecutePython: RequestHandler = async (req, res) => {
 
         res.json({
           success: false,
-          error: `Python execution failed: ${error.message}`,
-        } as ExecutePythonResponse);
+          error: `JavaScript execution failed: ${error.message}`,
+        } as ExecuteJavaScriptResponse);
       });
 
       // Handle timeout
       setTimeout(() => {
-        if (!responsesSent && !pythonProcess.killed) {
+        if (!responsesSent && !nodeProcess.killed) {
           responsesSent = true;
-          pythonProcess.kill("SIGTERM");
+          nodeProcess.kill("SIGTERM");
           try {
             unlinkSync(tempFile);
           } catch (e) {
@@ -137,7 +149,7 @@ export const handleExecutePython: RequestHandler = async (req, res) => {
           res.json({
             success: false,
             error: "Code execution timed out (10 seconds limit)",
-          } as ExecutePythonResponse);
+          } as ExecuteJavaScriptResponse);
         }
       }, 10000);
     } catch (fileError) {
@@ -151,13 +163,13 @@ export const handleExecutePython: RequestHandler = async (req, res) => {
       res.status(500).json({
         success: false,
         error: `Failed to create temporary file: ${fileError instanceof Error ? fileError.message : "Unknown error"}`,
-      } as ExecutePythonResponse);
+      } as ExecuteJavaScriptResponse);
     }
   } catch (error) {
-    console.error("Execute Python error:", error);
+    console.error("Execute JavaScript error:", error);
     res.status(500).json({
       success: false,
       error: "Internal server error",
-    } as ExecutePythonResponse);
+    } as ExecuteJavaScriptResponse);
   }
 };

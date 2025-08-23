@@ -1,11 +1,22 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Editor } from "@monaco-editor/react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { authFetch } from "@/contexts/AuthContext";
+import {
+  SafeResizeObserver,
+  createMonacoResizeObserverConfig,
+  createResizeSafeContainer,
+} from "@/lib/resizeObserverErrorHandler";
 import {
   Play,
   Square,
@@ -19,7 +30,7 @@ import {
   Brain,
   Sparkles,
   HelpCircle,
-  BarChart3
+  BarChart3,
 } from "lucide-react";
 
 interface CodeEditorProps {
@@ -27,7 +38,7 @@ interface CodeEditorProps {
     id: string;
     title: string;
     description: string;
-    difficulty: 'Easy' | 'Medium' | 'Hard';
+    difficulty: "Easy" | "Medium" | "Hard";
     starter_code?: string;
     test_cases?: Array<{
       input: string;
@@ -38,7 +49,11 @@ interface CodeEditorProps {
 
 export default function CodeEditor({ problem }: CodeEditorProps) {
   const editorRef = useRef<any>(null);
-  const [code, setCode] = useState(problem?.starter_code || `# Welcome to Python Practice!
+  const containerRef = useRef<HTMLDivElement>(null);
+  const resizeCleanupRef = useRef<(() => void) | null>(null);
+  const [code, setCode] = useState(
+    problem?.starter_code ||
+      `# Welcome to Python Practice!
 # Write your code below and click Run to execute
 
 def solution():
@@ -49,9 +64,10 @@ def solution():
 # Test your function
 result = solution()
 print(f"Result: {result}")
-`);
-  
-  const [output, setOutput] = useState('');
+`,
+  );
+
+  const [output, setOutput] = useState("");
   const [isRunning, setIsRunning] = useState(false);
   const [executionTime, setExecutionTime] = useState<number | null>(null);
   const [hasError, setHasError] = useState(false);
@@ -65,15 +81,15 @@ print(f"Result: {result}")
 
   const runCode = async () => {
     setIsRunning(true);
-    setOutput('');
+    setOutput("");
     setHasError(false);
     setExecutionTime(null);
 
     const startTime = Date.now();
 
     try {
-      const response = await authFetch('/api/execute-python', {
-        method: 'POST',
+      const response = await authFetch("/api/execute-python", {
+        method: "POST",
         body: JSON.stringify({ code }),
       });
 
@@ -82,14 +98,16 @@ print(f"Result: {result}")
       setExecutionTime(endTime - startTime);
 
       if (result.success) {
-        setOutput(result.output || 'Code executed successfully (no output)');
+        setOutput(result.output || "Code executed successfully (no output)");
         setHasError(false);
       } else {
-        setOutput(result.error || 'An error occurred');
+        setOutput(result.error || "An error occurred");
         setHasError(true);
       }
     } catch (error) {
-      setOutput(`Network error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setOutput(
+        `Network error: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
       setHasError(true);
       setExecutionTime(Date.now() - startTime);
     }
@@ -114,7 +132,7 @@ result = solution()
 print(f"Result: {result}")
 `);
     }
-    setOutput('');
+    setOutput("");
     setHasError(false);
     setExecutionTime(null);
     setAiHint(null);
@@ -124,12 +142,13 @@ print(f"Result: {result}")
   const getAIHint = async () => {
     setIsLoadingAI(true);
     try {
-      const response = await authFetch('/api/ai/get-hint', {
-        method: 'POST',
+      const response = await authFetch("/api/ai/get-hint", {
+        method: "POST",
         body: JSON.stringify({
           code,
-          problem_description: problem?.description || 'General coding practice',
-          hint_level: hintLevel
+          problem_description:
+            problem?.description || "General coding practice",
+          hint_level: hintLevel,
         }),
       });
 
@@ -142,7 +161,9 @@ print(f"Result: {result}")
         setHasError(true);
       }
     } catch (error) {
-      setOutput(`AI Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setOutput(
+        `AI Error: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
       setHasError(true);
     }
     setIsLoadingAI(false);
@@ -151,11 +172,11 @@ print(f"Result: {result}")
   const analyzeCode = async () => {
     setIsLoadingAI(true);
     try {
-      const response = await authFetch('/api/ai/analyze-code', {
-        method: 'POST',
+      const response = await authFetch("/api/ai/analyze-code", {
+        method: "POST",
         body: JSON.stringify({
           code,
-          problem_description: problem?.description || 'General code analysis'
+          problem_description: problem?.description || "General code analysis",
         }),
       });
 
@@ -168,24 +189,84 @@ print(f"Result: {result}")
         setHasError(true);
       }
     } catch (error) {
-      setOutput(`AI Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setOutput(
+        `AI Error: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
       setHasError(true);
     }
     setIsLoadingAI(false);
   };
 
-  const handleEditorDidMount = (editor: any) => {
+  const handleEditorDidMount = useCallback((editor: any) => {
     editorRef.current = editor;
-  };
+
+    // Setup resize-safe container
+    if (containerRef.current && !resizeCleanupRef.current) {
+      resizeCleanupRef.current = createResizeSafeContainer(
+        containerRef.current,
+      );
+
+      // Listen for custom resize events
+      containerRef.current.addEventListener("monaco-resize", () => {
+        try {
+          editor.layout();
+        } catch (error) {
+          console.warn("Editor layout error:", error);
+        }
+      });
+    }
+
+    // Manual layout trigger with debouncing
+    const layoutEditor = () => {
+      try {
+        if (editor && typeof editor.layout === "function") {
+          // Use requestAnimationFrame to avoid ResizeObserver conflicts
+          requestAnimationFrame(() => {
+            editor.layout();
+          });
+        }
+      } catch (error) {
+        console.warn("Editor layout error:", error);
+      }
+    };
+
+    // Setup safe resize observer for manual layout
+    const resizeObserver = new SafeResizeObserver(() => {
+      layoutEditor();
+    }, 200);
+
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+
+    // Cleanup function
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'Easy': return 'bg-success text-success-foreground';
-      case 'Medium': return 'bg-warning text-warning-foreground';
-      case 'Hard': return 'bg-destructive text-destructive-foreground';
-      default: return 'bg-secondary text-secondary-foreground';
+      case "Easy":
+        return "bg-success text-success-foreground";
+      case "Medium":
+        return "bg-warning text-warning-foreground";
+      case "Hard":
+        return "bg-destructive text-destructive-foreground";
+      default:
+        return "bg-secondary text-secondary-foreground";
     }
   };
+
+  // Cleanup resize observer on unmount
+  useEffect(() => {
+    return () => {
+      if (resizeCleanupRef.current) {
+        resizeCleanupRef.current();
+        resizeCleanupRef.current = null;
+      }
+    };
+  }, []);
 
   return (
     <div className="h-screen flex flex-col">
@@ -223,7 +304,7 @@ print(f"Result: {result}")
                   )}
                 </TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="description" className="px-4 pb-4">
                 <Card>
                   <CardHeader>
@@ -248,7 +329,7 @@ print(f"Result: {result}")
                   </CardContent>
                 </Card>
               </TabsContent>
-              
+
               <TabsContent value="examples" className="px-4 pb-4">
                 <Card>
                   <CardHeader>
@@ -259,8 +340,13 @@ print(f"Result: {result}")
                   </CardHeader>
                   <CardContent>
                     {problem.test_cases?.map((testCase, index) => (
-                      <div key={index} className="mb-4 p-3 bg-muted/50 rounded-lg">
-                        <h4 className="font-semibold mb-2">Example {index + 1}:</h4>
+                      <div
+                        key={index}
+                        className="mb-4 p-3 bg-muted/50 rounded-lg"
+                      >
+                        <h4 className="font-semibold mb-2">
+                          Example {index + 1}:
+                        </h4>
                         <div className="space-y-2 text-sm">
                           <div>
                             <span className="font-medium">Input:</span>
@@ -269,7 +355,9 @@ print(f"Result: {result}")
                             </code>
                           </div>
                           <div>
-                            <span className="font-medium">Expected Output:</span>
+                            <span className="font-medium">
+                              Expected Output:
+                            </span>
                             <code className="ml-2 bg-background px-2 py-1 rounded">
                               {testCase.expected_output}
                             </code>
@@ -277,7 +365,9 @@ print(f"Result: {result}")
                         </div>
                       </div>
                     )) || (
-                      <p className="text-muted-foreground">No test cases provided.</p>
+                      <p className="text-muted-foreground">
+                        No test cases provided.
+                      </p>
                     )}
                   </CardContent>
                 </Card>
@@ -351,7 +441,8 @@ print(f"Result: {result}")
                         </Alert>
                         {aiHint.explanation && (
                           <p className="text-sm text-muted-foreground">
-                            <strong>Why this helps:</strong> {aiHint.explanation}
+                            <strong>Why this helps:</strong>{" "}
+                            {aiHint.explanation}
                           </p>
                         )}
                         {aiHint.next_step && (
@@ -380,8 +471,12 @@ print(f"Result: {result}")
                       <div className="space-y-4">
                         {aiAnalysis.score && (
                           <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium">Overall Score:</span>
-                            <Badge variant="secondary">{aiAnalysis.score}/100</Badge>
+                            <span className="text-sm font-medium">
+                              Overall Score:
+                            </span>
+                            <Badge variant="secondary">
+                              {aiAnalysis.score}/100
+                            </Badge>
                           </div>
                         )}
 
@@ -389,22 +484,26 @@ print(f"Result: {result}")
                           <div className="space-y-2">
                             {aiAnalysis.feedback.correctness && (
                               <div className="text-sm">
-                                <strong>Correctness:</strong> {aiAnalysis.feedback.correctness}
+                                <strong>Correctness:</strong>{" "}
+                                {aiAnalysis.feedback.correctness}
                               </div>
                             )}
                             {aiAnalysis.feedback.efficiency && (
                               <div className="text-sm">
-                                <strong>Efficiency:</strong> {aiAnalysis.feedback.efficiency}
+                                <strong>Efficiency:</strong>{" "}
+                                {aiAnalysis.feedback.efficiency}
                               </div>
                             )}
                             {aiAnalysis.feedback.style && (
                               <div className="text-sm">
-                                <strong>Style:</strong> {aiAnalysis.feedback.style}
+                                <strong>Style:</strong>{" "}
+                                {aiAnalysis.feedback.style}
                               </div>
                             )}
                             {aiAnalysis.feedback.suggestions && (
                               <div className="text-sm">
-                                <strong>Suggestions:</strong> {aiAnalysis.feedback.suggestions}
+                                <strong>Suggestions:</strong>{" "}
+                                {aiAnalysis.feedback.suggestions}
                               </div>
                             )}
                           </div>
@@ -413,21 +512,32 @@ print(f"Result: {result}")
                         {aiAnalysis.explanation && (
                           <Alert>
                             <AlertDescription>
-                              <strong>Code Explanation:</strong> {aiAnalysis.explanation}
+                              <strong>Code Explanation:</strong>{" "}
+                              {aiAnalysis.explanation}
                             </AlertDescription>
                           </Alert>
                         )}
 
-                        {aiAnalysis.alternative_approaches && aiAnalysis.alternative_approaches.length > 0 && (
-                          <div>
-                            <h4 className="font-semibold text-sm mb-2">Alternative Approaches:</h4>
-                            <ul className="text-sm space-y-1">
-                              {aiAnalysis.alternative_approaches.map((approach: string, index: number) => (
-                                <li key={index} className="text-muted-foreground">• {approach}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
+                        {aiAnalysis.alternative_approaches &&
+                          aiAnalysis.alternative_approaches.length > 0 && (
+                            <div>
+                              <h4 className="font-semibold text-sm mb-2">
+                                Alternative Approaches:
+                              </h4>
+                              <ul className="text-sm space-y-1">
+                                {aiAnalysis.alternative_approaches.map(
+                                  (approach: string, index: number) => (
+                                    <li
+                                      key={index}
+                                      className="text-muted-foreground"
+                                    >
+                                      • {approach}
+                                    </li>
+                                  ),
+                                )}
+                              </ul>
+                            </div>
+                          )}
                       </div>
                     </CardContent>
                   </Card>
@@ -440,7 +550,8 @@ print(f"Result: {result}")
                         <Brain className="w-12 h-12 mx-auto mb-3 text-muted-foreground/50" />
                         <p className="font-medium mb-2">AI Assistant Ready</p>
                         <p className="text-sm">
-                          Click "Get Hint" for guidance or "Analyze My Code" for detailed feedback
+                          Click "Get Hint" for guidance or "Analyze My Code" for
+                          detailed feedback
                         </p>
                       </div>
                     </CardContent>
@@ -452,7 +563,7 @@ print(f"Result: {result}")
         )}
 
         {/* Code Editor Panel */}
-        <div className={`${problem ? 'w-2/3' : 'w-full'} flex flex-col`}>
+        <div className={`${problem ? "w-2/3" : "w-full"} flex flex-col`}>
           {/* Toolbar */}
           <div className="border-b p-3 bg-background/95 backdrop-blur">
             <div className="flex items-center justify-between">
@@ -532,29 +643,32 @@ print(f"Result: {result}")
 
           {/* Editor */}
           <div className="flex-1 flex flex-col">
-            <div className="flex-1">
+            <div
+              ref={containerRef}
+              className="flex-1"
+              style={{ width: "100%", height: "100%" }}
+            >
               <Editor
                 height="100%"
                 defaultLanguage="python"
                 value={code}
-                onChange={(value) => setCode(value || '')}
+                onChange={(value) => setCode(value || "")}
                 onMount={handleEditorDidMount}
                 theme="vs-dark"
                 options={{
+                  ...createMonacoResizeObserverConfig(),
                   minimap: { enabled: false },
                   fontSize: 14,
-                  lineNumbers: 'on',
+                  lineNumbers: "on",
                   roundedSelection: false,
-                  scrollBeyondLastLine: false,
-                  automaticLayout: true,
                   tabSize: 4,
                   insertSpaces: true,
-                  wordWrap: 'on',
+                  wordWrap: "on",
                   bracketPairColorization: { enabled: true },
                   guides: {
                     indentation: true,
-                    bracketPairs: true
-                  }
+                    bracketPairs: true,
+                  },
                 }}
               />
             </div>
@@ -566,7 +680,10 @@ print(f"Result: {result}")
                   <Terminal className="w-4 h-4" />
                   <span className="font-semibold">Output</span>
                   {executionTime !== null && (
-                    <Badge variant="outline" className="flex items-center gap-1">
+                    <Badge
+                      variant="outline"
+                      className="flex items-center gap-1"
+                    >
                       <Clock className="w-3 h-3" />
                       {executionTime}ms
                     </Badge>
@@ -579,8 +696,10 @@ print(f"Result: {result}")
                     ) : (
                       <CheckCircle className="w-4 h-4 text-success" />
                     )}
-                    <span className={`text-sm ${hasError ? 'text-destructive' : 'text-success'}`}>
-                      {hasError ? 'Error' : 'Success'}
+                    <span
+                      className={`text-sm ${hasError ? "text-destructive" : "text-success"}`}
+                    >
+                      {hasError ? "Error" : "Success"}
                     </span>
                   </div>
                 )}
@@ -592,14 +711,17 @@ print(f"Result: {result}")
                     Executing code...
                   </div>
                 ) : output ? (
-                  <pre className={`text-sm whitespace-pre-wrap font-mono ${
-                    hasError ? 'text-destructive' : 'text-foreground'
-                  }`}>
+                  <pre
+                    className={`text-sm whitespace-pre-wrap font-mono ${
+                      hasError ? "text-destructive" : "text-foreground"
+                    }`}
+                  >
                     {output}
                   </pre>
                 ) : (
                   <p className="text-muted-foreground text-sm">
-                    Click "Run Code" to execute your Python code. Output will appear here.
+                    Click "Run Code" to execute your Python code. Output will
+                    appear here.
                   </p>
                 )}
               </div>
