@@ -91,13 +91,23 @@ export default function TechnicalInterview() {
     setIsStarting(false);
   };
 
+  const handleVideoAnswer = async (transcribedText: string) => {
+    if (!transcribedText.trim() || !session || isLoading) return;
+
+    await sendMessageInternal(transcribedText);
+  };
+
   const sendMessage = async () => {
     if (!currentMessage.trim() || !session || isLoading) return;
+    await sendMessageInternal(currentMessage);
+    setCurrentMessage('');
+  };
 
+  const sendMessageInternal = async (message: string) => {
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
-      content: currentMessage,
+      content: message,
       timestamp: new Date()
     };
 
@@ -107,21 +117,21 @@ export default function TechnicalInterview() {
       messages: [...prev.messages, userMessage]
     } : null);
 
-    setCurrentMessage('');
     setIsLoading(true);
+    setAwaitingAnswer(false);
 
     try {
       const response = await authFetch('/api/interview/technical/message', {
         method: 'POST',
         body: JSON.stringify({
-          sessionId: session.id,
-          message: currentMessage,
-          messageHistory: session.messages
+          sessionId: session!.id,
+          message: message,
+          messageHistory: session!.messages
         }),
       });
 
       const data = await response.json();
-      
+
       if (data.success) {
         const botMessage: Message = {
           id: (Date.now() + 1).toString(),
@@ -136,11 +146,15 @@ export default function TechnicalInterview() {
           messages: [...prev.messages, botMessage],
           ...(data.sessionUpdate && data.sessionUpdate)
         } : null);
+
+        // Update current question for video mode
+        setCurrentQuestion(data.response);
+        setAwaitingAnswer(true);
       }
     } catch (error) {
       console.error('Message send error:', error);
     }
-    
+
     setIsLoading(false);
   };
 
