@@ -260,7 +260,9 @@ export default function AssignProblemModal({
                         onClick={() => setSelectedProblem(problem.id)}
                       >
                         <div className="flex items-center justify-between mb-1">
-                          <h4 className="font-medium text-sm">{problem.title}</h4>
+                          <h4 className="font-medium text-sm">
+                            {problem.title}
+                          </h4>
                           <Badge
                             className={`text-xs ${getDifficultyColor(problem.difficulty)}`}
                           >
@@ -290,7 +292,9 @@ export default function AssignProblemModal({
             </Card>
 
             {/* Student Selection */}
-            <Card className={selectedStudents.length > 0 ? "border-success" : ""}>
+            <Card
+              className={selectedStudents.length > 0 ? "border-success" : ""}
+            >
               <CardHeader className="pb-3">
                 <CardTitle className="text-base flex items-center gap-2">
                   <Users className="w-4 h-4 text-accent" />
@@ -338,7 +342,9 @@ export default function AssignProblemModal({
                           />
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between">
-                              <h4 className="font-medium text-sm truncate">{student.name}</h4>
+                              <h4 className="font-medium text-sm truncate">
+                                {student.name}
+                              </h4>
                               <Badge
                                 variant={
                                   student.status === "active"
@@ -372,7 +378,9 @@ export default function AssignProblemModal({
                     </p>
                     <div className="flex flex-wrap gap-1">
                       {selectedStudents.slice(0, 3).map((studentId) => {
-                        const student = students.find((s) => s.id === studentId);
+                        const student = students.find(
+                          (s) => s.id === studentId,
+                        );
                         return (
                           <Badge
                             key={studentId}
@@ -406,7 +414,9 @@ export default function AssignProblemModal({
             <CardContent className="space-y-3">
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="dueDate" className="text-sm">Due Date (Optional)</Label>
+                  <Label htmlFor="dueDate" className="text-sm">
+                    Due Date (Optional)
+                  </Label>
                   <Input
                     id="dueDate"
                     type="datetime-local"

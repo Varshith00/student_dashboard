@@ -99,7 +99,6 @@ export default function TechnicalInterview() {
     setIsStarting(false);
   };
 
-
   const sendMessage = async () => {
     if (!currentMessage.trim() || !session || isLoading) return;
     await sendMessageInternal(currentMessage);
@@ -463,7 +462,6 @@ export default function TechnicalInterview() {
       <div className="flex-1 flex flex-col">
         <div className="flex-1 p-4">
           <div className="max-w-6xl mx-auto h-full flex flex-col">
-
             {(interviewMode === "chat" || session.status === "completed") && (
               <>
                 <ScrollArea className="flex-1 pr-4">

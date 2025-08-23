@@ -78,5 +78,29 @@
     "name": "qwertyuiop",
     "role": "professor",
     "createdAt": "2025-08-23T10:25:25.692Z"
+  },
+  {
+    "id": "1755947875493aep51zw0i",
+    "email": "abhi1@gmail.com",
+    "password": "$2b$10$u4gYEYoOu5S8zGzUnBsn5.CXqe7sNyMfvJsdVh6S6ciPRB3cpv3Hu",
+    "name": "Abhiram",
+    "role": "student",
+    "createdAt": "2025-08-23T11:17:55.493Z"
+  },
+  {
+    "id": "1755947925244brau960rc",
+    "email": "abhi2@gmail.com",
+    "password": "$2b$10$XDSJJ1OV43OkqcAEg3lCg.hf4M4jmVrQMi..2PoqXmpcVUEjlTu.u",
+    "name": "Abhiram 2",
+    "role": "student",
+    "createdAt": "2025-08-23T11:18:45.244Z"
+  },
+  {
+    "id": "1755947965589q43pi0isy",
+    "email": "prof1@gmail.com",
+    "password": "$2b$10$YMCY4uF6LbPfiDAc7RZ/eO8qPxsfysud2lKhudhyPYHqyb18S4gqS",
+    "name": "Abhiram Profe",
+    "role": "professor",
+    "createdAt": "2025-08-23T11:19:25.589Z"
   }
 ]
