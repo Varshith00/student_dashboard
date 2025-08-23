@@ -48,6 +48,7 @@ export default function VideoInterviewInterface({
   const [analysisResult, setAnalysisResult] = useState<any>(null);
   const [hasMediaPermission, setHasMediaPermission] = useState(false);
   const [mediaError, setMediaError] = useState<string>("");
+  const [isRetryingMedia, setIsRetryingMedia] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -359,6 +360,46 @@ export default function VideoInterviewInterface({
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
+  const retryMediaAccess = async () => {
+    setIsRetryingMedia(true);
+    setMediaError("");
+
+    try {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop());
+        streamRef.current = null;
+      }
+
+      // Try again with reduced constraints if the first attempt failed
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          width: { ideal: 640 },
+          height: { ideal: 480 },
+          facingMode: "user",
+        },
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+        },
+      });
+
+      streamRef.current = stream;
+      setHasMediaPermission(true);
+      setMediaError("");
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.play().catch(console.warn);
+      }
+    } catch (error: any) {
+      console.error("Retry error:", error);
+      setMediaError("Still unable to access camera/microphone. You can continue with text-only mode by switching to Chat view.");
+      setHasMediaPermission(false);
+    } finally {
+      setIsRetryingMedia(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Question Display */}
@@ -386,6 +427,39 @@ export default function VideoInterviewInterface({
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-muted">
                   <VideoOff className="w-16 h-16 text-muted-foreground" />
+                </div>
+              )}
+
+              {/* Media Error Overlay */}
+              {mediaError && (
+                <div className="absolute inset-0 bg-muted/90 flex items-center justify-center p-4">
+                  <div className="text-center max-w-sm">
+                    <div className="w-16 h-16 bg-warning/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <VideoOff className="w-8 h-8 text-warning" />
+                    </div>
+                    <h4 className="font-semibold mb-2 text-foreground">Camera/Microphone Access Issue</h4>
+                    <p className="text-sm text-muted-foreground mb-4">{mediaError}</p>
+                    <div className="space-y-2">
+                      <Button
+                        onClick={retryMediaAccess}
+                        disabled={isRetryingMedia}
+                        size="sm"
+                        className="w-full"
+                      >
+                        {isRetryingMedia ? (
+                          <>
+                            <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-2" />
+                            Retrying...
+                          </>
+                        ) : (
+                          'Try Again'
+                        )}
+                      </Button>
+                      <p className="text-xs text-muted-foreground">
+                        You can also continue with Chat mode instead of Video mode
+                      </p>
+                    </div>
+                  </div>
                 </div>
               )}
 
