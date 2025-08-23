@@ -293,12 +293,12 @@ export const handleLogin: RequestHandler = async (req, res) => {
   }
 };
 
-// Get professor info by ID (for student registration verification)
+// Get professor info by email (for student registration verification)
 export const handleGetProfessor: RequestHandler = (req, res) => {
   try {
-    const { professorId } = req.params;
+    const { professorEmail } = req.params;
 
-    const professor = findUserById(professorId);
+    const professor = findUserByEmail(professorEmail);
     if (!professor || professor.role !== 'professor') {
       return res.status(404).json({
         success: false,
