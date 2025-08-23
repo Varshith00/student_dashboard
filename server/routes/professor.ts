@@ -68,7 +68,7 @@ interface StudentProgress {
 const assignments: Assignment[] = [
   {
     id: "assign_1",
-    professorId: "demo-professor-001",
+    professorId: "professor@demo.com",
     studentId: "demo-student-001", // Alex Rodriguez
     problemId: "two-sum",
     assignedDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
@@ -81,7 +81,7 @@ const assignments: Assignment[] = [
   },
   {
     id: "assign_2",
-    professorId: "demo-professor-001",
+    professorId: "professor@demo.com",
     studentId: "demo-student-001", // Alex Rodriguez
     problemId: "binary-search",
     assignedDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
@@ -92,7 +92,7 @@ const assignments: Assignment[] = [
   },
   {
     id: "assign_3",
-    professorId: "demo-professor-001",
+    professorId: "professor@demo.com",
     studentId: "demo-student-002", // Emma Thompson
     problemId: "two-sum",
     assignedDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
@@ -105,7 +105,7 @@ const assignments: Assignment[] = [
   },
   {
     id: "assign_4",
-    professorId: "demo-professor-001",
+    professorId: "professor@demo.com",
     studentId: "demo-student-002", // Emma Thompson
     problemId: "valid-parentheses",
     assignedDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
@@ -116,7 +116,7 @@ const assignments: Assignment[] = [
   },
   {
     id: "assign_5",
-    professorId: "demo-professor-001",
+    professorId: "professor@demo.com",
     studentId: "demo-student-003", // David Kim
     problemId: "linked-list-cycle",
     assignedDate: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(), // 4 days ago
