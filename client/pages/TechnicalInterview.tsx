@@ -103,7 +103,13 @@ export default function TechnicalInterview() {
       }
 
       if (data.success) {
-        setSession(data.session);
+        // Convert string dates to Date objects
+        const sessionWithDates = {
+          ...data.session,
+          startTime: new Date(data.session.startTime),
+          endTime: data.session.endTime ? new Date(data.session.endTime) : undefined
+        };
+        setSession(sessionWithDates);
         // Extract the initial question for video mode
         if (data.session.messages && data.session.messages.length > 0) {
           const initialQuestion = data.session.messages[0].content;
