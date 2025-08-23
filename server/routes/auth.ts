@@ -13,6 +13,7 @@ interface User {
   password: string;
   name: string;
   role: 'student' | 'professor';
+  professorId?: string; // For students - which professor they're mapped to
   createdAt: string;
 }
 
