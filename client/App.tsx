@@ -17,8 +17,8 @@ import TechnicalInterview from "./pages/TechnicalInterview";
 import BehavioralInterview from "./pages/BehavioralInterview";
 import Placeholder from "./pages/Placeholder";
 import NotFound from "./pages/NotFound";
-import CollaborativeEditor from "./components/CollaborativeEditor";
-import EnhancedWebEditor from "./components/EnhancedWebEditor";
+import CollaborationPage from "./pages/CollaborationPage";
+import WebEditorPage from "./pages/WebEditorPage";
 
 const queryClient = new QueryClient();
 
@@ -46,12 +46,11 @@ const App = () => (
             <Route path="/student/interview/behavioral" element={<BehavioralInterview />} />
 
             {/* Collaborative Programming routes */}
-            <Route path="/student/collaboration/new" element={<CollaborativeEditor />} />
-            <Route path="/student/collaboration/:sessionId" element={<CollaborativeEditor />} />
+            <Route path="/student/collaboration/new" element={<CollaborationPage />} />
+            <Route path="/student/collaboration/:sessionId" element={<CollaborationPage />} />
 
             {/* Enhanced Web Editor routes */}
-            <Route path="/student/editor/python" element={<EnhancedWebEditor language="python" />} />
-            <Route path="/student/editor/javascript" element={<EnhancedWebEditor language="javascript" />} />
+            <Route path="/student/editor/:language" element={<WebEditorPage />} />
 
             {/* Placeholder routes for future features */}
             <Route
