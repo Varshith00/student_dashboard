@@ -589,10 +589,12 @@ console.log(\`Result: \${result}\`);
                 }
               >
                 {connectionStatus === "connected"
-                  ? "Connected"
+                  ? "Live Sync"
                   : connectionStatus === "connecting"
                   ? "Connecting..."
-                  : "Disconnected"}
+                  : process.env.NODE_ENV === 'production'
+                  ? "Disconnected"
+                  : "Dev Mode"}
               </Badge>
             </div>
             <div className="flex items-center gap-2">
