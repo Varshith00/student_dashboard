@@ -59,5 +59,13 @@
     "role": "student",
     "professorId": "prof1@gmail.com-id",
     "createdAt": "2025-01-17T14:00:00.000Z"
+  },
+  {
+    "id": "1755954593259edi70i65y",
+    "email": "pragg@dsce.edu",
+    "password": "$2b$10$XYq42dgl8JuzxSk571kx2OAlJ8HPGv4LfKclVcCclrRGILU4Ez5ha",
+    "name": "DAYANANDA SAGAR",
+    "role": "professor",
+    "createdAt": "2025-08-23T13:09:53.259Z"
   }
 ]
