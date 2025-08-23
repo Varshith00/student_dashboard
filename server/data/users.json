@@ -22,5 +22,61 @@
     "name": "gandhu",
     "role": "student",
     "createdAt": "2025-08-23T07:21:30.267Z"
+  },
+  {
+    "id": "1755943388211s2gm0c8ce",
+    "email": "gandu2@dsce.edu",
+    "password": "$2b$10$aeERXTmsRPP25YSzgakRqeLkxwXySZb5UTrNTGnhrJzkA5QwIXgfu",
+    "name": "vishnu",
+    "role": "student",
+    "createdAt": "2025-08-23T10:03:08.211Z"
+  },
+  {
+    "id": "demo-student-001",
+    "email": "student@demo.com",
+    "password": "$2b$10$K8U9r0X9Y3nX9Y3nX9Y3n.G7eX9Y3nX9Y3nX9Y3nX9Y3nX9Y3nX9Y",
+    "name": "Demo Student",
+    "role": "student",
+    "createdAt": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "demo-professor-001",
+    "email": "professor@demo.com",
+    "password": "$2b$10$L9V0s1Y0Z4oY0Z4oY0Z4o.H8fY0Z4oY0Z4oY0Z4oY0Z4oY0Z4oY0Z4o",
+    "name": "Demo Professor",
+    "role": "professor",
+    "createdAt": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "1755943697209bf4wrkank",
+    "email": "test-student@demo.com",
+    "password": "$2b$10$Ap1bOl62q2K/6h5CyXgQKufuY5QYWz02JsWh/VV9Ilqsw3IncrCdy",
+    "name": "Test Student",
+    "role": "student",
+    "createdAt": "2025-08-23T10:08:17.209Z"
+  },
+  {
+    "id": "175594370703081qm4bodu",
+    "email": "demostudent@demo.com",
+    "password": "$2b$10$KypOa0lAIGmsZsstWhr7VeALv1CgXw1T7oCZ7vxj44JpbHedALtXS",
+    "name": "Demo Student",
+    "role": "student",
+    "createdAt": "2025-08-23T10:08:27.030Z"
+  },
+  {
+    "id": "1755943707150q9f1piref",
+    "email": "demoprofessor@demo.com",
+    "password": "$2b$10$8YQ/SMzD8GZQS4pGf.8I/eza5.eUQyvjqmL45FUCmCWnyCXLGWaX6",
+    "name": "Demo Professor",
+    "role": "professor",
+    "createdAt": "2025-08-23T10:08:27.150Z"
+  },
+  {
+    "id": "1755944725692lfm8jd2oz",
+    "email": "varun@gmail.com",
+    "password": "$2b$10$aYoAwz4E43KZFb/Ca97o6uTtCSTvqSmeuNev5lDJeI6P7Wt8s8KDi",
+    "name": "qwertyuiop",
+    "role": "professor",
+    "createdAt": "2025-08-23T10:25:25.692Z"
   }
 ]

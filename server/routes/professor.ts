@@ -35,25 +35,23 @@ interface StudentProgress {
   }[];
 }
 
-// Mock data storage
+// Mock data storage - Add demo assignments for our demo students
 const assignments: Assignment[] = [
   {
     id: "assign_1",
-    professorId: "prof_1",
-    studentId: "student_1",
+    professorId: "demo-professor-001",
+    studentId: "17559437070308qm4bodu", // demostudent@demo.com ID
     problemId: "two-sum",
     assignedDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
     dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days from now
-    status: "completed",
-    score: 85,
-    completedDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
-    attempts: 2,
-    timeSpent: 45,
+    status: "assigned",
+    attempts: 0,
+    timeSpent: 0,
   },
   {
     id: "assign_2",
-    professorId: "prof_1",
-    studentId: "student_2",
+    professorId: "demo-professor-001",
+    studentId: "17559437070308qm4bodu", // demostudent@demo.com ID
     problemId: "binary-search",
     assignedDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
     dueDate: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000).toISOString(), // 6 days from now
@@ -61,9 +59,28 @@ const assignments: Assignment[] = [
     attempts: 1,
     timeSpent: 30,
   },
+  {
+    id: "assign_3",
+    professorId: "demo-professor-001",
+    studentId: "17559437070308qm4bodu", // demostudent@demo.com ID
+    problemId: "valid-parentheses",
+    assignedDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
+    dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days from now
+    status: "completed",
+    score: 92,
+    completedDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+    attempts: 1,
+    timeSpent: 25,
+  },
 ];
 
 const studentProfiles = [
+  {
+    id: "17559437070308qm4bodu", // demostudent@demo.com actual ID
+    name: "Demo Student",
+    email: "demostudent@demo.com",
+    lastActive: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30 minutes ago
+  },
   {
     id: "student_1",
     name: "Alex Johnson",
@@ -499,6 +516,76 @@ export const handleDeleteAssignment: RequestHandler = async (req, res) => {
     res.status(500).json({
       success: false,
       error: "Failed to delete assignment",
+    });
+  }
+};
+
+// Get assignments for a student
+export const handleGetStudentAssignments: RequestHandler = async (req, res) => {
+  try {
+    const student = (req as any).user;
+
+    if (student.role !== "student") {
+      return res.status(403).json({
+        success: false,
+        error: "Access denied. Only students can view their assignments.",
+      });
+    }
+
+    // Find assignments for this student
+    const studentAssignments = assignments.filter(
+      (a) => a.studentId === student.id,
+    );
+
+    // Enrich assignments with professor info
+    const enrichedAssignments = studentAssignments.map((assignment) => {
+      // In a real app, you'd fetch professor details from the database
+      const professor = {
+        id: assignment.professorId,
+        name: assignment.professorId === "prof_1" ? "Dr. Smith" : "Dr. Johnson",
+        email:
+          assignment.professorId === "prof_1"
+            ? "dr.smith@university.edu"
+            : "dr.johnson@university.edu",
+      };
+
+      return {
+        ...assignment,
+        professorName: professor.name,
+        professorEmail: professor.email,
+        isOverdue:
+          assignment.dueDate &&
+          new Date(assignment.dueDate) < new Date() &&
+          assignment.status !== "completed",
+      };
+    });
+
+    // Sort by assigned date (newest first)
+    enrichedAssignments.sort(
+      (a, b) =>
+        new Date(b.assignedDate).getTime() - new Date(a.assignedDate).getTime(),
+    );
+
+    res.json({
+      success: true,
+      assignments: enrichedAssignments,
+      summary: {
+        total: enrichedAssignments.length,
+        pending: enrichedAssignments.filter((a) => a.status === "assigned")
+          .length,
+        inProgress: enrichedAssignments.filter(
+          (a) => a.status === "in_progress",
+        ).length,
+        completed: enrichedAssignments.filter((a) => a.status === "completed")
+          .length,
+        overdue: enrichedAssignments.filter((a) => a.isOverdue).length,
+      },
+    });
+  } catch (error) {
+    console.error("Get student assignments error:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch assignments",
     });
   }
 };
