@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Editor } from "@monaco-editor/react";
+import { io, Socket } from "socket.io-client";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -73,6 +74,10 @@ export default function CollaborativeEditor({
   const [aiSuggestion, setAiSuggestion] = useState<string>("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
+  // Socket connection
+  const socketRef = useRef<Socket | null>(null);
+  const [connectionStatus, setConnectionStatus] = useState<"connecting" | "connected" | "disconnected">("disconnected");
+
   function getDefaultCode(lang: "python" | "javascript") {
     if (lang === "python") {
       return `# Collaborative Python Session
@@ -118,6 +123,65 @@ console.log(\`Result: \${result}\`);
 `;
     }
   }
+
+  // Initialize socket connection
+  useEffect(() => {
+    if (!session?.id) return;
+
+    setConnectionStatus("connecting");
+    socketRef.current = io(window.location.origin, {
+      transports: ['websocket', 'polling']
+    });
+
+    const socket = socketRef.current;
+
+    socket.on('connect', () => {
+      console.log('Connected to socket server');
+      setConnectionStatus("connected");
+      socket.emit('join-session', session.id);
+    });
+
+    socket.on('disconnect', () => {
+      console.log('Disconnected from socket server');
+      setConnectionStatus("disconnected");
+    });
+
+    // Handle real-time code updates
+    socket.on('code-update', (data) => {
+      const { code: newCode, cursor, participantId, participantName } = data;
+      if (participantId !== participantId) {
+        setCode(newCode);
+        // Update the editor content
+        if (editorRef.current) {
+          editorRef.current.setValue(newCode);
+        }
+      }
+    });
+
+    // Handle participant updates
+    socket.on('participant-joined', (data) => {
+      const { participant, session: updatedSession } = data;
+      setSession(updatedSession);
+    });
+
+    socket.on('participant-left', (data) => {
+      const { participantId, participantName, session: updatedSession } = data;
+      setSession(updatedSession);
+    });
+
+    socket.on('cursor-update', (data) => {
+      const { cursor, participantId } = data;
+      // Handle cursor position updates from other participants
+      // Could be used to show cursors in the editor
+    });
+
+    return () => {
+      if (socket) {
+        socket.emit('leave-session', session.id);
+        socket.disconnect();
+      }
+    };
+  }, [session?.id]);
 
   // Initialize session
   useEffect(() => {
@@ -228,6 +292,16 @@ console.log(\`Result: \${result}\`);
     if (!session || !participantId || permission === "read") return;
 
     try {
+      // Emit real-time update via socket
+      if (socketRef.current && connectionStatus === "connected") {
+        socketRef.current.emit('code-change', {
+          sessionId: session.id,
+          participantId,
+          code: newCode,
+          cursor: editorRef.current?.getPosition()
+        });
+      }
+
       const response = await authFetch("/api/collaboration/update", {
         method: "POST",
         body: JSON.stringify({
@@ -400,7 +474,7 @@ console.log(\`Result: \${result}\`);
       // Debounce the update to avoid too many API calls
       const timeoutId = setTimeout(() => {
         updateCode(value);
-      }, 1000);
+      }, 500); // Reduced debounce time for better real-time feel
       return () => clearTimeout(timeoutId);
     }
   };
@@ -484,8 +558,20 @@ console.log(\`Result: \${result}\`);
             <div className="flex items-center gap-2">
               <Users className="w-6 h-6 text-primary" />
               <h1 className="text-xl font-bold">Collaborative Session</h1>
-              <Badge variant={isConnected ? "secondary" : "destructive"}>
-                {isConnected ? "Connected" : "Disconnected"}
+              <Badge
+                variant={
+                  connectionStatus === "connected"
+                    ? "secondary"
+                    : connectionStatus === "connecting"
+                    ? "outline"
+                    : "destructive"
+                }
+              >
+                {connectionStatus === "connected"
+                  ? "Connected"
+                  : connectionStatus === "connecting"
+                  ? "Connecting..."
+                  : "Disconnected"}
               </Badge>
             </div>
             <div className="flex items-center gap-2">
