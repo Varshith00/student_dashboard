@@ -60,24 +60,70 @@ export default function VideoInterviewInterface({
   useEffect(() => {
     const initializeVideo = async () => {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-          video: true, 
-          audio: true 
+        // Check if getUserMedia is supported
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          setMediaError("Camera/microphone access is not supported in this browser.");
+          return;
+        }
+
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+            facingMode: "user"
+          },
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            sampleRate: 44100
+          }
         });
-        
+
         streamRef.current = stream;
-        
+        setHasMediaPermission(true);
+        setMediaError("");
+
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
+          // Ensure video plays
+          videoRef.current.play().catch(e => {
+            console.log("Video autoplay prevented:", e);
+          });
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error accessing camera/microphone:", error);
+        let errorMessage = "Unable to access camera/microphone. ";
+
+        switch (error.name) {
+          case "NotAllowedError":
+          case "PermissionDeniedError":
+            errorMessage += "Please allow camera and microphone permissions and refresh the page.";
+            break;
+          case "NotFoundError":
+          case "DevicesNotFoundError":
+            errorMessage += "No camera or microphone found. Please check your devices.";
+            break;
+          case "NotSupportedError":
+            errorMessage += "Camera/microphone access is not supported in this browser.";
+            break;
+          case "NotReadableError":
+          case "TrackStartError":
+            errorMessage += "Camera/microphone is already in use by another application.";
+            break;
+          default:
+            errorMessage += "Please check your device settings and try again.";
+        }
+
+        setMediaError(errorMessage);
+        setHasMediaPermission(false);
       }
     };
 
-    initializeVideo();
+    // Add a small delay to ensure component is mounted
+    const timer = setTimeout(initializeVideo, 100);
 
     return () => {
+      clearTimeout(timer);
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
       }
