@@ -46,5 +46,13 @@
     "name": "Demo Professor",
     "role": "professor",
     "createdAt": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "1755943697209bf4wrkank",
+    "email": "test-student@demo.com",
+    "password": "$2b$10$Ap1bOl62q2K/6h5CyXgQKufuY5QYWz02JsWh/VV9Ilqsw3IncrCdy",
+    "name": "Test Student",
+    "role": "student",
+    "createdAt": "2025-08-23T10:08:17.209Z"
   }
 ]
