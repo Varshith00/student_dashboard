@@ -70,7 +70,7 @@ export function createServer() {
   app.post("/api/auth/student-register", handleStudentRegister);
   app.post("/api/auth/login", handleLogin);
   app.get("/api/auth/user", authMiddleware, handleGetUser);
-  app.get("/api/auth/professor/:professorId", handleGetProfessor);
+  app.get("/api/auth/professor/:professorEmail", handleGetProfessor);
 
   // Protected routes (require authentication)
   app.post("/api/execute-python", authMiddleware, handleExecutePython);
