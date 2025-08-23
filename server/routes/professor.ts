@@ -1,6 +1,8 @@
 import { RequestHandler } from "express";
 import fs from "fs";
 import path from "path";
+import { readFileSync, writeFileSync, existsSync } from "fs";
+import { join } from "path";
 
 // In-memory storage for demo (in production, use a proper database)
 interface Assignment {
