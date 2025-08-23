@@ -1,407 +1,376 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { authFetch, useAuth } from "@/contexts/AuthContext";
+import { GraduationCap, Laptop, Eye, EyeOff, UserPlus, CheckCircle, Search } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  GraduationCap,
-  User,
-  Lock,
-  ArrowRight,
-  BookOpen,
-  Brain,
-  Target,
-  Code,
-} from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+
+interface ProfessorInfo {
+  id: string;
+  name: string;
+  email: string;
+}
 
 export default function StudentLogin() {
-  const navigate = useNavigate();
-  const { user, login, register, setAuthData, isLoading } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-    confirmPassword: "",
-    name: "",
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [professorId, setProfessorId] = useState("");
+  const [professorInfo, setProfessorInfo] = useState<ProfessorInfo | null>(null);
+  const [isProfessorVerified, setIsProfessorVerified] = useState(false);
+  const [isVerifyingProfessor, setIsVerifyingProfessor] = useState(false);
+  const navigate = useNavigate();
+  const { login, user, isLoading } = useAuth();
 
-  // Redirect if already logged in as student
+  // Redirect if already logged in
   useEffect(() => {
-    if (user && user.role === "student") {
-      navigate("/student/dashboard");
-    } else if (user && user.role === "professor") {
-      navigate("/professor/dashboard");
-    }
-  }, [user, navigate]);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-    setError(""); // Clear error when user types
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setError("");
-
-    // Validation for registration
-    if (isRegistering) {
-      if (formData.password !== formData.confirmPassword) {
-        setError("Passwords do not match");
-        setIsSubmitting(false);
-        return;
-      }
-      if (formData.password.length < 6) {
-        setError("Password must be at least 6 characters long");
-        setIsSubmitting(false);
-        return;
-      }
-      if (!formData.name.trim()) {
-        setError("Name is required");
-        setIsSubmitting(false);
-        return;
+    if (user && !isLoading) {
+      if (user.role === 'student') {
+        navigate('/student/dashboard');
+      } else {
+        navigate('/professor/dashboard');
       }
     }
+  }, [user, isLoading, navigate]);
+
+  const verifyProfessor = async () => {
+    if (!professorId.trim()) {
+      setError('Please enter a professor ID');
+      return;
+    }
+
+    setIsVerifyingProfessor(true);
+    setError(null);
 
     try {
-      if (isRegistering) {
-        // Registration
-        const result = await register(
-          formData.email,
-          formData.password,
-          formData.name,
-          "student",
-        );
-        if (result.success) {
-          navigate("/student/dashboard");
-        } else {
-          setError(result.message || "Registration failed");
-        }
+      const response = await fetch(`/api/auth/professor/${professorId}`);
+      const data = await response.json();
+
+      if (data.success && data.professor) {
+        setProfessorInfo(data.professor);
+        setIsProfessorVerified(true);
+        setError(null);
       } else {
-        // Login
-        const response = await authFetch("/api/auth/login", {
-          method: "POST",
-          body: JSON.stringify({
-            email: formData.email,
-            password: formData.password,
+        setError(data.message || 'Professor not found');
+        setProfessorInfo(null);
+        setIsProfessorVerified(false);
+      }
+    } catch (error) {
+      setError('Failed to verify professor ID');
+      setProfessorInfo(null);
+      setIsProfessorVerified(false);
+    } finally {
+      setIsVerifyingProfessor(false);
+    }
+  };
+
+  const handleAuth = async (email: string, password: string, name?: string) => {
+    setError(null);
+
+    try {
+      let result;
+      if (isRegistering) {
+        if (!name) {
+          setError('Name is required for registration');
+          return;
+        }
+        if (!isProfessorVerified) {
+          setError('Please verify your professor ID first');
+          return;
+        }
+        
+        // Use student registration endpoint
+        const response = await fetch('/api/auth/student-register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ 
+            email, 
+            password, 
+            name, 
+            professorId 
           }),
         });
 
         const data = await response.json();
-
-        if (data.success && data.user.role === "student") {
-          setAuthData(data.user, data.token);
-          navigate("/student/dashboard");
-        } else if (data.success && data.user.role !== "student") {
-          setError(
-            "This login is for students only. Please use the professor login.",
-          );
+        if (data.success) {
+          localStorage.setItem("authToken", data.token);
+          result = { success: true };
         } else {
-          setError(data.message || "Invalid credentials");
+          result = { success: false, message: data.message };
         }
+      } else {
+        result = await login(email, password);
+      }
+
+      if (result.success) {
+        // Navigation will be handled by the useEffect above
+      } else {
+        setError(result.message || 'Authentication failed');
       }
     } catch (error) {
-      setError(
-        isRegistering
-          ? "Registration failed. Please try again."
-          : "Login failed. Please try again.",
-      );
-    } finally {
-      setIsSubmitting(false);
+      setError('An unexpected error occurred');
     }
   };
 
-  if (isLoading) {
+  const AuthForm = () => {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [name, setName] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+
+    const handleSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+
+      if (isRegistering && password !== confirmPassword) {
+        setError('Passwords do not match');
+        return;
+      }
+
+      if (isRegistering && password.length < 6) {
+        setError('Password must be at least 6 characters long');
+        return;
+      }
+
+      handleAuth(email, password, isRegistering ? name : undefined);
+    };
+
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full"></div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10">
-      {/* Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <Link to="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-              <GraduationCap className="w-6 h-6 text-primary-foreground" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">TechPrep</h1>
-              <p className="text-sm text-muted-foreground">Student Portal</p>
-            </div>
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link to="/professor/login">
-              <Button variant="outline">Professor Login</Button>
-            </Link>
-            <Link to="/">
-              <Button variant="ghost">Back to Home</Button>
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
-          {/* Left side - Login Form */}
-          <div className="space-y-6">
-            <div className="text-center lg:text-left">
-              <Badge className="mb-4" variant="secondary">
-                Student Access
-              </Badge>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-4">
-                Welcome Back, Student!
-              </h1>
-              <p className="text-xl text-muted-foreground">
-                Continue your journey to master technical skills and ace your
-                interviews.
-              </p>
-            </div>
-
-            <Card className="w-full max-w-md mx-auto lg:mx-0">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <User className="w-5 h-5 text-primary" />
-                  {isRegistering ? "Create Student Account" : "Student Login"}
-                </CardTitle>
-                <CardDescription>
-                  {isRegistering
-                    ? "Join TechPrep and start your learning journey"
-                    : "Access your learning dashboard and track your progress"}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  {isRegistering && (
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Full Name</Label>
-                      <Input
-                        id="name"
-                        name="name"
-                        type="text"
-                        placeholder="Enter your full name"
-                        value={formData.name}
-                        onChange={handleInputChange}
-                        required
-                        disabled={isSubmitting}
-                      />
-                    </div>
-                  )}
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      placeholder="student@university.edu"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      required
-                      disabled={isSubmitting}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
-                    <Input
-                      id="password"
-                      name="password"
-                      type="password"
-                      placeholder={
-                        isRegistering
-                          ? "Create a password (min 6 characters)"
-                          : "••••••••"
-                      }
-                      value={formData.password}
-                      onChange={handleInputChange}
-                      required
-                      disabled={isSubmitting}
-                    />
-                  </div>
-                  {isRegistering && (
-                    <div className="space-y-2">
-                      <Label htmlFor="confirmPassword">Confirm Password</Label>
-                      <Input
-                        id="confirmPassword"
-                        name="confirmPassword"
-                        type="password"
-                        placeholder="Confirm your password"
-                        value={formData.confirmPassword}
-                        onChange={handleInputChange}
-                        required
-                        disabled={isSubmitting}
-                      />
-                    </div>
-                  )}
-
-                  {error && (
-                    <div className="p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md">
-                      {error}
-                    </div>
-                  )}
-
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {isRegistering && (
+          <>
+            {/* Professor ID Section */}
+            <div className="space-y-3 p-4 bg-muted/30 rounded-lg">
+              <Label className="text-base font-semibold">Professor Information</Label>
+              <div className="space-y-2">
+                <Label htmlFor="professor-id">Professor ID</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="professor-id"
+                    type="text"
+                    placeholder="Enter your professor's ID"
+                    value={professorId}
+                    onChange={(e) => {
+                      setProfessorId(e.target.value);
+                      setIsProfessorVerified(false);
+                      setProfessorInfo(null);
+                    }}
+                    required
+                  />
                   <Button
-                    type="submit"
-                    className="w-full"
-                    disabled={isSubmitting}
+                    type="button"
+                    variant="outline"
+                    onClick={verifyProfessor}
+                    disabled={isVerifyingProfessor || !professorId.trim()}
                   >
-                    {isSubmitting ? (
-                      <>
-                        <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-2" />
-                        {isRegistering
-                          ? "Creating account..."
-                          : "Signing in..."}
-                      </>
+                    {isVerifyingProfessor ? (
+                      <div className="animate-spin w-4 h-4 border-2 border-primary border-t-transparent rounded-full"></div>
                     ) : (
-                      <>
-                        {isRegistering ? "Create Account" : "Sign In"}
-                        <ArrowRight className="w-4 h-4 ml-2" />
-                      </>
+                      <Search className="w-4 h-4" />
                     )}
                   </Button>
-                </form>
-
-                <div className="mt-6 text-center">
-                  <p className="text-sm text-muted-foreground">
-                    {isRegistering
-                      ? "Already have an account?"
-                      : "Don't have an account?"}{" "}
-                    <Button
-                      variant="link"
-                      className="p-0 h-auto"
-                      onClick={() => {
-                        setIsRegistering(!isRegistering);
-                        setError("");
-                        setFormData({
-                          email: "",
-                          password: "",
-                          confirmPassword: "",
-                          name: "",
-                        });
-                      }}
-                      type="button"
-                    >
-                      {isRegistering ? "Sign in here" : "Create account"}
-                    </Button>
-                  </p>
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Demo Credentials */}
-            <Card className="max-w-md mx-auto lg:mx-0 bg-muted/30">
-              <CardContent className="p-4">
-                <h4 className="font-semibold text-sm mb-2">
-                  Demo Student Account:
-                </h4>
-                <div className="text-sm text-muted-foreground space-y-1">
-                  <p>
-                    <strong>Email:</strong> demostudent@demo.com
-                  </p>
-                  <p>
-                    <strong>Password:</strong> student123
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Right side - Features */}
-          <div className="space-y-6">
-            <div className="grid gap-6">
-              <Card className="border-2 hover:border-primary/50 transition-colors">
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                      <Code className="w-6 h-6 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-lg mb-2">
-                        Coding Practice
-                      </h3>
-                      <p className="text-muted-foreground">
-                        Solve problems with real Python execution, get instant
-                        feedback, and track your progress.
-                      </p>
+                {isProfessorVerified && professorInfo && (
+                  <div className="flex items-center gap-2 p-2 bg-success/10 border border-success/20 rounded">
+                    <CheckCircle className="w-4 h-4 text-success" />
+                    <div className="text-sm">
+                      <span className="font-medium text-success">Professor found: </span>
+                      <span>{professorInfo.name} ({professorInfo.email})</span>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-2 hover:border-accent/50 transition-colors">
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center">
-                      <Brain className="w-6 h-6 text-accent" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-lg mb-2">
-                        AI Mock Interviews
-                      </h3>
-                      <p className="text-muted-foreground">
-                        Practice with AI-powered video interviews that analyze
-                        your responses and provide detailed feedback.
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-2 hover:border-success/50 transition-colors">
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-success/10 rounded-lg flex items-center justify-center">
-                      <Target className="w-6 h-6 text-success" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-lg mb-2">
-                        Progress Tracking
-                      </h3>
-                      <p className="text-muted-foreground">
-                        Monitor your improvement with detailed analytics, skill
-                        assessments, and achievement tracking.
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-2 hover:border-warning/50 transition-colors">
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-warning/10 rounded-lg flex items-center justify-center">
-                      <BookOpen className="w-6 h-6 text-warning" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-lg mb-2">
-                        Assignment Management
-                      </h3>
-                      <p className="text-muted-foreground">
-                        Receive assignments from professors and track your
-                        completion status in real-time.
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                )}
+              </div>
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="student-name">Full Name</Label>
+              <Input
+                id="student-name"
+                type="text"
+                placeholder="Enter your full name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+            </div>
+          </>
+        )}
+
+        <div className="space-y-2">
+          <Label htmlFor="student-email">Email</Label>
+          <Input
+            id="student-email"
+            type="email"
+            placeholder="student@university.edu"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="student-password">Password</Label>
+          <div className="relative">
+            <Input
+              id="student-password"
+              type={showPassword ? "text" : "password"}
+              placeholder={isRegistering ? "Create a password (min 6 characters)" : "Enter your password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
+        </div>
+
+        {isRegistering && (
+          <div className="space-y-2">
+            <Label htmlFor="confirm-password">Confirm Password</Label>
+            <Input
+              id="confirm-password"
+              type={showPassword ? "text" : "password"}
+              placeholder="Confirm your password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+            />
+          </div>
+        )}
+
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        <Button 
+          type="submit" 
+          className="w-full" 
+          disabled={isLoading || (isRegistering && !isProfessorVerified)}
+        >
+          {isLoading ? (
+            isRegistering ? "Creating account..." : "Signing in..."
+          ) : (
+            isRegistering
+              ? "Create Student Account"
+              : "Sign in as Student"
+          )}
+        </Button>
+
+        <div className="text-center text-sm text-muted-foreground">
+          {isRegistering ? "Already have an account?" : "Don't have an account?"}{" "}
+          <Button
+            variant="link"
+            className="p-0 h-auto"
+            onClick={() => {
+              setIsRegistering(!isRegistering);
+              setError(null);
+              setProfessorId('');
+              setProfessorInfo(null);
+              setIsProfessorVerified(false);
+            }}
+          >
+            {isRegistering ? "Sign in here" : "Create account"}
+          </Button>
+        </div>
+      </form>
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <Link to="/" className="inline-flex items-center gap-3 mb-6">
+            <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
+              <GraduationCap className="w-7 h-7 text-primary-foreground" />
+            </div>
+            <h1 className="text-3xl font-bold text-foreground">TechPrep</h1>
+          </Link>
+          <h2 className="text-2xl font-semibold text-foreground">Student Portal</h2>
+          <p className="text-muted-foreground">
+            {isRegistering 
+              ? "Join your professor's class and start learning" 
+              : "Sign in to access your learning dashboard"
+            }
+          </p>
+        </div>
+
+        <Card>
+          <CardHeader className="pb-4">
+            <CardTitle className="text-center flex items-center justify-center gap-2">
+              {isRegistering ? (
+                <>
+                  <UserPlus className="w-5 h-5" />
+                  Join Your Professor's Class
+                </>
+              ) : (
+                <>
+                  <Laptop className="w-5 h-5" />
+                  Sign In
+                </>
+              )}
+            </CardTitle>
+            <CardDescription className="text-center">
+              {isRegistering
+                ? "Enter your professor's ID to get started"
+                : "Access your coding practice and progress tracking"
+              }
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center p-4 bg-primary/5 rounded-lg mb-6">
+              <Laptop className="w-12 h-12 text-primary mx-auto mb-2" />
+              <h3 className="font-semibold">Student Portal</h3>
+              <p className="text-sm text-muted-foreground">
+                {isRegistering
+                  ? "Get mapped to your professor and start practicing coding problems"
+                  : "Access your coding practice, progress tracking, and collaboration tools"
+                }
+              </p>
+            </div>
+            
+            <AuthForm />
+
+            {isRegistering && (
+              <div className="mt-4 p-3 bg-muted/30 rounded-lg">
+                <h4 className="font-medium text-sm mb-2">Need Help?</h4>
+                <p className="text-xs text-muted-foreground">
+                  Ask your professor for their Professor ID. This ID is needed to join their class and access assignments.
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <div className="text-center mt-6 space-y-2">
+          <Link to="/">
+            <Button variant="link">← Back to Home</Button>
+          </Link>
+          <div className="text-sm text-muted-foreground">
+            Are you a professor?{" "}
+            <Link to="/professor/login" className="text-primary hover:underline">
+              Professor Login
+            </Link>
           </div>
         </div>
       </div>
