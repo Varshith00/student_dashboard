@@ -65,7 +65,7 @@ export default function BehavioralInterview() {
 
   const startInterview = async (focus: string[]) => {
     setIsStarting(true);
-    
+
     try {
       const response = await authFetch('/api/interview/behavioral/start', {
         method: 'POST',
@@ -73,16 +73,22 @@ export default function BehavioralInterview() {
       });
 
       const data = await response.json();
-      
+
       if (data.success) {
         setSession(data.session);
+        // Extract the initial question for video mode
+        if (data.session.messages && data.session.messages.length > 0) {
+          const initialQuestion = data.session.messages[0].content;
+          setCurrentQuestion(initialQuestion);
+          setAwaitingAnswer(true);
+        }
       } else {
         console.error('Failed to start interview:', data.error);
       }
     } catch (error) {
       console.error('Interview start error:', error);
     }
-    
+
     setIsStarting(false);
   };
 
