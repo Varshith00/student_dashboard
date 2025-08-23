@@ -242,12 +242,33 @@ export default function VideoInterviewInterface({
 
   const startRecording = async () => {
     try {
-      if (!streamRef.current) return;
+      if (!streamRef.current) {
+        setMediaError("No media stream available. Please ensure camera and microphone permissions are granted.");
+        return;
+      }
+
+      // Check if MediaRecorder is supported
+      if (!window.MediaRecorder) {
+        setMediaError("Recording is not supported in this browser. Please use a modern browser.");
+        return;
+      }
+
+      // Try different audio formats for compatibility
+      let mimeType = "audio/webm;codecs=opus";
+      if (!MediaRecorder.isTypeSupported(mimeType)) {
+        mimeType = "audio/webm";
+        if (!MediaRecorder.isTypeSupported(mimeType)) {
+          mimeType = "audio/mp4";
+          if (!MediaRecorder.isTypeSupported(mimeType)) {
+            mimeType = "";
+          }
+        }
+      }
 
       // Start MediaRecorder for audio backup
-      mediaRecorderRef.current = new MediaRecorder(streamRef.current, {
-        mimeType: "audio/webm;codecs=opus",
-      });
+      mediaRecorderRef.current = new MediaRecorder(streamRef.current,
+        mimeType ? { mimeType } : undefined
+      );
 
       audioChunksRef.current = [];
 
@@ -257,11 +278,21 @@ export default function VideoInterviewInterface({
         }
       };
 
+      mediaRecorderRef.current.onerror = (event) => {
+        console.error("MediaRecorder error:", event);
+        setMediaError("Recording error occurred. Please try again.");
+      };
+
       mediaRecorderRef.current.start(100);
 
-      // Start speech recognition
+      // Start speech recognition if available
       if (recognitionRef.current) {
-        recognitionRef.current.start();
+        try {
+          recognitionRef.current.start();
+        } catch (error) {
+          console.warn("Speech recognition could not start:", error);
+          // Continue without speech recognition
+        }
       }
 
       setIsRecording(true);
@@ -270,6 +301,7 @@ export default function VideoInterviewInterface({
       setTranscribedText("");
     } catch (error) {
       console.error("Error starting recording:", error);
+      setMediaError("Failed to start recording. Please check your microphone permissions and try again.");
     }
   };
 
