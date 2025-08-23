@@ -176,7 +176,7 @@ export default function AssignProblemModal({
           Assign Problem
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[90vh]">
+      <DialogContent className="w-[95vw] max-w-6xl h-[85vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Code className="w-5 h-5 text-primary" />
