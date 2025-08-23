@@ -84,7 +84,89 @@ const generateToken = (user: User): string => {
   );
 };
 
-// Registration handler
+// Student registration with professor mapping
+export const handleStudentRegister: RequestHandler = async (req, res) => {
+  try {
+    const { email, password, name, professorId } = req.body as AuthRequest;
+
+    // Validation
+    if (!email || !password || !name || !professorId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email, password, name, and professor ID are required'
+      } as AuthResponse);
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 6 characters long'
+      } as AuthResponse);
+    }
+
+    // Check if user already exists
+    const existingUser = findUserByEmail(email);
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: 'User with this email already exists'
+      } as AuthResponse);
+    }
+
+    // Verify professor exists
+    const professor = findUserById(professorId);
+    if (!professor || professor.role !== 'professor') {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid professor ID'
+      } as AuthResponse);
+    }
+
+    // Hash password
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    // Create new student
+    const newUser: User = {
+      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+      email: email.toLowerCase(),
+      password: hashedPassword,
+      name,
+      role: 'student',
+      professorId,
+      createdAt: new Date().toISOString()
+    };
+
+    // Save user
+    const users = loadUsers();
+    users.push(newUser);
+    saveUsers(users);
+
+    // Generate token
+    const token = generateToken(newUser);
+
+    res.status(201).json({
+      success: true,
+      message: 'Student registered successfully',
+      token,
+      user: {
+        id: newUser.id,
+        email: newUser.email,
+        name: newUser.name,
+        role: newUser.role
+      }
+    } as AuthResponse);
+
+  } catch (error) {
+    console.error('Student registration error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error during registration'
+    } as AuthResponse);
+  }
+};
+
+// General registration handler (for professors)
 export const handleRegister: RequestHandler = async (req, res) => {
   try {
     const { email, password, name, role = 'student' } = req.body as AuthRequest;
