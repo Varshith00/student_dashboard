@@ -205,20 +205,28 @@ export default function ProfessorDashboard() {
               <CardContent>
                 <div className="grid md:grid-cols-4 gap-6">
                   <div className="text-center p-4 bg-primary/5 rounded-lg">
-                    <div className="text-3xl font-bold text-primary mb-2">24</div>
+                    <div className="text-3xl font-bold text-primary mb-2">
+                      {analytics?.totalStudents || students.length}
+                    </div>
                     <div className="text-sm text-muted-foreground">Total Students</div>
                   </div>
                   <div className="text-center p-4 bg-success/5 rounded-lg">
-                    <div className="text-3xl font-bold text-success mb-2">18</div>
-                    <div className="text-sm text-muted-foreground">Active This Week</div>
+                    <div className="text-3xl font-bold text-success mb-2">
+                      {students.filter(s => s.status === 'active').length}
+                    </div>
+                    <div className="text-sm text-muted-foreground">Active Students</div>
                   </div>
                   <div className="text-center p-4 bg-accent/5 rounded-lg">
-                    <div className="text-3xl font-bold text-accent mb-2">78%</div>
-                    <div className="text-sm text-muted-foreground">Average Progress</div>
+                    <div className="text-3xl font-bold text-accent mb-2">
+                      {Math.round(analytics?.averageScore || 0)}%
+                    </div>
+                    <div className="text-sm text-muted-foreground">Average Score</div>
                   </div>
                   <div className="text-center p-4 bg-warning/5 rounded-lg">
-                    <div className="text-3xl font-bold text-warning mb-2">156</div>
-                    <div className="text-sm text-muted-foreground">Problems Solved</div>
+                    <div className="text-3xl font-bold text-warning mb-2">
+                      {analytics?.completedAssignments || 0}
+                    </div>
+                    <div className="text-sm text-muted-foreground">Completed Assignments</div>
                   </div>
                 </div>
               </CardContent>
