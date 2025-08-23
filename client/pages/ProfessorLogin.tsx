@@ -214,7 +214,7 @@ export default function ProfessorLogin() {
                 </h4>
                 <div className="text-sm text-muted-foreground space-y-1">
                   <p>
-                    <strong>Email:</strong> professor@demo.com
+                    <strong>Email:</strong> demoprofessor@demo.com
                   </p>
                   <p>
                     <strong>Password:</strong> professor123
