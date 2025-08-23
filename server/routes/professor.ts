@@ -382,10 +382,10 @@ export const handleGetClassAnalytics: RequestHandler = async (req, res) => {
       });
     }
 
-    // Get students mapped to this professor
+    // Get students mapped to this professor by email
     const allUsers = loadUsers();
     const mappedStudents = allUsers.filter(
-      user => user.role === 'student' && user.professorId === professor.id
+      user => user.role === 'student' && user.professorId === professor.email
     );
 
     const professorAssignments = assignments.filter(
