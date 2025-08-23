@@ -410,6 +410,9 @@ export default function TechnicalInterview() {
                 onAnswerSubmit={handleVideoAnswer}
                 isLoading={isLoading}
                 disabled={!awaitingAnswer}
+                interviewType="technical"
+                difficulty={session.difficulty}
+                focus={session.focus}
               />
             )}
 
