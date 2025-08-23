@@ -145,19 +145,19 @@ export default function StudentLogin() {
       <form onSubmit={handleSubmit} className="space-y-4">
         {isRegistering && (
           <>
-            {/* Professor ID Section */}
+            {/* Professor Email Section */}
             <div className="space-y-3 p-4 bg-muted/30 rounded-lg">
               <Label className="text-base font-semibold">Professor Information</Label>
               <div className="space-y-2">
-                <Label htmlFor="professor-id">Professor ID</Label>
+                <Label htmlFor="professor-email">Professor Email</Label>
                 <div className="flex gap-2">
                   <Input
-                    id="professor-id"
-                    type="text"
-                    placeholder="Enter your professor's ID"
-                    value={professorId}
+                    id="professor-email"
+                    type="email"
+                    placeholder="Enter your professor's email"
+                    value={professorEmail}
                     onChange={(e) => {
-                      setProfessorId(e.target.value);
+                      setProfessorEmail(e.target.value);
                       setIsProfessorVerified(false);
                       setProfessorInfo(null);
                     }}
@@ -167,7 +167,7 @@ export default function StudentLogin() {
                     type="button"
                     variant="outline"
                     onClick={verifyProfessor}
-                    disabled={isVerifyingProfessor || !professorId.trim()}
+                    disabled={isVerifyingProfessor || !professorEmail.trim()}
                   >
                     {isVerifyingProfessor ? (
                       <div className="animate-spin w-4 h-4 border-2 border-primary border-t-transparent rounded-full"></div>
