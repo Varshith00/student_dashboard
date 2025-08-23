@@ -89,5 +89,22 @@ export function createServer() {
     handleEndBehavioralInterview,
   );
 
+  // Audio analysis routes
+  app.post(
+    "/api/audio/transcribe",
+    authMiddleware,
+    handleAudioTranscription,
+  );
+  app.post(
+    "/api/audio/analyze-answer",
+    authMiddleware,
+    handleAnswerAnalysis,
+  );
+  app.post(
+    "/api/audio/analyze-batch",
+    authMiddleware,
+    handleBatchAnswerAnalysis,
+  );
+
   return app;
 }
