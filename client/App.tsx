@@ -21,6 +21,7 @@ import BehavioralInterview from "./pages/BehavioralInterview";
 import Placeholder from "./pages/Placeholder";
 import NotFound from "./pages/NotFound";
 import CollaborationPage from "./pages/CollaborationPage";
+import PairProgramming from "./pages/PairProgramming";
 import WebEditorPage from "./pages/WebEditorPage";
 import ResizeObserverTest from "./pages/ResizeObserverTest";
 
