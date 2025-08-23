@@ -64,42 +64,90 @@ interface StudentProgress {
   }[];
 }
 
-// Mock data storage - Add demo assignments for our demo students
+// Mock data storage - Demo assignments for clean demo students
 const assignments: Assignment[] = [
   {
     id: "assign_1",
     professorId: "demo-professor-001",
-    studentId: "17559437070308qm4bodu", // demostudent@demo.com ID
+    studentId: "demo-student-001", // Alex Rodriguez
     problemId: "two-sum",
     assignedDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
     dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days from now
-    status: "assigned",
-    attempts: 0,
-    timeSpent: 0,
+    status: "completed",
+    score: 95,
+    completedDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+    attempts: 1,
+    timeSpent: 35,
   },
   {
     id: "assign_2",
     professorId: "demo-professor-001",
-    studentId: "17559437070308qm4bodu", // demostudent@demo.com ID
+    studentId: "demo-student-001", // Alex Rodriguez
     problemId: "binary-search",
     assignedDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
     dueDate: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000).toISOString(), // 6 days from now
     status: "in_progress",
     attempts: 1,
-    timeSpent: 30,
+    timeSpent: 45,
   },
   {
     id: "assign_3",
     professorId: "demo-professor-001",
-    studentId: "17559437070308qm4bodu", // demostudent@demo.com ID
-    problemId: "valid-parentheses",
+    studentId: "demo-student-002", // Emma Thompson
+    problemId: "two-sum",
     assignedDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
     dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days from now
     status: "completed",
+    score: 88,
+    completedDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
+    attempts: 2,
+    timeSpent: 55,
+  },
+  {
+    id: "assign_4",
+    professorId: "demo-professor-001",
+    studentId: "demo-student-002", // Emma Thompson
+    problemId: "valid-parentheses",
+    assignedDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+    dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days from now
+    status: "assigned",
+    attempts: 0,
+    timeSpent: 0,
+  },
+  {
+    id: "assign_5",
+    professorId: "demo-professor-001",
+    studentId: "demo-student-003", // David Kim
+    problemId: "linked-list-cycle",
+    assignedDate: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(), // 4 days ago
+    dueDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago (overdue)
+    status: "in_progress",
+    attempts: 3,
+    timeSpent: 120,
+  },
+  {
+    id: "assign_6",
+    professorId: "prof1@gmail.com-id",
+    studentId: "demo-student-004", // Priya Patel
+    problemId: "merge-sorted-arrays",
+    assignedDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
+    dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days from now
+    status: "completed",
     score: 92,
-    completedDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+    completedDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
     attempts: 1,
-    timeSpent: 25,
+    timeSpent: 40,
+  },
+  {
+    id: "assign_7",
+    professorId: "prof1@gmail.com-id",
+    studentId: "demo-student-005", // Marcus Williams
+    problemId: "fibonacci-sequence",
+    assignedDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
+    dueDate: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString(), // 4 days from now
+    status: "in_progress",
+    attempts: 2,
+    timeSpent: 75,
   },
 ];
 
