@@ -443,11 +443,12 @@ export default function AssignProblemModal({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-between pt-4 border-t">
+        <div className="flex items-center justify-between pt-3 mt-3 border-t border-border flex-shrink-0">
           <Button
             variant="outline"
             onClick={() => setIsOpen(false)}
             disabled={isAssigning}
+            className="h-9"
           >
             Cancel
           </Button>
@@ -456,6 +457,7 @@ export default function AssignProblemModal({
             disabled={
               !selectedProblem || selectedStudents.length === 0 || isAssigning
             }
+            className="h-9"
           >
             {isAssigning ? (
               <>
