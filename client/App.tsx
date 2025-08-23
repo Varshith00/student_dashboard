@@ -39,17 +39,11 @@ const App = () => (
             {/* AI Question Generator */}
             <Route path="/ai/question-generator" element={<AIQuestionGenerator />} />
 
+            {/* Interview routes */}
+            <Route path="/student/interview/technical" element={<TechnicalInterview />} />
+            <Route path="/student/interview/behavioral" element={<BehavioralInterview />} />
+
             {/* Placeholder routes for future features */}
-            <Route
-              path="/student/interview"
-              element={
-                <Placeholder
-                  title="AI Mock Interviews"
-                  description="AI-powered interview simulation coming soon."
-                  feature="realistic interview practice with AI"
-                />
-              }
-            />
             <Route
               path="/student/collaboration"
               element={
