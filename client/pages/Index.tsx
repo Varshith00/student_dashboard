@@ -189,7 +189,7 @@ export default function Index() {
                     <span>Skill tracking & analytics</span>
                   </div>
                 </div>
-                <Link to="/login" className="w-full">
+                <Link to="/student/login" className="w-full">
                   <Button className="w-full">Student Login</Button>
                 </Link>
               </div>
