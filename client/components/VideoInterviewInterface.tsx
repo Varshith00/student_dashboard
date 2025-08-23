@@ -46,6 +46,8 @@ export default function VideoInterviewInterface({
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<any>(null);
+  const [hasMediaPermission, setHasMediaPermission] = useState(false);
+  const [mediaError, setMediaError] = useState<string>("");
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
