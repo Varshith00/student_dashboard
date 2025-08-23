@@ -572,6 +572,328 @@ export default function StudentDashboard() {
             </Card>
           </div>
         )}
+
+        {activeTab === 'pair-programming' && (
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users2 className="w-6 h-6 text-primary" />
+                  Collaborative Programming
+                </CardTitle>
+                <CardDescription>
+                  Code together in real-time with peers and mentors
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <Card className="border-2 hover:border-primary/50 transition-colors">
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Play className="w-5 h-5 text-success" />
+                        Start New Session
+                      </CardTitle>
+                      <CardDescription>
+                        Create a new collaborative coding session
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3 mb-4">
+                        <div className="flex justify-between text-sm">
+                          <span>Real-time sync:</span>
+                          <CheckCircle className="w-4 h-4 text-success" />
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>Voice chat:</span>
+                          <CheckCircle className="w-4 h-4 text-success" />
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>Code sharing:</span>
+                          <CheckCircle className="w-4 h-4 text-success" />
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>Multiple cursors:</span>
+                          <CheckCircle className="w-4 h-4 text-success" />
+                        </div>
+                      </div>
+                      <Link to="/student/collaboration/new" className="w-full">
+                        <Button className="w-full">
+                          <Users2 className="w-4 h-4 mr-2" />
+                          Create Session
+                        </Button>
+                      </Link>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="border-2 hover:border-accent/50 transition-colors">
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Target className="w-5 h-5 text-accent" />
+                        Join Session
+                      </CardTitle>
+                      <CardDescription>
+                        Enter a session ID to join ongoing collaboration
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3 mb-4">
+                        <input
+                          type="text"
+                          placeholder="Enter session ID..."
+                          className="w-full px-3 py-2 border rounded-md"
+                        />
+                        <div className="text-sm text-muted-foreground">
+                          <p>• Get the session ID from your collaborator</p>
+                          <p>• Session supports up to 4 participants</p>
+                          <p>• Works with Python and JavaScript</p>
+                        </div>
+                      </div>
+                      <Button variant="outline" className="w-full border-accent text-accent hover:bg-accent hover:text-accent-foreground">
+                        <Play className="w-4 h-4 mr-2" />
+                        Join Session
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <div className="mt-6">
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    <Clock className="w-5 h-5 text-muted-foreground" />
+                    Recent Sessions
+                  </h3>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+                          <Users2 className="w-4 h-4 text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-medium">Binary Tree Problems</p>
+                          <p className="text-sm text-muted-foreground">With Sarah, Mike • 2 hours ago</p>
+                        </div>
+                      </div>
+                      <Button variant="outline" size="sm">
+                        <Play className="w-3 h-3 mr-1" />
+                        Rejoin
+                      </Button>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-accent/10 rounded-full flex items-center justify-center">
+                          <Users2 className="w-4 h-4 text-accent" />
+                        </div>
+                        <div>
+                          <p className="font-medium">Algorithm Study Group</p>
+                          <p className="text-sm text-muted-foreground">With Alex, Emma, Jake • Yesterday</p>
+                        </div>
+                      </div>
+                      <Badge variant="secondary">Ended</Badge>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {activeTab === 'web-editor' && (
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Monitor className="w-6 h-6 text-accent" />
+                  Advanced Web Editor
+                </CardTitle>
+                <CardDescription>
+                  Full-featured editor with AI suggestions, multi-language support, and error highlighting
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-3 gap-6 mb-6">
+                  <Card className="border-2 hover:border-primary/50 transition-colors">
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Code className="w-5 h-5 text-primary" />
+                        Python Editor
+                      </CardTitle>
+                      <CardDescription>
+                        Enhanced Python development environment
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2 mb-4 text-sm">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-success" />
+                          <span>AI code suggestions</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-success" />
+                          <span>Real-time error detection</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-success" />
+                          <span>Syntax highlighting</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-success" />
+                          <span>Auto-completion</span>
+                        </div>
+                      </div>
+                      <Link to="/student/editor/python" className="w-full">
+                        <Button className="w-full">
+                          <Code className="w-4 h-4 mr-2" />
+                          Open Python Editor
+                        </Button>
+                      </Link>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="border-2 hover:border-warning/50 transition-colors">
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Code className="w-5 h-5 text-warning" />
+                        JavaScript Editor
+                      </CardTitle>
+                      <CardDescription>
+                        Modern JavaScript development tools
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2 mb-4 text-sm">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-success" />
+                          <span>ES6+ support</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-success" />
+                          <span>JSX highlighting</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-success" />
+                          <span>TypeScript support</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-success" />
+                          <span>Node.js runtime</span>
+                        </div>
+                      </div>
+                      <Link to="/student/editor/javascript" className="w-full">
+                        <Button variant="outline" className="w-full border-warning text-warning hover:bg-warning hover:text-warning-foreground">
+                          <Code className="w-4 h-4 mr-2" />
+                          Open JS Editor
+                        </Button>
+                      </Link>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="border-2 hover:border-accent/50 transition-colors">
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Sparkles className="w-5 h-5 text-accent" />
+                        AI Features
+                      </CardTitle>
+                      <CardDescription>
+                        Intelligent coding assistance
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2 mb-4 text-sm">
+                        <div className="flex items-center gap-2">
+                          <Brain className="w-4 h-4 text-accent" />
+                          <span>Smart code completion</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Brain className="w-4 h-4 text-accent" />
+                          <span>Error explanations</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Brain className="w-4 h-4 text-accent" />
+                          <span>Code optimization</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Brain className="w-4 h-4 text-accent" />
+                          <span>Performance tips</span>
+                        </div>
+                      </div>
+                      <Button variant="secondary" className="w-full">
+                        <Sparkles className="w-4 h-4 mr-2" />
+                        Learn More
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                  <Card className="bg-gradient-to-br from-primary/5 to-accent/5 border-dashed">
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <BookOpen className="w-5 h-5 text-primary" />
+                        Recent Projects
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between p-3 bg-background/50 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                              <Code className="w-4 h-4 text-primary" />
+                            </div>
+                            <div>
+                              <p className="font-medium">sorting_algorithms.py</p>
+                              <p className="text-sm text-muted-foreground">Modified 2 hours ago</p>
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm">Open</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-background/50 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 bg-warning/10 rounded-lg flex items-center justify-center">
+                              <Code className="w-4 h-4 text-warning" />
+                            </div>
+                            <div>
+                              <p className="font-medium">todo_app.js</p>
+                              <p className="text-sm text-muted-foreground">Modified yesterday</p>
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm">Open</Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-gradient-to-br from-accent/5 to-primary/5 border-dashed">
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Target className="w-5 h-5 text-accent" />
+                        Templates
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <Button variant="outline" className="w-full justify-start">
+                          <Code className="w-4 h-4 mr-2" />
+                          Python Data Structures
+                        </Button>
+                        <Button variant="outline" className="w-full justify-start">
+                          <Code className="w-4 h-4 mr-2" />
+                          JavaScript Functions
+                        </Button>
+                        <Button variant="outline" className="w-full justify-start">
+                          <Code className="w-4 h-4 mr-2" />
+                          Algorithm Template
+                        </Button>
+                        <Button variant="outline" className="w-full justify-start">
+                          <Code className="w-4 h-4 mr-2" />
+                          React Component
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
     </div>
   );
