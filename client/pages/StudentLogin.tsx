@@ -283,7 +283,7 @@ export default function StudentLogin() {
             onClick={() => {
               setIsRegistering(!isRegistering);
               setError(null);
-              setProfessorId('');
+              setProfessorEmail('');
               setProfessorInfo(null);
               setIsProfessorVerified(false);
             }}
