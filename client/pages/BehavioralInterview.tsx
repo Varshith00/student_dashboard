@@ -413,6 +413,8 @@ export default function BehavioralInterview() {
                 onAnswerSubmit={handleVideoAnswer}
                 isLoading={isLoading}
                 disabled={!awaitingAnswer}
+                interviewType="behavioral"
+                focus={session.focus}
               />
             )}
 
