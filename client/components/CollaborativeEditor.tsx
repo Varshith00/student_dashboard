@@ -124,64 +124,85 @@ console.log(\`Result: \${result}\`);
     }
   }
 
-  // Initialize socket connection
+  // Initialize socket connection (only in production)
   useEffect(() => {
     if (!session?.id) return;
 
-    setConnectionStatus("connecting");
-    socketRef.current = io(window.location.origin, {
-      transports: ['websocket', 'polling']
-    });
+    // Check if we're in production environment
+    const isProduction = process.env.NODE_ENV === 'production';
 
-    const socket = socketRef.current;
-
-    socket.on('connect', () => {
-      console.log('Connected to socket server');
-      setConnectionStatus("connected");
-      socket.emit('join-session', session.id);
-    });
-
-    socket.on('disconnect', () => {
-      console.log('Disconnected from socket server');
+    if (!isProduction) {
+      // In development, skip socket connection to avoid conflicts
       setConnectionStatus("disconnected");
-    });
+      console.log('🔧 Development mode: Real-time collaboration disabled');
+      return;
+    }
 
-    // Handle real-time code updates
-    socket.on('code-update', (data) => {
-      const { code: newCode, cursor, participantId, participantName } = data;
-      if (participantId !== participantId) {
-        setCode(newCode);
-        // Update the editor content
-        if (editorRef.current) {
-          editorRef.current.setValue(newCode);
+    setConnectionStatus("connecting");
+
+    try {
+      socketRef.current = io(window.location.origin, {
+        transports: ['websocket', 'polling']
+      });
+
+      const socket = socketRef.current;
+
+      socket.on('connect', () => {
+        console.log('Connected to socket server');
+        setConnectionStatus("connected");
+        socket.emit('join-session', session.id);
+      });
+
+      socket.on('disconnect', () => {
+        console.log('Disconnected from socket server');
+        setConnectionStatus("disconnected");
+      });
+
+      socket.on('connect_error', () => {
+        console.log('Socket connection failed');
+        setConnectionStatus("disconnected");
+      });
+
+      // Handle real-time code updates
+      socket.on('code-update', (data) => {
+        const { code: newCode, cursor, participantId: updateParticipantId, participantName } = data;
+        if (updateParticipantId !== participantId) {
+          setCode(newCode);
+          // Update the editor content
+          if (editorRef.current) {
+            editorRef.current.setValue(newCode);
+          }
         }
-      }
-    });
+      });
 
-    // Handle participant updates
-    socket.on('participant-joined', (data) => {
-      const { participant, session: updatedSession } = data;
-      setSession(updatedSession);
-    });
+      // Handle participant updates
+      socket.on('participant-joined', (data) => {
+        const { participant, session: updatedSession } = data;
+        setSession(updatedSession);
+      });
 
-    socket.on('participant-left', (data) => {
-      const { participantId, participantName, session: updatedSession } = data;
-      setSession(updatedSession);
-    });
+      socket.on('participant-left', (data) => {
+        const { participantId: leftParticipantId, participantName, session: updatedSession } = data;
+        setSession(updatedSession);
+      });
 
-    socket.on('cursor-update', (data) => {
-      const { cursor, participantId } = data;
-      // Handle cursor position updates from other participants
-      // Could be used to show cursors in the editor
-    });
+      socket.on('cursor-update', (data) => {
+        const { cursor, participantId: cursorParticipantId } = data;
+        // Handle cursor position updates from other participants
+        // Could be used to show cursors in the editor
+      });
 
-    return () => {
-      if (socket) {
-        socket.emit('leave-session', session.id);
-        socket.disconnect();
-      }
-    };
-  }, [session?.id]);
+      return () => {
+        if (socket) {
+          socket.emit('leave-session', session.id);
+          socket.disconnect();
+        }
+      };
+    } catch (error) {
+      console.error('Failed to initialize socket connection:', error);
+      setConnectionStatus("disconnected");
+    }
+  }, [session?.id, participantId]);
 
   // Initialize session
   useEffect(() => {
