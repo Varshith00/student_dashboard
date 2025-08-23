@@ -5,6 +5,14 @@ import { handleDemo } from "./routes/demo";
 import { handleExecutePython } from "./routes/execute-python";
 import { handleGenerateQuestion, handleAnalyzeCode, handleGetHint } from "./routes/ai-questions";
 import { handleRegister, handleLogin, handleGetUser, authMiddleware } from "./routes/auth";
+import {
+  handleStartTechnicalInterview,
+  handleTechnicalInterviewMessage,
+  handleEndTechnicalInterview,
+  handleStartBehavioralInterview,
+  handleBehavioralInterviewMessage,
+  handleEndBehavioralInterview
+} from "./routes/interview";
 
 export function createServer() {
   const app = express();
@@ -32,6 +40,14 @@ export function createServer() {
   app.post("/api/ai/generate-question", authMiddleware, handleGenerateQuestion);
   app.post("/api/ai/analyze-code", authMiddleware, handleAnalyzeCode);
   app.post("/api/ai/get-hint", authMiddleware, handleGetHint);
+
+  // Interview routes
+  app.post("/api/interview/technical/start", authMiddleware, handleStartTechnicalInterview);
+  app.post("/api/interview/technical/message", authMiddleware, handleTechnicalInterviewMessage);
+  app.post("/api/interview/technical/end", authMiddleware, handleEndTechnicalInterview);
+  app.post("/api/interview/behavioral/start", authMiddleware, handleStartBehavioralInterview);
+  app.post("/api/interview/behavioral/message", authMiddleware, handleBehavioralInterviewMessage);
+  app.post("/api/interview/behavioral/end", authMiddleware, handleEndBehavioralInterview);
 
   return app;
 }
