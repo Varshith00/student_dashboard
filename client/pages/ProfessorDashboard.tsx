@@ -36,6 +36,10 @@ export default function ProfessorDashboard() {
   const { user, logout, isLoading } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
   const [searchQuery, setSearchQuery] = useState('');
+  const [students, setStudents] = useState<any[]>([]);
+  const [assignments, setAssignments] = useState<any[]>([]);
+  const [analytics, setAnalytics] = useState<any>(null);
+  const [isLoadingData, setIsLoadingData] = useState(false);
 
   // Redirect if not logged in or not a professor
   useEffect(() => {
