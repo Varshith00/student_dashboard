@@ -6,12 +6,13 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { 
-  Sparkles, 
-  Brain, 
-  Code, 
-  ArrowLeft, 
-  Copy, 
+import { authFetch } from "@/contexts/AuthContext";
+import {
+  Sparkles,
+  Brain,
+  Code,
+  ArrowLeft,
+  Copy,
   Download,
   RefreshCw,
   GraduationCap,
