@@ -38,6 +38,7 @@ export default function CodingProblem() {
   }
 
   const handleLogout = () => {
+    logout();
     navigate('/');
   };
 
