@@ -11,7 +11,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
 import { authFetch } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import {
   Play,
   Square,
@@ -23,7 +26,6 @@ import {
   MicOff,
   Video,
   VideoOff,
-  MessageSquare,
   Settings,
   UserPlus,
   Terminal,
@@ -33,15 +35,12 @@ import {
   XCircle,
   Eye,
   Edit,
+  ArrowLeft,
+  LogOut,
+  Brain,
+  Lightbulb,
 } from "lucide-react";
-
-interface Participant {
-  id: string;
-  name: string;
-  color: string;
-  cursor?: { line: number; column: number };
-  isActive: boolean;
-}
+import type { CollaborationSession, Participant } from "@shared/api";
 
 interface CollaborativeEditorProps {
   sessionId?: string;
@@ -53,59 +52,33 @@ export default function CollaborativeEditor({
   language = "python",
 }: CollaborativeEditorProps) {
   const editorRef = useRef<any>(null);
-  const [code, setCode] = useState(getDefaultCode(language));
+  const navigate = useNavigate();
+  
+  // Core editor state
+  const [code, setCode] = useState("");
   const [output, setOutput] = useState("");
   const [isRunning, setIsRunning] = useState(false);
   const [executionTime, setExecutionTime] = useState<number | null>(null);
   const [hasError, setHasError] = useState(false);
 
-  // Collaboration features
-  const [participants, setParticipants] = useState<Participant[]>([
-    { id: "1", name: "You", color: "#3b82f6", isActive: true },
-    {
-      id: "2",
-      name: "Alex Chen",
-      color: "#ef4444",
-      cursor: { line: 5, column: 10 },
-      isActive: true,
-    },
-    {
-      id: "3",
-      name: "Sarah Johnson",
-      color: "#22c55e",
-      cursor: { line: 12, column: 0 },
-      isActive: false,
-    },
-  ]);
-
-  const [isConnected, setIsConnected] = useState(true);
-  const [isMicOn, setIsMicOn] = useState(false);
-  const [isVideoOn, setIsVideoOn] = useState(false);
-  const [isHost, setIsHost] = useState(true);
+  // Session state
+  const [session, setSession] = useState<CollaborationSession | null>(null);
+  const [participantId, setParticipantId] = useState<string>("");
+  const [isConnected, setIsConnected] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [permission, setPermission] = useState<"write" | "read">("write");
 
-  // Chat
-  const [chatMessages, setChatMessages] = useState([
-    {
-      id: "1",
-      sender: "Alex Chen",
-      message: "Hey, ready to work on this together?",
-      timestamp: new Date(Date.now() - 300000),
-    },
-    {
-      id: "2",
-      sender: "You",
-      message: "Yes! Let's start with the algorithm approach",
-      timestamp: new Date(Date.now() - 240000),
-    },
-    {
-      id: "3",
-      sender: "Sarah Johnson",
-      message: "I think we should use a recursive solution",
-      timestamp: new Date(Date.now() - 180000),
-    },
-  ]);
-  const [newMessage, setNewMessage] = useState("");
+  // Communication state
+  const [isMicOn, setIsMicOn] = useState(false);
+  const [isVideoOn, setIsVideoOn] = useState(false);
+
+  // Join session state
+  const [joinSessionId, setJoinSessionId] = useState("");
+  const [isJoining, setIsJoining] = useState(false);
+
+  // AI features state
+  const [aiSuggestion, setAiSuggestion] = useState<string>("");
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   function getDefaultCode(lang: "python" | "javascript") {
     if (lang === "python") {
@@ -153,7 +126,135 @@ console.log(\`Result: \${result}\`);
     }
   }
 
+  // Initialize session
+  useEffect(() => {
+    const initializeSession = async () => {
+      if (sessionId) {
+        // Join existing session
+        await joinExistingSession(sessionId);
+      } else {
+        // Create new session
+        await createNewSession();
+      }
+    };
+
+    initializeSession();
+  }, [sessionId, language]);
+
+  const createNewSession = async () => {
+    try {
+      setIsLoading(true);
+      const response = await authFetch("/api/collaboration/create", {
+        method: "POST",
+        body: JSON.stringify({
+          language,
+          initialCode: getDefaultCode(language),
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        // Navigate to the new session
+        navigate(`/student/collaboration/${data.sessionId}`);
+      } else {
+        toast.error(data.message || "Failed to create session");
+      }
+    } catch (error) {
+      toast.error("Failed to create collaboration session");
+      console.error("Error creating session:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const joinExistingSession = async (sessionId: string) => {
+    try {
+      setIsLoading(true);
+      const response = await authFetch("/api/collaboration/join", {
+        method: "POST",
+        body: JSON.stringify({ sessionId }),
+      });
+
+      const data = await response.json();
+      if (data.success && data.session && data.participantId) {
+        setSession(data.session);
+        setParticipantId(data.participantId);
+        setCode(data.session.code);
+        setIsConnected(true);
+        
+        // Set permission based on participant data
+        const participant = data.session.participants.find(p => p.id === data.participantId);
+        if (participant) {
+          setPermission(participant.permission);
+        }
+        
+        toast.success("Successfully joined collaboration session!");
+      } else {
+        toast.error(data.message || "Failed to join session");
+        navigate("/student/collaboration/new");
+      }
+    } catch (error) {
+      toast.error("Failed to join collaboration session");
+      console.error("Error joining session:", error);
+      navigate("/student/collaboration/new");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleJoinSession = async () => {
+    if (!joinSessionId.trim()) {
+      toast.error("Please enter a session ID");
+      return;
+    }
+
+    setIsJoining(true);
+    try {
+      const response = await authFetch("/api/collaboration/join", {
+        method: "POST",
+        body: JSON.stringify({ sessionId: joinSessionId }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        navigate(`/student/collaboration/${joinSessionId}`);
+      } else {
+        toast.error(data.message || "Failed to join session");
+      }
+    } catch (error) {
+      toast.error("Failed to join session");
+      console.error("Error joining session:", error);
+    } finally {
+      setIsJoining(false);
+    }
+  };
+
+  const updateCode = async (newCode: string) => {
+    if (!session || !participantId || permission === "read") return;
+
+    try {
+      const response = await authFetch("/api/collaboration/update", {
+        method: "POST",
+        body: JSON.stringify({
+          sessionId: session.id,
+          participantId,
+          code: newCode,
+          cursor: editorRef.current?.getPosition(),
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success && data.session) {
+        setSession(data.session);
+      }
+    } catch (error) {
+      console.error("Error updating code:", error);
+    }
+  };
+
   const runCode = async () => {
+    if (!code) return;
+
     setIsRunning(true);
     setOutput("");
     setHasError(false);
@@ -163,7 +264,7 @@ console.log(\`Result: \${result}\`);
 
     try {
       const endpoint =
-        language === "python"
+        session?.language === "python"
           ? "/api/execute-python"
           : "/api/execute-javascript";
       const response = await authFetch(endpoint, {
@@ -193,24 +294,104 @@ console.log(\`Result: \${result}\`);
     setIsRunning(false);
   };
 
-  const copySessionLink = () => {
-    const link = `${window.location.origin}/student/collaboration/${sessionId}`;
-    navigator.clipboard.writeText(link);
-    // Could add toast notification here
+  const analyzeCode = async () => {
+    if (!code) {
+      toast.error("Please write some code first");
+      return;
+    }
+
+    setIsAnalyzing(true);
+    try {
+      const response = await authFetch("/api/ai/analyze-code", {
+        method: "POST",
+        body: JSON.stringify({
+          code,
+          language: session?.language || language,
+        }),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        setAiSuggestion(result.analysis);
+        toast.success("AI analysis complete!");
+      } else {
+        toast.error(result.error || "Analysis failed");
+      }
+    } catch (error) {
+      toast.error("Failed to analyze code");
+      console.error("Error analyzing code:", error);
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
-  const sendMessage = () => {
-    if (newMessage.trim()) {
-      setChatMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now().toString(),
-          sender: "You",
-          message: newMessage,
-          timestamp: new Date(),
-        },
-      ]);
-      setNewMessage("");
+  const getHint = async () => {
+    if (!code) {
+      toast.error("Please write some code first");
+      return;
+    }
+
+    setIsAnalyzing(true);
+    try {
+      const response = await authFetch("/api/ai/get-hint", {
+        method: "POST",
+        body: JSON.stringify({
+          code,
+          language: session?.language || language,
+        }),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        setAiSuggestion(result.hint);
+        toast.success("AI hint generated!");
+      } else {
+        toast.error(result.error || "Failed to get hint");
+      }
+    } catch (error) {
+      toast.error("Failed to get hint");
+      console.error("Error getting hint:", error);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  const copySessionLink = () => {
+    if (!session) return;
+    
+    const link = `${window.location.origin}/student/collaboration/${session.id}`;
+    navigator.clipboard.writeText(link);
+    toast.success("Session link copied to clipboard!");
+  };
+
+  const copySessionId = () => {
+    if (!session) return;
+    
+    navigator.clipboard.writeText(session.id);
+    toast.success("Session ID copied to clipboard!");
+  };
+
+  const handleBack = () => {
+    navigate("/student/dashboard");
+  };
+
+  const handleLeaveSession = async () => {
+    if (!session || !participantId) return;
+
+    try {
+      await authFetch("/api/collaboration/leave", {
+        method: "POST",
+        body: JSON.stringify({
+          sessionId: session.id,
+          participantId,
+        }),
+      });
+      
+      toast.success("Left collaboration session");
+      navigate("/student/dashboard");
+    } catch (error) {
+      console.error("Error leaving session:", error);
+      navigate("/student/dashboard");
     }
   };
 
@@ -218,12 +399,89 @@ console.log(\`Result: \${result}\`);
     editorRef.current = editor;
   };
 
+  const handleCodeChange = (value: string | undefined) => {
+    if (value !== undefined) {
+      setCode(value);
+      // Debounce the update to avoid too many API calls
+      const timeoutId = setTimeout(() => {
+        updateCode(value);
+      }, 1000);
+      return () => clearTimeout(timeoutId);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-muted-foreground">
+            {sessionId ? "Joining session..." : "Creating session..."}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show join session interface if no session yet
+  if (!session) {
+    return (
+      <div className="h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="w-6 h-6 text-primary" />
+              Join Collaboration Session
+            </CardTitle>
+            <CardDescription>
+              Enter a session ID to join an existing collaboration session
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Session ID</label>
+              <Input
+                placeholder="Enter session ID (e.g., collab_123_abc)"
+                value={joinSessionId}
+                onChange={(e) => setJoinSessionId(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && handleJoinSession()}
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button
+                onClick={handleJoinSession}
+                disabled={isJoining || !joinSessionId.trim()}
+                className="flex-1"
+              >
+                {isJoining ? "Joining..." : "Join Session"}
+              </Button>
+              <Button variant="outline" onClick={handleBack}>
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back
+              </Button>
+            </div>
+            <div className="text-center">
+              <p className="text-sm text-muted-foreground mb-2">Or</p>
+              <Button variant="outline" onClick={createNewSession} className="w-full">
+                Create New Session
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="h-screen flex flex-col bg-background">
       {/* Header */}
       <div className="border-b bg-background/95 backdrop-blur p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
+            <Button variant="outline" size="sm" onClick={handleBack}>
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back
+            </Button>
             <div className="flex items-center gap-2">
               <Users className="w-6 h-6 text-primary" />
               <h1 className="text-xl font-bold">Collaborative Session</h1>
@@ -234,9 +492,9 @@ console.log(\`Result: \${result}\`);
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">Session ID:</span>
               <code className="bg-muted px-2 py-1 rounded text-sm">
-                {sessionId || "demo-123"}
+                {session.id}
               </code>
-              <Button variant="outline" size="sm" onClick={copySessionLink}>
+              <Button variant="outline" size="sm" onClick={copySessionId}>
                 <Copy className="w-4 h-4" />
               </Button>
             </div>
@@ -245,22 +503,20 @@ console.log(\`Result: \${result}\`);
           <div className="flex items-center gap-2">
             {/* Participants */}
             <div className="flex items-center gap-1 border-r pr-2 mr-2">
-              {participants.map((participant) => (
+              {session.participants
+                .filter(p => p.isActive)
+                .map((participant) => (
                 <div
                   key={participant.id}
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold text-white relative ${
-                    participant.isActive ? "" : "opacity-50"
-                  }`}
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold text-white relative"
                   style={{ backgroundColor: participant.color }}
                   title={participant.name}
                 >
                   {participant.name.charAt(0).toUpperCase()}
-                  {participant.isActive && (
-                    <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-success rounded-full border-2 border-background"></div>
-                  )}
+                  <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-success rounded-full border-2 border-background"></div>
                 </div>
               ))}
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={copySessionLink}>
                 <UserPlus className="w-4 h-4" />
               </Button>
             </div>
@@ -271,6 +527,7 @@ console.log(\`Result: \${result}\`);
               size="sm"
               onClick={() => setIsMicOn(!isMicOn)}
               className={isMicOn ? "bg-success/10 border-success" : ""}
+              title={isMicOn ? "Mute microphone" : "Unmute microphone"}
             >
               {isMicOn ? (
                 <Mic className="w-4 h-4" />
@@ -283,6 +540,7 @@ console.log(\`Result: \${result}\`);
               size="sm"
               onClick={() => setIsVideoOn(!isVideoOn)}
               className={isVideoOn ? "bg-success/10 border-success" : ""}
+              title={isVideoOn ? "Turn off video" : "Turn on video"}
             >
               {isVideoOn ? (
                 <Video className="w-4 h-4" />
@@ -291,9 +549,14 @@ console.log(\`Result: \${result}\`);
               )}
             </Button>
 
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={copySessionLink}>
               <Share className="w-4 h-4 mr-2" />
               Share
+            </Button>
+
+            <Button variant="outline" size="sm" onClick={handleLeaveSession}>
+              <LogOut className="w-4 h-4 mr-2" />
+              Leave
             </Button>
           </div>
         </div>
@@ -308,7 +571,7 @@ console.log(\`Result: \${result}\`);
               <div className="flex items-center gap-2">
                 <Code className="w-5 h-5 text-primary" />
                 <span className="font-semibold">
-                  {language === "python" ? "Python" : "JavaScript"} Editor
+                  {session.language === "python" ? "Python" : "JavaScript"} Editor
                 </span>
                 <Badge
                   variant={permission === "write" ? "default" : "secondary"}
@@ -325,11 +588,33 @@ console.log(\`Result: \${result}\`);
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setCode(getDefaultCode(language))}
-                  disabled={isRunning}
+                  onClick={() => {
+                    const defaultCode = getDefaultCode(session.language);
+                    setCode(defaultCode);
+                    updateCode(defaultCode);
+                  }}
+                  disabled={isRunning || permission === "read"}
                 >
                   <RotateCcw className="w-4 h-4 mr-2" />
                   Reset
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={analyzeCode}
+                  disabled={isAnalyzing || !code}
+                >
+                  <Brain className="w-4 h-4 mr-2" />
+                  AI Analysis
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={getHint}
+                  disabled={isAnalyzing || !code}
+                >
+                  <Lightbulb className="w-4 h-4 mr-2" />
+                  AI Hint
                 </Button>
                 <Button
                   onClick={runCode}
@@ -357,9 +642,9 @@ console.log(\`Result: \${result}\`);
           <div className="flex-1">
             <Editor
               height="100%"
-              defaultLanguage={language}
+              defaultLanguage={session.language}
               value={code}
-              onChange={(value) => setCode(value || "")}
+              onChange={handleCodeChange}
               onMount={handleEditorDidMount}
               theme="vs-dark"
               options={{
@@ -369,7 +654,7 @@ console.log(\`Result: \${result}\`);
                 roundedSelection: false,
                 scrollBeyondLastLine: false,
                 automaticLayout: true,
-                tabSize: language === "python" ? 4 : 2,
+                tabSize: session.language === "python" ? 4 : 2,
                 insertSpaces: true,
                 wordWrap: "on",
                 bracketPairColorization: { enabled: true },
@@ -377,6 +662,7 @@ console.log(\`Result: \${result}\`);
                   indentation: true,
                   bracketPairs: true,
                 },
+                readOnly: permission === "read",
               }}
             />
           </div>
@@ -425,7 +711,7 @@ console.log(\`Result: \${result}\`);
                 </pre>
               ) : (
                 <p className="text-muted-foreground text-sm">
-                  Click "Run Code" to execute your {language} code. Output will
+                  Click "Run Code" to execute your {session.language} code. Output will
                   appear here.
                 </p>
               )}
@@ -438,7 +724,7 @@ console.log(\`Result: \${result}\`);
           <Tabs defaultValue="participants" className="h-full">
             <TabsList className="grid w-full grid-cols-3 m-4">
               <TabsTrigger value="participants">Team</TabsTrigger>
-              <TabsTrigger value="chat">Chat</TabsTrigger>
+              <TabsTrigger value="ai">AI Panel</TabsTrigger>
               <TabsTrigger value="settings">Settings</TabsTrigger>
             </TabsList>
 
@@ -447,16 +733,18 @@ console.log(\`Result: \${result}\`);
                 <CardHeader>
                   <CardTitle className="text-lg">Participants</CardTitle>
                   <CardDescription>
-                    {participants.filter((p) => p.isActive).length} of{" "}
-                    {participants.length} active
+                    {session.participants.filter((p) => p.isActive).length} of{" "}
+                    {session.participants.length} active
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {participants.map((participant) => (
+                    {session.participants.map((participant) => (
                       <div
                         key={participant.id}
-                        className="flex items-center gap-3 p-2 rounded-lg bg-background"
+                        className={`flex items-center gap-3 p-2 rounded-lg bg-background ${
+                          !participant.isActive && "opacity-50"
+                        }`}
                       >
                         <div
                           className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold text-white"
@@ -467,11 +755,13 @@ console.log(\`Result: \${result}\`);
                         <div className="flex-1">
                           <p className="font-medium text-sm">
                             {participant.name}
+                            {participant.id === participantId && " (You)"}
                           </p>
                           <p className="text-xs text-muted-foreground">
                             {participant.isActive ? "Active" : "Away"}
                             {participant.cursor &&
                               ` • Line ${participant.cursor.line}`}
+                            {" • " + participant.permission}
                           </p>
                         </div>
                         <div
@@ -486,49 +776,61 @@ console.log(\`Result: \${result}\`);
               <Alert>
                 <UserPlus className="h-4 w-4" />
                 <AlertDescription>
-                  Share the session ID to invite more collaborators
+                  Share the session ID or use the Share button to invite more collaborators
                 </AlertDescription>
               </Alert>
             </TabsContent>
 
-            <TabsContent
-              value="chat"
-              className="px-4 pb-4 flex flex-col h-full"
-            >
-              <Card className="flex-1 flex flex-col">
+            <TabsContent value="ai" className="px-4 pb-4 space-y-4">
+              <Card>
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2">
-                    <MessageSquare className="w-5 h-5" />
-                    Team Chat
+                    <Brain className="w-5 h-5" />
+                    AI Assistant
                   </CardTitle>
+                  <CardDescription>
+                    Get AI-powered code analysis and suggestions
+                  </CardDescription>
                 </CardHeader>
-                <CardContent className="flex-1 flex flex-col">
-                  <div className="flex-1 space-y-3 overflow-y-auto max-h-64 mb-4">
-                    {chatMessages.map((msg) => (
-                      <div key={msg.id} className="text-sm">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="font-medium">{msg.sender}</span>
-                          <span className="text-xs text-muted-foreground">
-                            {msg.timestamp.toLocaleTimeString()}
-                          </span>
-                        </div>
-                        <p className="text-muted-foreground">{msg.message}</p>
-                      </div>
-                    ))}
-                  </div>
+                <CardContent className="space-y-4">
                   <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      onKeyPress={(e) => e.key === "Enter" && sendMessage()}
-                      placeholder="Type a message..."
-                      className="flex-1 px-3 py-2 text-sm border rounded-md"
-                    />
-                    <Button size="sm" onClick={sendMessage}>
-                      Send
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={analyzeCode}
+                      disabled={isAnalyzing || !code}
+                      className="flex-1"
+                    >
+                      <Brain className="w-4 h-4 mr-2" />
+                      Analyze
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={getHint}
+                      disabled={isAnalyzing || !code}
+                      className="flex-1"
+                    >
+                      <Lightbulb className="w-4 h-4 mr-2" />
+                      Get Hint
                     </Button>
                   </div>
+                  
+                  {isAnalyzing && (
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <div className="animate-spin w-4 h-4 border-2 border-primary border-t-transparent rounded-full"></div>
+                      Analyzing code...
+                    </div>
+                  )}
+                  
+                  {aiSuggestion && (
+                    <div className="p-3 bg-background rounded-lg border">
+                      <h4 className="font-medium text-sm mb-2">AI Suggestion:</h4>
+                      <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                        {aiSuggestion}
+                      </p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -544,14 +846,11 @@ console.log(\`Result: \${result}\`);
                 <CardContent className="space-y-4">
                   <div>
                     <label className="text-sm font-medium">Language</label>
-                    <select
-                      value={language}
-                      className="w-full mt-1 px-3 py-2 text-sm border rounded-md"
-                      disabled
-                    >
-                      <option value="python">Python</option>
-                      <option value="javascript">JavaScript</option>
-                    </select>
+                    <div className="mt-1">
+                      <Badge variant="outline">
+                        {session.language === "python" ? "Python" : "JavaScript"}
+                      </Badge>
+                    </div>
                   </div>
 
                   <div>
@@ -569,12 +868,25 @@ console.log(\`Result: \${result}\`);
                     </div>
                   </div>
 
+                  <div>
+                    <label className="text-sm font-medium">Session ID</label>
+                    <div className="flex gap-2 mt-1">
+                      <code className="flex-1 bg-muted px-2 py-1 rounded text-xs">
+                        {session.id}
+                      </code>
+                      <Button variant="outline" size="sm" onClick={copySessionId}>
+                        <Copy className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  </div>
+
                   <div className="space-y-2">
-                    <Button variant="outline" size="sm" className="w-full">
-                      <Settings className="w-4 h-4 mr-2" />
-                      Session Settings
+                    <Button variant="outline" size="sm" className="w-full" onClick={copySessionLink}>
+                      <Share className="w-4 h-4 mr-2" />
+                      Share Session Link
                     </Button>
-                    <Button variant="destructive" size="sm" className="w-full">
+                    <Button variant="destructive" size="sm" className="w-full" onClick={handleLeaveSession}>
+                      <LogOut className="w-4 h-4 mr-2" />
                       Leave Session
                     </Button>
                   </div>
