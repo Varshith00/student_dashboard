@@ -31,11 +31,11 @@ export default function Index() {
             <h1 className="text-2xl font-bold text-foreground">TechPrep</h1>
           </div>
           <div className="flex items-center gap-4">
-            <Link to="/login">
-              <Button variant="outline">Login</Button>
+            <Link to="/student/login">
+              <Button variant="outline">Student Login</Button>
             </Link>
-            <Link to="/login">
-              <Button>Get Started</Button>
+            <Link to="/professor/login">
+              <Button>Professor Login</Button>
             </Link>
           </div>
         </div>
