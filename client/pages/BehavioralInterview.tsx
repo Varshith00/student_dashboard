@@ -707,12 +707,6 @@ export default function BehavioralInterview() {
                         Start New Interview
                       </Button>
                     </div>
-                    <div className="text-center mt-2">
-                      <p className="text-sm text-muted-foreground">
-                        You will be automatically redirected to the dashboard in
-                        a few seconds...
-                      </p>
-                    </div>
                   </CardContent>
                 </Card>
               </>
