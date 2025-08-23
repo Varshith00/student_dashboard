@@ -253,13 +253,17 @@ export function createDevServer() {
       req.method === "PATCH"
     ) {
       // Skip if body already parsed or if content-type is not JSON
-      if (req.body !== undefined || req.body === null || (req as any)._bodyParsed) {
+      if (
+        req.body !== undefined ||
+        req.body === null ||
+        (req as any)._bodyParsed
+      ) {
         return next();
       }
 
       // Check if content-type is JSON
-      const contentType = req.headers['content-type'] || '';
-      if (!contentType.includes('application/json')) {
+      const contentType = req.headers["content-type"] || "";
+      if (!contentType.includes("application/json")) {
         req.body = {};
         return next();
       }
