@@ -153,7 +153,7 @@ export default function StudentDashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setActiveTab('interviews')}>
+              <Card className="hover:shadow-lg transition-shadow">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <Brain className="w-5 h-5 text-accent" />
@@ -164,10 +164,20 @@ export default function StudentDashboard() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Button variant="outline" className="w-full">
-                    <Calendar className="w-4 h-4 mr-2" />
-                    Start Interview
-                  </Button>
+                  <div className="space-y-2">
+                    <Link to="/student/interview/technical" className="w-full">
+                      <Button variant="outline" className="w-full">
+                        <Brain className="w-4 h-4 mr-2" />
+                        Technical Interview
+                      </Button>
+                    </Link>
+                    <Link to="/student/interview/behavioral" className="w-full">
+                      <Button variant="outline" className="w-full">
+                        <Calendar className="w-4 h-4 mr-2" />
+                        Behavioral Interview
+                      </Button>
+                    </Link>
+                  </div>
                 </CardContent>
               </Card>
 
