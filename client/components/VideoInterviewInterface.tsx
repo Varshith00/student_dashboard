@@ -658,15 +658,49 @@ export default function VideoInterviewInterface({
                   </Badge>
                 )}
               </div>
-              <div className="min-h-[120px] p-3 bg-muted rounded-lg">
+              <div className="min-h-[120px] p-3 bg-muted rounded-lg relative">
                 {transcribedText ? (
-                  <p className="text-sm leading-relaxed">{transcribedText}</p>
+                  <div className="space-y-2">
+                    <p className="text-sm leading-relaxed">{transcribedText}</p>
+                    {!hasMediaPermission && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const newText = prompt("Edit your answer:", transcribedText);
+                          if (newText !== null) {
+                            setTranscribedText(newText);
+                          }
+                        }}
+                      >
+                        Edit Text
+                      </Button>
+                    )}
+                  </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground italic">
-                    {isRecording
-                      ? "Start speaking... Your answer will appear here in real-time."
-                      : "Click 'Start Recording Answer' and begin speaking your response."}
-                  </p>
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground italic">
+                      {isRecording
+                        ? "Start speaking... Your answer will appear here in real-time."
+                        : hasMediaPermission
+                        ? "Click 'Start Recording Answer' and begin speaking your response."
+                        : "You can type your answer manually using the button below."}
+                    </p>
+                    {!hasMediaPermission && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const answer = prompt("Type your answer:", "");
+                          if (answer) {
+                            setTranscribedText(answer);
+                          }
+                        }}
+                      >
+                        Type Answer Manually
+                      </Button>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
