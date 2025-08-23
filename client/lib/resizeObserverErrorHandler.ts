@@ -10,7 +10,7 @@ let resizeObserverErrorSuppressed = false;
  */
 const debounce = <T extends (...args: any[]) => any>(
   func: T,
-  wait: number
+  wait: number,
 ): ((...args: Parameters<T>) => void) => {
   let timeout: NodeJS.Timeout;
   return (...args: Parameters<T>) => {
@@ -30,7 +30,7 @@ export class SafeResizeObserver {
   constructor(callback: ResizeObserverCallback, debounceMs: number = 100) {
     this.callback = callback;
     this.debouncedCallback = debounce(callback, debounceMs);
-    
+
     this.observer = new ResizeObserver((entries, observer) => {
       try {
         // Use requestAnimationFrame to avoid ResizeObserver loop errors
@@ -39,8 +39,8 @@ export class SafeResizeObserver {
         });
       } catch (error) {
         // Silently handle ResizeObserver errors to prevent console spam
-        if (!error.message?.includes('ResizeObserver loop limit exceeded')) {
-          console.warn('SafeResizeObserver error:', error);
+        if (!error.message?.includes("ResizeObserver loop limit exceeded")) {
+          console.warn("SafeResizeObserver error:", error);
         }
       }
     });
@@ -50,7 +50,7 @@ export class SafeResizeObserver {
     try {
       this.observer.observe(target, options);
     } catch (error) {
-      console.warn('Failed to observe element:', error);
+      console.warn("Failed to observe element:", error);
     }
   }
 
@@ -58,7 +58,7 @@ export class SafeResizeObserver {
     try {
       this.observer.unobserve(target);
     } catch (error) {
-      console.warn('Failed to unobserve element:', error);
+      console.warn("Failed to unobserve element:", error);
     }
   }
 
@@ -66,7 +66,7 @@ export class SafeResizeObserver {
     try {
       this.observer.disconnect();
     } catch (error) {
-      console.warn('Failed to disconnect observer:', error);
+      console.warn("Failed to disconnect observer:", error);
     }
   }
 }
@@ -86,14 +86,14 @@ export const initializeResizeObserverErrorHandling = () => {
     // Suppress ResizeObserver loop errors that are harmless but noisy
     if (
       args.length > 0 &&
-      typeof args[0] === 'string' &&
-      args[0].includes('ResizeObserver loop limit exceeded')
+      typeof args[0] === "string" &&
+      args[0].includes("ResizeObserver loop limit exceeded")
     ) {
       // Log once for debugging purposes
       if (!resizeObserverErrorSuppressed) {
         console.warn(
-          'ResizeObserver errors are being suppressed. This is normal for Monaco Editor.',
-          'If you need to debug ResizeObserver issues, set resizeObserverErrorSuppressed to false.'
+          "ResizeObserver errors are being suppressed. This is normal for Monaco Editor.",
+          "If you need to debug ResizeObserver issues, set resizeObserverErrorSuppressed to false.",
         );
         resizeObserverErrorSuppressed = true;
       }
@@ -108,12 +108,12 @@ export const initializeResizeObserverErrorHandling = () => {
   window.onerror = (message, source, lineno, colno, error) => {
     // Suppress ResizeObserver loop errors
     if (
-      typeof message === 'string' &&
-      message.includes('ResizeObserver loop limit exceeded')
+      typeof message === "string" &&
+      message.includes("ResizeObserver loop limit exceeded")
     ) {
       return true; // Prevent default error handling
     }
-    
+
     // Call original handler for other errors
     if (originalErrorHandler) {
       return originalErrorHandler(message, source, lineno, colno, error);
@@ -122,18 +122,21 @@ export const initializeResizeObserverErrorHandling = () => {
   };
 
   // Handle unhandled promise rejections that might be ResizeObserver related
-  window.addEventListener('unhandledrejection', (event) => {
+  window.addEventListener("unhandledrejection", (event) => {
     if (
       event.reason &&
-      typeof event.reason.message === 'string' &&
-      event.reason.message.includes('ResizeObserver')
+      typeof event.reason.message === "string" &&
+      event.reason.message.includes("ResizeObserver")
     ) {
       event.preventDefault();
-      console.warn('Suppressed ResizeObserver promise rejection:', event.reason.message);
+      console.warn(
+        "Suppressed ResizeObserver promise rejection:",
+        event.reason.message,
+      );
     }
   });
 
-  console.log('✅ ResizeObserver error handling initialized');
+  console.log("✅ ResizeObserver error handling initialized");
 };
 
 /**
@@ -142,15 +145,15 @@ export const initializeResizeObserverErrorHandling = () => {
 export const createMonacoResizeObserverConfig = () => ({
   // Disable automatic layout to prevent ResizeObserver conflicts
   automaticLayout: false,
-  
+
   // Custom resize handling
   scrollBeyondLastLine: false,
   smoothScrolling: false,
-  
+
   // Performance optimizations
-  renderLineHighlight: 'none' as const,
+  renderLineHighlight: "none" as const,
   renderIndentGuides: false,
-  
+
   // Reduce unnecessary computations
   folding: false,
   lineDecorationsWidth: 0,
@@ -168,7 +171,7 @@ export const useSafeMonacoMount = (callback: () => void, deps: any[] = []) => {
         callback();
       }, 0);
     } catch (error) {
-      console.warn('Monaco mount error:', error);
+      console.warn("Monaco mount error:", error);
     }
   };
 };
@@ -179,33 +182,33 @@ export const useSafeMonacoMount = (callback: () => void, deps: any[] = []) => {
 export const createResizeSafeContainer = (element: HTMLElement) => {
   // Add stable dimensions to prevent layout thrashing
   if (!element.style.width) {
-    element.style.width = '100%';
+    element.style.width = "100%";
   }
   if (!element.style.height) {
-    element.style.height = '100%';
+    element.style.height = "100%";
   }
-  
+
   // Ensure the container has layout
-  if (element.style.display === 'none') {
-    element.style.display = 'block';
+  if (element.style.display === "none") {
+    element.style.display = "block";
   }
-  
+
   // Add resize observer with debouncing
   const observer = new SafeResizeObserver((entries) => {
     for (const entry of entries) {
       const { width, height } = entry.contentRect;
       if (width > 0 && height > 0) {
         // Trigger Monaco Editor layout update
-        const event = new CustomEvent('monaco-resize', {
-          detail: { width, height }
+        const event = new CustomEvent("monaco-resize", {
+          detail: { width, height },
         });
         element.dispatchEvent(event);
       }
     }
   }, 150); // 150ms debounce
-  
+
   observer.observe(element);
-  
+
   return () => {
     observer.disconnect();
   };

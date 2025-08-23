@@ -1,6 +1,12 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import {
@@ -20,7 +26,7 @@ import {
   TrendingUp,
   Users2,
   Monitor,
-  Sparkles
+  Sparkles,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -29,18 +35,18 @@ import { problems } from "@/data/problems";
 export default function StudentDashboard() {
   const navigate = useNavigate();
   const { user, logout, isLoading } = useAuth();
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState("overview");
 
   // Redirect if not logged in or not a student
   useEffect(() => {
-    if (!isLoading && (!user || user.role !== 'student')) {
-      navigate('/login');
+    if (!isLoading && (!user || user.role !== "student")) {
+      navigate("/login");
     }
   }, [user, isLoading, navigate]);
 
   const handleLogout = () => {
     logout();
-    navigate('/');
+    navigate("/");
   };
 
   if (isLoading) {
@@ -51,7 +57,7 @@ export default function StudentDashboard() {
     );
   }
 
-  if (!user || user.role !== 'student') {
+  if (!user || user.role !== "student") {
     return null;
   }
 
@@ -83,48 +89,48 @@ export default function StudentDashboard() {
         {/* Navigation Tabs */}
         <div className="flex gap-2 mb-8 overflow-x-auto">
           <Button
-            variant={activeTab === 'overview' ? 'default' : 'outline'}
-            onClick={() => setActiveTab('overview')}
+            variant={activeTab === "overview" ? "default" : "outline"}
+            onClick={() => setActiveTab("overview")}
             className="whitespace-nowrap"
           >
             <BarChart3 className="w-4 h-4 mr-2" />
             Overview
           </Button>
           <Button
-            variant={activeTab === 'coding' ? 'default' : 'outline'}
-            onClick={() => setActiveTab('coding')}
+            variant={activeTab === "coding" ? "default" : "outline"}
+            onClick={() => setActiveTab("coding")}
             className="whitespace-nowrap"
           >
             <Code className="w-4 h-4 mr-2" />
             Coding Practice
           </Button>
           <Button
-            variant={activeTab === 'interviews' ? 'default' : 'outline'}
-            onClick={() => setActiveTab('interviews')}
+            variant={activeTab === "interviews" ? "default" : "outline"}
+            onClick={() => setActiveTab("interviews")}
             className="whitespace-nowrap"
           >
             <Brain className="w-4 h-4 mr-2" />
             Mock Interviews
           </Button>
           <Button
-            variant={activeTab === 'progress' ? 'default' : 'outline'}
-            onClick={() => setActiveTab('progress')}
+            variant={activeTab === "progress" ? "default" : "outline"}
+            onClick={() => setActiveTab("progress")}
             className="whitespace-nowrap"
           >
             <TrendingUp className="w-4 h-4 mr-2" />
             Progress
           </Button>
           <Button
-            variant={activeTab === 'pair-programming' ? 'default' : 'outline'}
-            onClick={() => setActiveTab('pair-programming')}
+            variant={activeTab === "pair-programming" ? "default" : "outline"}
+            onClick={() => setActiveTab("pair-programming")}
             className="whitespace-nowrap"
           >
             <Users2 className="w-4 h-4 mr-2" />
             Pair Programming
           </Button>
           <Button
-            variant={activeTab === 'web-editor' ? 'default' : 'outline'}
-            onClick={() => setActiveTab('web-editor')}
+            variant={activeTab === "web-editor" ? "default" : "outline"}
+            onClick={() => setActiveTab("web-editor")}
             className="whitespace-nowrap"
           >
             <Monitor className="w-4 h-4 mr-2" />
@@ -132,7 +138,7 @@ export default function StudentDashboard() {
           </Button>
         </div>
 
-        {activeTab === 'overview' && (
+        {activeTab === "overview" && (
           <div className="space-y-6">
             {/* Welcome Section */}
             <Card>
@@ -148,16 +154,28 @@ export default function StudentDashboard() {
               <CardContent>
                 <div className="grid md:grid-cols-3 gap-6">
                   <div className="text-center p-4 bg-primary/5 rounded-lg">
-                    <div className="text-3xl font-bold text-primary mb-2">47</div>
-                    <div className="text-sm text-muted-foreground">Problems Solved</div>
+                    <div className="text-3xl font-bold text-primary mb-2">
+                      47
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      Problems Solved
+                    </div>
                   </div>
                   <div className="text-center p-4 bg-accent/5 rounded-lg">
-                    <div className="text-3xl font-bold text-accent mb-2">12</div>
-                    <div className="text-sm text-muted-foreground">Mock Interviews</div>
+                    <div className="text-3xl font-bold text-accent mb-2">
+                      12
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      Mock Interviews
+                    </div>
                   </div>
                   <div className="text-center p-4 bg-success/5 rounded-lg">
-                    <div className="text-3xl font-bold text-success mb-2">85%</div>
-                    <div className="text-sm text-muted-foreground">Success Rate</div>
+                    <div className="text-3xl font-bold text-success mb-2">
+                      85%
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      Success Rate
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -186,7 +204,7 @@ export default function StudentDashboard() {
                     <Button
                       variant="outline"
                       className="w-full"
-                      onClick={() => setActiveTab('coding')}
+                      onClick={() => setActiveTab("coding")}
                     >
                       View All Problems
                     </Button>
@@ -228,9 +246,7 @@ export default function StudentDashboard() {
                     <Users className="w-5 h-5 text-warning" />
                     Peer Study
                   </CardTitle>
-                  <CardDescription>
-                    Join collaborative sessions
-                  </CardDescription>
+                  <CardDescription>Join collaborative sessions</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Button variant="secondary" className="w-full">
@@ -252,7 +268,10 @@ export default function StudentDashboard() {
                 </CardHeader>
                 <CardContent>
                   <Link to="/ai/question-generator" className="w-full">
-                    <Button variant="outline" className="w-full border-accent text-accent hover:bg-accent hover:text-accent-foreground">
+                    <Button
+                      variant="outline"
+                      className="w-full border-accent text-accent hover:bg-accent hover:text-accent-foreground"
+                    >
                       <Brain className="w-4 h-4 mr-2" />
                       Generate Questions
                     </Button>
@@ -265,31 +284,45 @@ export default function StudentDashboard() {
             <Card>
               <CardHeader>
                 <CardTitle>Recent Activity</CardTitle>
-                <CardDescription>Your latest progress and achievements</CardDescription>
+                <CardDescription>
+                  Your latest progress and achievements
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg">
                     <CheckCircle className="w-6 h-6 text-success" />
                     <div className="flex-1">
-                      <p className="font-medium">Completed "Binary Search Tree" problem</p>
-                      <p className="text-sm text-muted-foreground">2 hours ago</p>
+                      <p className="font-medium">
+                        Completed "Binary Search Tree" problem
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        2 hours ago
+                      </p>
                     </div>
                     <Badge variant="secondary">Medium</Badge>
                   </div>
                   <div className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg">
                     <Brain className="w-6 h-6 text-accent" />
                     <div className="flex-1">
-                      <p className="font-medium">Mock interview: Technical Round</p>
+                      <p className="font-medium">
+                        Mock interview: Technical Round
+                      </p>
                       <p className="text-sm text-muted-foreground">Yesterday</p>
                     </div>
-                    <Badge className="bg-accent text-accent-foreground">Excellent</Badge>
+                    <Badge className="bg-accent text-accent-foreground">
+                      Excellent
+                    </Badge>
                   </div>
                   <div className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg">
                     <Trophy className="w-6 h-6 text-warning" />
                     <div className="flex-1">
-                      <p className="font-medium">Achieved "Problem Solver" badge</p>
-                      <p className="text-sm text-muted-foreground">3 days ago</p>
+                      <p className="font-medium">
+                        Achieved "Problem Solver" badge
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        3 days ago
+                      </p>
                     </div>
                     <Badge variant="outline">New</Badge>
                   </div>
@@ -299,7 +332,7 @@ export default function StudentDashboard() {
           </div>
         )}
 
-        {activeTab === 'coding' && (
+        {activeTab === "coding" && (
           <div className="space-y-6">
             <Card>
               <CardHeader>
@@ -316,32 +349,45 @@ export default function StudentDashboard() {
                   {problems.map((problem) => {
                     const getDifficultyColor = () => {
                       switch (problem.difficulty) {
-                        case 'Easy': return 'bg-success text-success-foreground';
-                        case 'Medium': return 'bg-warning text-warning-foreground';
-                        case 'Hard': return 'bg-destructive text-destructive-foreground';
-                        default: return 'bg-secondary text-secondary-foreground';
+                        case "Easy":
+                          return "bg-success text-success-foreground";
+                        case "Medium":
+                          return "bg-warning text-warning-foreground";
+                        case "Hard":
+                          return "bg-destructive text-destructive-foreground";
+                        default:
+                          return "bg-secondary text-secondary-foreground";
                       }
                     };
 
                     const getIconColor = () => {
                       switch (problem.difficulty) {
-                        case 'Easy': return 'text-success';
-                        case 'Medium': return 'text-warning';
-                        case 'Hard': return 'text-destructive';
-                        default: return 'text-primary';
+                        case "Easy":
+                          return "text-success";
+                        case "Medium":
+                          return "text-warning";
+                        case "Hard":
+                          return "text-destructive";
+                        default:
+                          return "text-primary";
                       }
                     };
 
                     return (
-                      <div key={problem.id} className="flex items-center justify-between p-4 border rounded-lg hover:border-primary/50 transition-colors">
+                      <div
+                        key={problem.id}
+                        className="flex items-center justify-between p-4 border rounded-lg hover:border-primary/50 transition-colors"
+                      >
                         <div className="flex items-center gap-4">
-                          <div className={`w-12 h-12 bg-${problem.difficulty === 'Easy' ? 'success' : problem.difficulty === 'Medium' ? 'warning' : 'destructive'}/10 rounded-lg flex items-center justify-center`}>
+                          <div
+                            className={`w-12 h-12 bg-${problem.difficulty === "Easy" ? "success" : problem.difficulty === "Medium" ? "warning" : "destructive"}/10 rounded-lg flex items-center justify-center`}
+                          >
                             <Target className={`w-6 h-6 ${getIconColor()}`} />
                           </div>
                           <div className="flex-1">
                             <h3 className="font-semibold">{problem.title}</h3>
                             <p className="text-sm text-muted-foreground line-clamp-1">
-                              {problem.tags.join(', ')}
+                              {problem.tags.join(", ")}
                             </p>
                           </div>
                         </div>
@@ -365,7 +411,7 @@ export default function StudentDashboard() {
           </div>
         )}
 
-        {activeTab === 'interviews' && (
+        {activeTab === "interviews" && (
           <div className="space-y-6">
             <Card>
               <CardHeader>
@@ -374,7 +420,8 @@ export default function StudentDashboard() {
                   AI-Powered Mock Interviews
                 </CardTitle>
                 <CardDescription>
-                  Practice technical and behavioral interviews with AI that mimics real company processes
+                  Practice technical and behavioral interviews with AI that
+                  mimics real company processes
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -408,7 +455,10 @@ export default function StudentDashboard() {
                           <span>Interactive Chat</span>
                         </div>
                       </div>
-                      <Link to="/student/interview/technical" className="w-full">
+                      <Link
+                        to="/student/interview/technical"
+                        className="w-full"
+                      >
                         <Button className="w-full">
                           <Brain className="w-4 h-4 mr-2" />
                           Start Technical Interview
@@ -446,8 +496,14 @@ export default function StudentDashboard() {
                           <span>Scenario-based Questions</span>
                         </div>
                       </div>
-                      <Link to="/student/interview/behavioral" className="w-full">
-                        <Button variant="outline" className="w-full border-accent text-accent hover:bg-accent hover:text-accent-foreground">
+                      <Link
+                        to="/student/interview/behavioral"
+                        className="w-full"
+                      >
+                        <Button
+                          variant="outline"
+                          className="w-full border-accent text-accent hover:bg-accent hover:text-accent-foreground"
+                        >
                           <Target className="w-4 h-4 mr-2" />
                           Start Behavioral Interview
                         </Button>
@@ -463,7 +519,9 @@ export default function StudentDashboard() {
                   </h3>
                   <div className="grid md:grid-cols-2 gap-4 text-sm text-muted-foreground">
                     <div>
-                      <h4 className="font-medium text-foreground mb-1">Technical Interview:</h4>
+                      <h4 className="font-medium text-foreground mb-1">
+                        Technical Interview:
+                      </h4>
                       <ul className="space-y-1">
                         <li>• Real-time problem solving</li>
                         <li>• Code explanation and optimization</li>
@@ -472,7 +530,9 @@ export default function StudentDashboard() {
                       </ul>
                     </div>
                     <div>
-                      <h4 className="font-medium text-foreground mb-1">Behavioral Interview:</h4>
+                      <h4 className="font-medium text-foreground mb-1">
+                        Behavioral Interview:
+                      </h4>
                       <ul className="space-y-1">
                         <li>• Situational and analytical questions</li>
                         <li>• Critical thinking puzzles</li>
@@ -487,7 +547,7 @@ export default function StudentDashboard() {
           </div>
         )}
 
-        {activeTab === 'progress' && (
+        {activeTab === "progress" && (
           <div className="space-y-6">
             <Card>
               <CardHeader>
@@ -507,28 +567,36 @@ export default function StudentDashboard() {
                       <div>
                         <div className="flex justify-between mb-2">
                           <span className="text-sm">Python Programming</span>
-                          <span className="text-sm text-muted-foreground">85%</span>
+                          <span className="text-sm text-muted-foreground">
+                            85%
+                          </span>
                         </div>
                         <Progress value={85} className="h-2" />
                       </div>
                       <div>
                         <div className="flex justify-between mb-2">
                           <span className="text-sm">Data Structures</span>
-                          <span className="text-sm text-muted-foreground">72%</span>
+                          <span className="text-sm text-muted-foreground">
+                            72%
+                          </span>
                         </div>
                         <Progress value={72} className="h-2" />
                       </div>
                       <div>
                         <div className="flex justify-between mb-2">
                           <span className="text-sm">Algorithms</span>
-                          <span className="text-sm text-muted-foreground">68%</span>
+                          <span className="text-sm text-muted-foreground">
+                            68%
+                          </span>
                         </div>
                         <Progress value={68} className="h-2" />
                       </div>
                       <div>
                         <div className="flex justify-between mb-2">
                           <span className="text-sm">Interview Skills</span>
-                          <span className="text-sm text-muted-foreground">78%</span>
+                          <span className="text-sm text-muted-foreground">
+                            78%
+                          </span>
                         </div>
                         <Progress value={78} className="h-2" />
                       </div>
@@ -573,7 +641,7 @@ export default function StudentDashboard() {
           </div>
         )}
 
-        {activeTab === 'pair-programming' && (
+        {activeTab === "pair-programming" && (
           <div className="space-y-6">
             <Card>
               <CardHeader>
@@ -648,7 +716,10 @@ export default function StudentDashboard() {
                           <p>• Works with Python and JavaScript</p>
                         </div>
                       </div>
-                      <Button variant="outline" className="w-full border-accent text-accent hover:bg-accent hover:text-accent-foreground">
+                      <Button
+                        variant="outline"
+                        className="w-full border-accent text-accent hover:bg-accent hover:text-accent-foreground"
+                      >
                         <Play className="w-4 h-4 mr-2" />
                         Join Session
                       </Button>
@@ -669,7 +740,9 @@ export default function StudentDashboard() {
                         </div>
                         <div>
                           <p className="font-medium">Binary Tree Problems</p>
-                          <p className="text-sm text-muted-foreground">With Sarah, Mike • 2 hours ago</p>
+                          <p className="text-sm text-muted-foreground">
+                            With Sarah, Mike • 2 hours ago
+                          </p>
                         </div>
                       </div>
                       <Button variant="outline" size="sm">
@@ -684,7 +757,9 @@ export default function StudentDashboard() {
                         </div>
                         <div>
                           <p className="font-medium">Algorithm Study Group</p>
-                          <p className="text-sm text-muted-foreground">With Alex, Emma, Jake • Yesterday</p>
+                          <p className="text-sm text-muted-foreground">
+                            With Alex, Emma, Jake • Yesterday
+                          </p>
                         </div>
                       </div>
                       <Badge variant="secondary">Ended</Badge>
@@ -696,7 +771,7 @@ export default function StudentDashboard() {
           </div>
         )}
 
-        {activeTab === 'web-editor' && (
+        {activeTab === "web-editor" && (
           <div className="space-y-6">
             <Card>
               <CardHeader>
@@ -705,7 +780,8 @@ export default function StudentDashboard() {
                   Advanced Web Editor
                 </CardTitle>
                 <CardDescription>
-                  Full-featured editor with AI suggestions, multi-language support, and error highlighting
+                  Full-featured editor with AI suggestions, multi-language
+                  support, and error highlighting
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -778,7 +854,10 @@ export default function StudentDashboard() {
                         </div>
                       </div>
                       <Link to="/student/editor/javascript" className="w-full">
-                        <Button variant="outline" className="w-full border-warning text-warning hover:bg-warning hover:text-warning-foreground">
+                        <Button
+                          variant="outline"
+                          className="w-full border-warning text-warning hover:bg-warning hover:text-warning-foreground"
+                        >
                           <Code className="w-4 h-4 mr-2" />
                           Open JS Editor
                         </Button>
@@ -839,11 +918,17 @@ export default function StudentDashboard() {
                               <Code className="w-4 h-4 text-primary" />
                             </div>
                             <div>
-                              <p className="font-medium">sorting_algorithms.py</p>
-                              <p className="text-sm text-muted-foreground">Modified 2 hours ago</p>
+                              <p className="font-medium">
+                                sorting_algorithms.py
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                Modified 2 hours ago
+                              </p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">Open</Button>
+                          <Button variant="outline" size="sm">
+                            Open
+                          </Button>
                         </div>
                         <div className="flex items-center justify-between p-3 bg-background/50 rounded-lg">
                           <div className="flex items-center gap-3">
@@ -852,10 +937,14 @@ export default function StudentDashboard() {
                             </div>
                             <div>
                               <p className="font-medium">todo_app.js</p>
-                              <p className="text-sm text-muted-foreground">Modified yesterday</p>
+                              <p className="text-sm text-muted-foreground">
+                                Modified yesterday
+                              </p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">Open</Button>
+                          <Button variant="outline" size="sm">
+                            Open
+                          </Button>
                         </div>
                       </div>
                     </CardContent>
@@ -870,19 +959,31 @@ export default function StudentDashboard() {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3">
-                        <Button variant="outline" className="w-full justify-start">
+                        <Button
+                          variant="outline"
+                          className="w-full justify-start"
+                        >
                           <Code className="w-4 h-4 mr-2" />
                           Python Data Structures
                         </Button>
-                        <Button variant="outline" className="w-full justify-start">
+                        <Button
+                          variant="outline"
+                          className="w-full justify-start"
+                        >
                           <Code className="w-4 h-4 mr-2" />
                           JavaScript Functions
                         </Button>
-                        <Button variant="outline" className="w-full justify-start">
+                        <Button
+                          variant="outline"
+                          className="w-full justify-start"
+                        >
                           <Code className="w-4 h-4 mr-2" />
                           Algorithm Template
                         </Button>
-                        <Button variant="outline" className="w-full justify-start">
+                        <Button
+                          variant="outline"
+                          className="w-full justify-start"
+                        >
                           <Code className="w-4 h-4 mr-2" />
                           React Component
                         </Button>

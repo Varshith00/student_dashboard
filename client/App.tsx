@@ -38,27 +38,54 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
             <Route path="/student/dashboard" element={<StudentDashboard />} />
-            <Route path="/professor/dashboard" element={<ProfessorDashboard />} />
+            <Route
+              path="/professor/dashboard"
+              element={<ProfessorDashboard />}
+            />
 
             {/* Coding practice with real Python editor */}
-            <Route path="/student/coding/:problemId" element={<CodingProblem />} />
+            <Route
+              path="/student/coding/:problemId"
+              element={<CodingProblem />}
+            />
 
             {/* AI Question Generator */}
-            <Route path="/ai/question-generator" element={<AIQuestionGenerator />} />
+            <Route
+              path="/ai/question-generator"
+              element={<AIQuestionGenerator />}
+            />
 
             {/* Interview routes */}
-            <Route path="/student/interview/technical" element={<TechnicalInterview />} />
-            <Route path="/student/interview/behavioral" element={<BehavioralInterview />} />
+            <Route
+              path="/student/interview/technical"
+              element={<TechnicalInterview />}
+            />
+            <Route
+              path="/student/interview/behavioral"
+              element={<BehavioralInterview />}
+            />
 
             {/* Collaborative Programming routes */}
-            <Route path="/student/collaboration/new" element={<CollaborationPage />} />
-            <Route path="/student/collaboration/:sessionId" element={<CollaborationPage />} />
+            <Route
+              path="/student/collaboration/new"
+              element={<CollaborationPage />}
+            />
+            <Route
+              path="/student/collaboration/:sessionId"
+              element={<CollaborationPage />}
+            />
 
             {/* Enhanced Web Editor routes */}
-            <Route path="/student/editor/:language" element={<WebEditorPage />} />
+            <Route
+              path="/student/editor/:language"
+              element={<WebEditorPage />}
+            />
 
             {/* ResizeObserver Test Route */}
-            <Route path="/test/resize-observer" element={<ResizeObserverTest />} />
+            <Route
+              path="/test/resize-observer"
+              element={<ResizeObserverTest />}
+            />
 
             {/* Placeholder routes for future features */}
             <Route

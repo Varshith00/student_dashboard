@@ -4,15 +4,24 @@ import cors from "cors";
 import { handleDemo } from "./routes/demo";
 import { handleExecutePython } from "./routes/execute-python";
 import { handleExecuteJavaScript } from "./routes/execute-javascript";
-import { handleGenerateQuestion, handleAnalyzeCode, handleGetHint } from "./routes/ai-questions";
-import { handleRegister, handleLogin, handleGetUser, authMiddleware } from "./routes/auth";
+import {
+  handleGenerateQuestion,
+  handleAnalyzeCode,
+  handleGetHint,
+} from "./routes/ai-questions";
+import {
+  handleRegister,
+  handleLogin,
+  handleGetUser,
+  authMiddleware,
+} from "./routes/auth";
 import {
   handleStartTechnicalInterview,
   handleTechnicalInterviewMessage,
   handleEndTechnicalInterview,
   handleStartBehavioralInterview,
   handleBehavioralInterviewMessage,
-  handleEndBehavioralInterview
+  handleEndBehavioralInterview,
 } from "./routes/interview";
 
 export function createServer() {
@@ -20,7 +29,7 @@ export function createServer() {
 
   // Middleware
   app.use(cors());
-  app.use(express.json({ limit: '10mb' })); // Increase limit for code submissions
+  app.use(express.json({ limit: "10mb" })); // Increase limit for code submissions
   app.use(express.urlencoded({ extended: true }));
 
   // Example API routes
@@ -44,12 +53,36 @@ export function createServer() {
   app.post("/api/ai/get-hint", authMiddleware, handleGetHint);
 
   // Interview routes
-  app.post("/api/interview/technical/start", authMiddleware, handleStartTechnicalInterview);
-  app.post("/api/interview/technical/message", authMiddleware, handleTechnicalInterviewMessage);
-  app.post("/api/interview/technical/end", authMiddleware, handleEndTechnicalInterview);
-  app.post("/api/interview/behavioral/start", authMiddleware, handleStartBehavioralInterview);
-  app.post("/api/interview/behavioral/message", authMiddleware, handleBehavioralInterviewMessage);
-  app.post("/api/interview/behavioral/end", authMiddleware, handleEndBehavioralInterview);
+  app.post(
+    "/api/interview/technical/start",
+    authMiddleware,
+    handleStartTechnicalInterview,
+  );
+  app.post(
+    "/api/interview/technical/message",
+    authMiddleware,
+    handleTechnicalInterviewMessage,
+  );
+  app.post(
+    "/api/interview/technical/end",
+    authMiddleware,
+    handleEndTechnicalInterview,
+  );
+  app.post(
+    "/api/interview/behavioral/start",
+    authMiddleware,
+    handleStartBehavioralInterview,
+  );
+  app.post(
+    "/api/interview/behavioral/message",
+    authMiddleware,
+    handleBehavioralInterviewMessage,
+  );
+  app.post(
+    "/api/interview/behavioral/end",
+    authMiddleware,
+    handleEndBehavioralInterview,
+  );
 
   return app;
 }

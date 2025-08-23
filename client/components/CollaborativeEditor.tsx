@@ -1,7 +1,13 @@
 import { useState, useRef, useEffect } from "react";
 import { Editor } from "@monaco-editor/react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -26,7 +32,7 @@ import {
   CheckCircle,
   XCircle,
   Eye,
-  Edit
+  Edit,
 } from "lucide-react";
 
 interface Participant {
@@ -39,40 +45,70 @@ interface Participant {
 
 interface CollaborativeEditorProps {
   sessionId?: string;
-  language?: 'python' | 'javascript';
+  language?: "python" | "javascript";
 }
 
-export default function CollaborativeEditor({ sessionId, language = 'python' }: CollaborativeEditorProps) {
+export default function CollaborativeEditor({
+  sessionId,
+  language = "python",
+}: CollaborativeEditorProps) {
   const editorRef = useRef<any>(null);
   const [code, setCode] = useState(getDefaultCode(language));
-  const [output, setOutput] = useState('');
+  const [output, setOutput] = useState("");
   const [isRunning, setIsRunning] = useState(false);
   const [executionTime, setExecutionTime] = useState<number | null>(null);
   const [hasError, setHasError] = useState(false);
-  
+
   // Collaboration features
   const [participants, setParticipants] = useState<Participant[]>([
-    { id: '1', name: 'You', color: '#3b82f6', isActive: true },
-    { id: '2', name: 'Alex Chen', color: '#ef4444', cursor: { line: 5, column: 10 }, isActive: true },
-    { id: '3', name: 'Sarah Johnson', color: '#22c55e', cursor: { line: 12, column: 0 }, isActive: false }
+    { id: "1", name: "You", color: "#3b82f6", isActive: true },
+    {
+      id: "2",
+      name: "Alex Chen",
+      color: "#ef4444",
+      cursor: { line: 5, column: 10 },
+      isActive: true,
+    },
+    {
+      id: "3",
+      name: "Sarah Johnson",
+      color: "#22c55e",
+      cursor: { line: 12, column: 0 },
+      isActive: false,
+    },
   ]);
-  
+
   const [isConnected, setIsConnected] = useState(true);
   const [isMicOn, setIsMicOn] = useState(false);
   const [isVideoOn, setIsVideoOn] = useState(false);
   const [isHost, setIsHost] = useState(true);
-  const [permission, setPermission] = useState<'write' | 'read'>('write');
-  
+  const [permission, setPermission] = useState<"write" | "read">("write");
+
   // Chat
   const [chatMessages, setChatMessages] = useState([
-    { id: '1', sender: 'Alex Chen', message: 'Hey, ready to work on this together?', timestamp: new Date(Date.now() - 300000) },
-    { id: '2', sender: 'You', message: 'Yes! Let\'s start with the algorithm approach', timestamp: new Date(Date.now() - 240000) },
-    { id: '3', sender: 'Sarah Johnson', message: 'I think we should use a recursive solution', timestamp: new Date(Date.now() - 180000) }
+    {
+      id: "1",
+      sender: "Alex Chen",
+      message: "Hey, ready to work on this together?",
+      timestamp: new Date(Date.now() - 300000),
+    },
+    {
+      id: "2",
+      sender: "You",
+      message: "Yes! Let's start with the algorithm approach",
+      timestamp: new Date(Date.now() - 240000),
+    },
+    {
+      id: "3",
+      sender: "Sarah Johnson",
+      message: "I think we should use a recursive solution",
+      timestamp: new Date(Date.now() - 180000),
+    },
   ]);
-  const [newMessage, setNewMessage] = useState('');
+  const [newMessage, setNewMessage] = useState("");
 
-  function getDefaultCode(lang: 'python' | 'javascript') {
-    if (lang === 'python') {
+  function getDefaultCode(lang: "python" | "javascript") {
+    if (lang === "python") {
       return `# Collaborative Python Session
 # Problem: Two Sum - Find two numbers that add up to target
 
@@ -119,16 +155,19 @@ console.log(\`Result: \${result}\`);
 
   const runCode = async () => {
     setIsRunning(true);
-    setOutput('');
+    setOutput("");
     setHasError(false);
     setExecutionTime(null);
 
     const startTime = Date.now();
 
     try {
-      const endpoint = language === 'python' ? '/api/execute-python' : '/api/execute-javascript';
+      const endpoint =
+        language === "python"
+          ? "/api/execute-python"
+          : "/api/execute-javascript";
       const response = await authFetch(endpoint, {
-        method: 'POST',
+        method: "POST",
         body: JSON.stringify({ code }),
       });
 
@@ -137,14 +176,16 @@ console.log(\`Result: \${result}\`);
       setExecutionTime(endTime - startTime);
 
       if (result.success) {
-        setOutput(result.output || 'Code executed successfully (no output)');
+        setOutput(result.output || "Code executed successfully (no output)");
         setHasError(false);
       } else {
-        setOutput(result.error || 'An error occurred');
+        setOutput(result.error || "An error occurred");
         setHasError(true);
       }
     } catch (error) {
-      setOutput(`Network error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setOutput(
+        `Network error: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
       setHasError(true);
       setExecutionTime(Date.now() - startTime);
     }
@@ -160,13 +201,16 @@ console.log(\`Result: \${result}\`);
 
   const sendMessage = () => {
     if (newMessage.trim()) {
-      setChatMessages(prev => [...prev, {
-        id: Date.now().toString(),
-        sender: 'You',
-        message: newMessage,
-        timestamp: new Date()
-      }]);
-      setNewMessage('');
+      setChatMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          sender: "You",
+          message: newMessage,
+          timestamp: new Date(),
+        },
+      ]);
+      setNewMessage("");
     }
   };
 
@@ -189,13 +233,15 @@ console.log(\`Result: \${result}\`);
             </div>
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">Session ID:</span>
-              <code className="bg-muted px-2 py-1 rounded text-sm">{sessionId || 'demo-123'}</code>
+              <code className="bg-muted px-2 py-1 rounded text-sm">
+                {sessionId || "demo-123"}
+              </code>
               <Button variant="outline" size="sm" onClick={copySessionLink}>
                 <Copy className="w-4 h-4" />
               </Button>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2">
             {/* Participants */}
             <div className="flex items-center gap-1 border-r pr-2 mr-2">
@@ -203,7 +249,7 @@ console.log(\`Result: \${result}\`);
                 <div
                   key={participant.id}
                   className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold text-white relative ${
-                    participant.isActive ? '' : 'opacity-50'
+                    participant.isActive ? "" : "opacity-50"
                   }`}
                   style={{ backgroundColor: participant.color }}
                   title={participant.name}
@@ -224,17 +270,25 @@ console.log(\`Result: \${result}\`);
               variant="outline"
               size="sm"
               onClick={() => setIsMicOn(!isMicOn)}
-              className={isMicOn ? 'bg-success/10 border-success' : ''}
+              className={isMicOn ? "bg-success/10 border-success" : ""}
             >
-              {isMicOn ? <Mic className="w-4 h-4" /> : <MicOff className="w-4 h-4" />}
+              {isMicOn ? (
+                <Mic className="w-4 h-4" />
+              ) : (
+                <MicOff className="w-4 h-4" />
+              )}
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={() => setIsVideoOn(!isVideoOn)}
-              className={isVideoOn ? 'bg-success/10 border-success' : ''}
+              className={isVideoOn ? "bg-success/10 border-success" : ""}
             >
-              {isVideoOn ? <Video className="w-4 h-4" /> : <VideoOff className="w-4 h-4" />}
+              {isVideoOn ? (
+                <Video className="w-4 h-4" />
+              ) : (
+                <VideoOff className="w-4 h-4" />
+              )}
             </Button>
 
             <Button variant="outline" size="sm">
@@ -253,10 +307,18 @@ console.log(\`Result: \${result}\`);
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Code className="w-5 h-5 text-primary" />
-                <span className="font-semibold">{language === 'python' ? 'Python' : 'JavaScript'} Editor</span>
-                <Badge variant={permission === 'write' ? 'default' : 'secondary'}>
-                  {permission === 'write' ? <Edit className="w-3 h-3 mr-1" /> : <Eye className="w-3 h-3 mr-1" />}
-                  {permission === 'write' ? 'Can Edit' : 'Read Only'}
+                <span className="font-semibold">
+                  {language === "python" ? "Python" : "JavaScript"} Editor
+                </span>
+                <Badge
+                  variant={permission === "write" ? "default" : "secondary"}
+                >
+                  {permission === "write" ? (
+                    <Edit className="w-3 h-3 mr-1" />
+                  ) : (
+                    <Eye className="w-3 h-3 mr-1" />
+                  )}
+                  {permission === "write" ? "Can Edit" : "Read Only"}
                 </Badge>
               </div>
               <div className="flex items-center gap-2">
@@ -297,24 +359,24 @@ console.log(\`Result: \${result}\`);
               height="100%"
               defaultLanguage={language}
               value={code}
-              onChange={(value) => setCode(value || '')}
+              onChange={(value) => setCode(value || "")}
               onMount={handleEditorDidMount}
               theme="vs-dark"
               options={{
                 minimap: { enabled: false },
                 fontSize: 14,
-                lineNumbers: 'on',
+                lineNumbers: "on",
                 roundedSelection: false,
                 scrollBeyondLastLine: false,
                 automaticLayout: true,
-                tabSize: language === 'python' ? 4 : 2,
+                tabSize: language === "python" ? 4 : 2,
                 insertSpaces: true,
-                wordWrap: 'on',
+                wordWrap: "on",
                 bracketPairColorization: { enabled: true },
                 guides: {
                   indentation: true,
-                  bracketPairs: true
-                }
+                  bracketPairs: true,
+                },
               }}
             />
           </div>
@@ -339,8 +401,10 @@ console.log(\`Result: \${result}\`);
                   ) : (
                     <CheckCircle className="w-4 h-4 text-success" />
                   )}
-                  <span className={`text-sm ${hasError ? 'text-destructive' : 'text-success'}`}>
-                    {hasError ? 'Error' : 'Success'}
+                  <span
+                    className={`text-sm ${hasError ? "text-destructive" : "text-success"}`}
+                  >
+                    {hasError ? "Error" : "Success"}
                   </span>
                 </div>
               )}
@@ -352,14 +416,17 @@ console.log(\`Result: \${result}\`);
                   Executing code...
                 </div>
               ) : output ? (
-                <pre className={`text-sm whitespace-pre-wrap font-mono ${
-                  hasError ? 'text-destructive' : 'text-foreground'
-                }`}>
+                <pre
+                  className={`text-sm whitespace-pre-wrap font-mono ${
+                    hasError ? "text-destructive" : "text-foreground"
+                  }`}
+                >
                   {output}
                 </pre>
               ) : (
                 <p className="text-muted-foreground text-sm">
-                  Click "Run Code" to execute your {language} code. Output will appear here.
+                  Click "Run Code" to execute your {language} code. Output will
+                  appear here.
                 </p>
               )}
             </div>
@@ -374,19 +441,23 @@ console.log(\`Result: \${result}\`);
               <TabsTrigger value="chat">Chat</TabsTrigger>
               <TabsTrigger value="settings">Settings</TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="participants" className="px-4 pb-4 space-y-4">
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg">Participants</CardTitle>
                   <CardDescription>
-                    {participants.filter(p => p.isActive).length} of {participants.length} active
+                    {participants.filter((p) => p.isActive).length} of{" "}
+                    {participants.length} active
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
                     {participants.map((participant) => (
-                      <div key={participant.id} className="flex items-center gap-3 p-2 rounded-lg bg-background">
+                      <div
+                        key={participant.id}
+                        className="flex items-center gap-3 p-2 rounded-lg bg-background"
+                      >
                         <div
                           className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold text-white"
                           style={{ backgroundColor: participant.color }}
@@ -394,13 +465,18 @@ console.log(\`Result: \${result}\`);
                           {participant.name.charAt(0).toUpperCase()}
                         </div>
                         <div className="flex-1">
-                          <p className="font-medium text-sm">{participant.name}</p>
+                          <p className="font-medium text-sm">
+                            {participant.name}
+                          </p>
                           <p className="text-xs text-muted-foreground">
-                            {participant.isActive ? 'Active' : 'Away'}
-                            {participant.cursor && ` • Line ${participant.cursor.line}`}
+                            {participant.isActive ? "Active" : "Away"}
+                            {participant.cursor &&
+                              ` • Line ${participant.cursor.line}`}
                           </p>
                         </div>
-                        <div className={`w-2 h-2 rounded-full ${participant.isActive ? 'bg-success' : 'bg-muted-foreground'}`}></div>
+                        <div
+                          className={`w-2 h-2 rounded-full ${participant.isActive ? "bg-success" : "bg-muted-foreground"}`}
+                        ></div>
                       </div>
                     ))}
                   </div>
@@ -414,8 +490,11 @@ console.log(\`Result: \${result}\`);
                 </AlertDescription>
               </Alert>
             </TabsContent>
-            
-            <TabsContent value="chat" className="px-4 pb-4 flex flex-col h-full">
+
+            <TabsContent
+              value="chat"
+              className="px-4 pb-4 flex flex-col h-full"
+            >
               <Card className="flex-1 flex flex-col">
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2">
@@ -442,7 +521,7 @@ console.log(\`Result: \${result}\`);
                       type="text"
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                      onKeyPress={(e) => e.key === "Enter" && sendMessage()}
                       placeholder="Type a message..."
                       className="flex-1 px-3 py-2 text-sm border rounded-md"
                     />
@@ -465,8 +544,8 @@ console.log(\`Result: \${result}\`);
                 <CardContent className="space-y-4">
                   <div>
                     <label className="text-sm font-medium">Language</label>
-                    <select 
-                      value={language} 
+                    <select
+                      value={language}
                       className="w-full mt-1 px-3 py-2 text-sm border rounded-md"
                       disabled
                     >
@@ -474,12 +553,18 @@ console.log(\`Result: \${result}\`);
                       <option value="javascript">JavaScript</option>
                     </select>
                   </div>
-                  
+
                   <div>
-                    <label className="text-sm font-medium">Your Permission</label>
+                    <label className="text-sm font-medium">
+                      Your Permission
+                    </label>
                     <div className="mt-1">
-                      <Badge variant={permission === 'write' ? 'default' : 'secondary'}>
-                        {permission === 'write' ? 'Editor' : 'Viewer'}
+                      <Badge
+                        variant={
+                          permission === "write" ? "default" : "secondary"
+                        }
+                      >
+                        {permission === "write" ? "Editor" : "Viewer"}
                       </Badge>
                     </div>
                   </div>

@@ -1,7 +1,13 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Editor } from "@monaco-editor/react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,7 +15,7 @@ import { authFetch } from "@/contexts/AuthContext";
 import {
   SafeResizeObserver,
   createMonacoResizeObserverConfig,
-  createResizeSafeContainer
+  createResizeSafeContainer,
 } from "@/lib/resizeObserverErrorHandler";
 import {
   Play,
@@ -36,39 +42,46 @@ import {
   BarChart3,
   HelpCircle,
   BookOpen,
-  Wand2
+  Wand2,
 } from "lucide-react";
 
 interface EnhancedWebEditorProps {
-  language?: 'python' | 'javascript';
+  language?: "python" | "javascript";
   fileName?: string;
 }
 
 interface AIError {
   line: number;
   message: string;
-  severity: 'error' | 'warning' | 'info';
+  severity: "error" | "warning" | "info";
   suggestion?: string;
 }
 
 interface AICompletion {
   text: string;
   description: string;
-  type: 'function' | 'variable' | 'keyword' | 'snippet';
+  type: "function" | "variable" | "keyword" | "snippet";
 }
 
-export default function EnhancedWebEditor({ language = 'python', fileName }: EnhancedWebEditorProps) {
+export default function EnhancedWebEditor({
+  language = "python",
+  fileName,
+}: EnhancedWebEditorProps) {
   const editorRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const resizeCleanupRef = useRef<(() => void) | null>(null);
-  const [currentLanguage, setCurrentLanguage] = useState<'python' | 'javascript'>(language);
+  const [currentLanguage, setCurrentLanguage] = useState<
+    "python" | "javascript"
+  >(language);
   const [code, setCode] = useState(getDefaultCode(currentLanguage));
-  const [output, setOutput] = useState('');
+  const [output, setOutput] = useState("");
   const [isRunning, setIsRunning] = useState(false);
   const [executionTime, setExecutionTime] = useState<number | null>(null);
   const [hasError, setHasError] = useState(false);
-  const [currentFileName, setCurrentFileName] = useState(fileName || `main.${currentLanguage === 'python' ? 'py' : 'js'}`);
-  
+  const [currentFileName, setCurrentFileName] = useState(
+    fileName || `main.${currentLanguage === "python" ? "py" : "js"}`,
+  );
+
   // AI Features
   const [aiErrors, setAiErrors] = useState<AIError[]>([]);
   const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
@@ -76,16 +89,16 @@ export default function EnhancedWebEditor({ language = 'python', fileName }: Enh
   const [autoComplete, setAutoComplete] = useState(true);
   const [aiInsights, setAiInsights] = useState<any>(null);
   const [showAISidebar, setShowAISidebar] = useState(false);
-  
+
   // Editor features
   const [fontSize, setFontSize] = useState(14);
-  const [theme, setTheme] = useState<'vs-dark' | 'light' | 'vs'>('vs-dark');
+  const [theme, setTheme] = useState<"vs-dark" | "light" | "vs">("vs-dark");
   const [showMinimap, setShowMinimap] = useState(false);
-  const [wordWrap, setWordWrap] = useState<'on' | 'off'>('on');
+  const [wordWrap, setWordWrap] = useState<"on" | "off">("on");
   const [autoSave, setAutoSave] = useState(true);
 
-  function getDefaultCode(lang: 'python' | 'javascript') {
-    if (lang === 'python') {
+  function getDefaultCode(lang: "python" | "javascript") {
+    if (lang === "python") {
       return `"""
 Enhanced Python Editor with AI Features
 This editor provides:
@@ -239,12 +252,12 @@ class DataProcessor {
   const analyzeCodeWithAI = async () => {
     setIsAnalyzing(true);
     try {
-      const response = await authFetch('/api/ai/analyze-code', {
-        method: 'POST',
+      const response = await authFetch("/api/ai/analyze-code", {
+        method: "POST",
         body: JSON.stringify({
           code,
           language: currentLanguage,
-          analysis_type: 'comprehensive'
+          analysis_type: "comprehensive",
         }),
       });
 
@@ -255,41 +268,44 @@ class DataProcessor {
         setAiErrors([
           {
             line: 45,
-            message: 'Potential undefined variable',
-            severity: 'warning',
-            suggestion: 'Consider initializing the variable before use'
+            message: "Potential undefined variable",
+            severity: "warning",
+            suggestion: "Consider initializing the variable before use",
           },
           {
             line: 23,
-            message: 'This function could be optimized',
-            severity: 'info',
-            suggestion: 'Use list comprehension for better performance'
-          }
+            message: "This function could be optimized",
+            severity: "info",
+            suggestion: "Use list comprehension for better performance",
+          },
         ]);
         setAiSuggestions([
-          'Add type hints for better code clarity',
-          'Consider using async/await for better performance',
-          'Add error handling for edge cases'
+          "Add type hints for better code clarity",
+          "Consider using async/await for better performance",
+          "Add error handling for edge cases",
         ]);
       }
     } catch (error) {
-      console.error('AI analysis error:', error);
+      console.error("AI analysis error:", error);
     }
     setIsAnalyzing(false);
   };
 
   const runCode = async () => {
     setIsRunning(true);
-    setOutput('');
+    setOutput("");
     setHasError(false);
     setExecutionTime(null);
 
     const startTime = Date.now();
 
     try {
-      const endpoint = currentLanguage === 'python' ? '/api/execute-python' : '/api/execute-javascript';
+      const endpoint =
+        currentLanguage === "python"
+          ? "/api/execute-python"
+          : "/api/execute-javascript";
       const response = await authFetch(endpoint, {
-        method: 'POST',
+        method: "POST",
         body: JSON.stringify({ code }),
       });
 
@@ -298,14 +314,16 @@ class DataProcessor {
       setExecutionTime(endTime - startTime);
 
       if (result.success) {
-        setOutput(result.output || 'Code executed successfully (no output)');
+        setOutput(result.output || "Code executed successfully (no output)");
         setHasError(false);
       } else {
-        setOutput(result.error || 'An error occurred');
+        setOutput(result.error || "An error occurred");
         setHasError(true);
       }
     } catch (error) {
-      setOutput(`Network error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setOutput(
+        `Network error: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
       setHasError(true);
       setExecutionTime(Date.now() - startTime);
     }
@@ -313,96 +331,109 @@ class DataProcessor {
     setIsRunning(false);
   };
 
-  const switchLanguage = (newLang: 'python' | 'javascript') => {
+  const switchLanguage = (newLang: "python" | "javascript") => {
     setCurrentLanguage(newLang);
     setCode(getDefaultCode(newLang));
-    setCurrentFileName(`main.${newLang === 'python' ? 'py' : 'js'}`);
-    setOutput('');
+    setCurrentFileName(`main.${newLang === "python" ? "py" : "js"}`);
+    setOutput("");
     setAiErrors([]);
     setAiSuggestions([]);
     setAiInsights(null);
   };
 
   const saveFile = () => {
-    const blob = new Blob([code], { type: 'text/plain' });
+    const blob = new Blob([code], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = currentFileName;
     a.click();
     URL.revokeObjectURL(url);
   };
 
-  const handleEditorDidMount = useCallback((editor: any) => {
-    editorRef.current = editor;
+  const handleEditorDidMount = useCallback(
+    (editor: any) => {
+      editorRef.current = editor;
 
-    // Setup resize-safe container
-    if (containerRef.current && !resizeCleanupRef.current) {
-      resizeCleanupRef.current = createResizeSafeContainer(containerRef.current);
+      // Setup resize-safe container
+      if (containerRef.current && !resizeCleanupRef.current) {
+        resizeCleanupRef.current = createResizeSafeContainer(
+          containerRef.current,
+        );
 
-      // Listen for custom resize events
-      containerRef.current.addEventListener('monaco-resize', () => {
-        try {
-          editor.layout();
-        } catch (error) {
-          console.warn('Editor layout error:', error);
-        }
-      });
-    }
-
-    // Manual layout trigger with debouncing
-    const layoutEditor = () => {
-      try {
-        if (editor && typeof editor.layout === 'function') {
-          // Use requestAnimationFrame to avoid ResizeObserver conflicts
-          requestAnimationFrame(() => {
+        // Listen for custom resize events
+        containerRef.current.addEventListener("monaco-resize", () => {
+          try {
             editor.layout();
-          });
-        }
-      } catch (error) {
-        console.warn('Editor layout error:', error);
+          } catch (error) {
+            console.warn("Editor layout error:", error);
+          }
+        });
       }
-    };
 
-    // Setup safe resize observer for manual layout
-    const resizeObserver = new SafeResizeObserver(() => {
-      layoutEditor();
-    }, 200);
-
-    if (containerRef.current) {
-      resizeObserver.observe(containerRef.current);
-    }
-
-    // Add AI error markers with safety
-    setTimeout(() => {
-      try {
-        if (aiErrors.length > 0 && editor) {
-          const markers = aiErrors.map(error => ({
-            startLineNumber: error.line,
-            endLineNumber: error.line,
-            startColumn: 1,
-            endColumn: 1000,
-            message: error.message,
-            severity: error.severity === 'error' ? 8 : error.severity === 'warning' ? 4 : 1
-          }));
-          editor.deltaDecorations([], markers);
+      // Manual layout trigger with debouncing
+      const layoutEditor = () => {
+        try {
+          if (editor && typeof editor.layout === "function") {
+            // Use requestAnimationFrame to avoid ResizeObserver conflicts
+            requestAnimationFrame(() => {
+              editor.layout();
+            });
+          }
+        } catch (error) {
+          console.warn("Editor layout error:", error);
         }
-      } catch (error) {
-        console.warn('Error setting editor markers:', error);
-      }
-    }, 1000);
+      };
 
-    // Cleanup function
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, [aiErrors]);
+      // Setup safe resize observer for manual layout
+      const resizeObserver = new SafeResizeObserver(() => {
+        layoutEditor();
+      }, 200);
+
+      if (containerRef.current) {
+        resizeObserver.observe(containerRef.current);
+      }
+
+      // Add AI error markers with safety
+      setTimeout(() => {
+        try {
+          if (aiErrors.length > 0 && editor) {
+            const markers = aiErrors.map((error) => ({
+              startLineNumber: error.line,
+              endLineNumber: error.line,
+              startColumn: 1,
+              endColumn: 1000,
+              message: error.message,
+              severity:
+                error.severity === "error"
+                  ? 8
+                  : error.severity === "warning"
+                    ? 4
+                    : 1,
+            }));
+            editor.deltaDecorations([], markers);
+          }
+        } catch (error) {
+          console.warn("Error setting editor markers:", error);
+        }
+      }, 1000);
+
+      // Cleanup function
+      return () => {
+        resizeObserver.disconnect();
+      };
+    },
+    [aiErrors],
+  );
 
   // Auto-save functionality
   useEffect(() => {
     if (autoSave) {
       const timer = setTimeout(() => {
-        localStorage.setItem(`code_${currentLanguage}_${currentFileName}`, code);
+        localStorage.setItem(
+          `code_${currentLanguage}_${currentFileName}`,
+          code,
+        );
       }, 2000);
       return () => clearTimeout(timer);
     }
@@ -441,22 +472,22 @@ class DataProcessor {
               />
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2">
             {/* Language Switcher */}
             <div className="flex items-center gap-1 border rounded-md p-1">
               <Button
-                variant={currentLanguage === 'python' ? 'default' : 'ghost'}
+                variant={currentLanguage === "python" ? "default" : "ghost"}
                 size="sm"
-                onClick={() => switchLanguage('python')}
+                onClick={() => switchLanguage("python")}
                 className="h-7"
               >
                 Python
               </Button>
               <Button
-                variant={currentLanguage === 'javascript' ? 'default' : 'ghost'}
+                variant={currentLanguage === "javascript" ? "default" : "ghost"}
                 size="sm"
-                onClick={() => switchLanguage('javascript')}
+                onClick={() => switchLanguage("javascript")}
                 className="h-7"
               >
                 JavaScript
@@ -472,7 +503,7 @@ class DataProcessor {
               variant="outline"
               size="sm"
               onClick={() => setShowAISidebar(!showAISidebar)}
-              className={showAISidebar ? 'bg-accent/10 border-accent' : ''}
+              className={showAISidebar ? "bg-accent/10 border-accent" : ""}
             >
               <Brain className="w-4 h-4 mr-2" />
               AI Assistant
@@ -483,29 +514,41 @@ class DataProcessor {
 
       <div className="flex-1 flex">
         {/* Main Editor */}
-        <div className={`${showAISidebar ? 'flex-1' : 'w-full'} flex flex-col`}>
+        <div className={`${showAISidebar ? "flex-1" : "w-full"} flex flex-col`}>
           {/* Toolbar */}
           <div className="border-b p-3 bg-background/95 backdrop-blur">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="flex items-center gap-1">
                   <Zap className="w-3 h-3" />
-                  {currentLanguage.charAt(0).toUpperCase() + currentLanguage.slice(1)}
+                  {currentLanguage.charAt(0).toUpperCase() +
+                    currentLanguage.slice(1)}
                 </Badge>
                 {aiErrors.length > 0 && (
-                  <Badge variant="destructive" className="flex items-center gap-1">
+                  <Badge
+                    variant="destructive"
+                    className="flex items-center gap-1"
+                  >
                     <AlertTriangle className="w-3 h-3" />
-                    {aiErrors.filter(e => e.severity === 'error').length} errors
+                    {aiErrors.filter((e) => e.severity === "error").length}{" "}
+                    errors
                   </Badge>
                 )}
-                {aiErrors.filter(e => e.severity === 'warning').length > 0 && (
-                  <Badge variant="secondary" className="flex items-center gap-1">
+                {aiErrors.filter((e) => e.severity === "warning").length >
+                  0 && (
+                  <Badge
+                    variant="secondary"
+                    className="flex items-center gap-1"
+                  >
                     <AlertTriangle className="w-3 h-3" />
-                    {aiErrors.filter(e => e.severity === 'warning').length} warnings
+                    {
+                      aiErrors.filter((e) => e.severity === "warning").length
+                    }{" "}
+                    warnings
                   </Badge>
                 )}
               </div>
-              
+
               <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
@@ -520,7 +563,7 @@ class DataProcessor {
                   )}
                   AI Analyze
                 </Button>
-                
+
                 <Button
                   variant="outline"
                   size="sm"
@@ -554,35 +597,39 @@ class DataProcessor {
           </div>
 
           {/* Editor */}
-          <div ref={containerRef} className="flex-1" style={{ width: '100%', height: '100%' }}>
+          <div
+            ref={containerRef}
+            className="flex-1"
+            style={{ width: "100%", height: "100%" }}
+          >
             <Editor
               height="100%"
               language={currentLanguage}
               value={code}
-              onChange={(value) => setCode(value || '')}
+              onChange={(value) => setCode(value || "")}
               onMount={handleEditorDidMount}
               theme={theme}
               options={{
                 ...createMonacoResizeObserverConfig(),
                 minimap: { enabled: showMinimap },
                 fontSize: fontSize,
-                lineNumbers: 'on',
+                lineNumbers: "on",
                 roundedSelection: false,
-                tabSize: currentLanguage === 'python' ? 4 : 2,
+                tabSize: currentLanguage === "python" ? 4 : 2,
                 insertSpaces: true,
                 wordWrap: wordWrap,
                 bracketPairColorization: { enabled: true },
                 guides: {
                   indentation: true,
-                  bracketPairs: true
+                  bracketPairs: true,
                 },
                 suggestOnTriggerCharacters: true,
                 quickSuggestions: autoComplete,
                 parameterHints: { enabled: true },
-                autoClosingBrackets: 'always',
-                autoClosingQuotes: 'always',
+                autoClosingBrackets: "always",
+                autoClosingQuotes: "always",
                 formatOnType: true,
-                formatOnPaste: true
+                formatOnPaste: true,
               }}
             />
           </div>
@@ -607,8 +654,10 @@ class DataProcessor {
                   ) : (
                     <CheckCircle className="w-4 h-4 text-success" />
                   )}
-                  <span className={`text-sm ${hasError ? 'text-destructive' : 'text-success'}`}>
-                    {hasError ? 'Error' : 'Success'}
+                  <span
+                    className={`text-sm ${hasError ? "text-destructive" : "text-success"}`}
+                  >
+                    {hasError ? "Error" : "Success"}
                   </span>
                 </div>
               )}
@@ -620,14 +669,17 @@ class DataProcessor {
                   Executing {currentLanguage} code...
                 </div>
               ) : output ? (
-                <pre className={`text-sm whitespace-pre-wrap font-mono ${
-                  hasError ? 'text-destructive' : 'text-foreground'
-                }`}>
+                <pre
+                  className={`text-sm whitespace-pre-wrap font-mono ${
+                    hasError ? "text-destructive" : "text-foreground"
+                  }`}
+                >
                   {output}
                 </pre>
               ) : (
                 <p className="text-muted-foreground text-sm">
-                  Click "Run Code" to execute your {currentLanguage} code. Output will appear here.
+                  Click "Run Code" to execute your {currentLanguage} code.
+                  Output will appear here.
                 </p>
               )}
             </div>
@@ -643,7 +695,7 @@ class DataProcessor {
                 <TabsTrigger value="suggestions">Hints</TabsTrigger>
                 <TabsTrigger value="settings">Settings</TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="analysis" className="px-4 pb-4 space-y-4">
                 <Card>
                   <CardHeader>
@@ -660,28 +712,44 @@ class DataProcessor {
                       <div className="space-y-3">
                         <div className="grid grid-cols-2 gap-2 text-sm">
                           <div className="text-center p-2 bg-primary/5 rounded">
-                            <div className="font-bold text-primary">{aiInsights.score || 85}</div>
-                            <div className="text-xs text-muted-foreground">Quality Score</div>
+                            <div className="font-bold text-primary">
+                              {aiInsights.score || 85}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              Quality Score
+                            </div>
                           </div>
                           <div className="text-center p-2 bg-success/5 rounded">
-                            <div className="font-bold text-success">{aiInsights.complexity || 'Medium'}</div>
-                            <div className="text-xs text-muted-foreground">Complexity</div>
+                            <div className="font-bold text-success">
+                              {aiInsights.complexity || "Medium"}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              Complexity
+                            </div>
                           </div>
                         </div>
-                        
+
                         {aiErrors.length > 0 && (
                           <div>
-                            <h4 className="font-semibold text-sm mb-2">Issues Found:</h4>
+                            <h4 className="font-semibold text-sm mb-2">
+                              Issues Found:
+                            </h4>
                             <div className="space-y-2">
                               {aiErrors.map((error, index) => (
-                                <Alert key={index} className={
-                                  error.severity === 'error' ? 'border-destructive' :
-                                  error.severity === 'warning' ? 'border-warning' : 
-                                  'border-primary'
-                                }>
+                                <Alert
+                                  key={index}
+                                  className={
+                                    error.severity === "error"
+                                      ? "border-destructive"
+                                      : error.severity === "warning"
+                                        ? "border-warning"
+                                        : "border-primary"
+                                  }
+                                >
                                   <AlertTriangle className="h-4 w-4" />
                                   <AlertDescription>
-                                    <strong>Line {error.line}:</strong> {error.message}
+                                    <strong>Line {error.line}:</strong>{" "}
+                                    {error.message}
                                     {error.suggestion && (
                                       <div className="mt-1 text-xs text-muted-foreground">
                                         {error.suggestion}
@@ -698,13 +766,15 @@ class DataProcessor {
                       <div className="text-center text-muted-foreground py-4">
                         <Brain className="w-12 h-12 mx-auto mb-3 text-muted-foreground/50" />
                         <p className="font-medium mb-2">No Analysis Yet</p>
-                        <p className="text-sm">Click "AI Analyze" to get insights</p>
+                        <p className="text-sm">
+                          Click "AI Analyze" to get insights
+                        </p>
                       </div>
                     )}
                   </CardContent>
                 </Card>
               </TabsContent>
-              
+
               <TabsContent value="suggestions" className="px-4 pb-4 space-y-4">
                 <Card>
                   <CardHeader>
@@ -722,12 +792,10 @@ class DataProcessor {
                         {aiSuggestions.map((suggestion, index) => (
                           <Alert key={index}>
                             <Wand2 className="h-4 w-4" />
-                            <AlertDescription>
-                              {suggestion}
-                            </AlertDescription>
+                            <AlertDescription>{suggestion}</AlertDescription>
                           </Alert>
                         ))}
-                        
+
                         <Button variant="outline" size="sm" className="w-full">
                           <HelpCircle className="w-4 h-4 mr-2" />
                           Get More Suggestions
@@ -737,7 +805,9 @@ class DataProcessor {
                       <div className="text-center text-muted-foreground py-4">
                         <Lightbulb className="w-12 h-12 mx-auto mb-3 text-muted-foreground/50" />
                         <p className="font-medium mb-2">No Suggestions Yet</p>
-                        <p className="text-sm">Write some code to get AI suggestions</p>
+                        <p className="text-sm">
+                          Write some code to get AI suggestions
+                        </p>
                       </div>
                     )}
                   </CardContent>
@@ -751,19 +821,35 @@ class DataProcessor {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    <Button variant="outline" size="sm" className="w-full justify-start">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full justify-start"
+                    >
                       <Sparkles className="w-4 h-4 mr-2" />
                       Optimize Performance
                     </Button>
-                    <Button variant="outline" size="sm" className="w-full justify-start">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full justify-start"
+                    >
                       <Zap className="w-4 h-4 mr-2" />
                       Add Error Handling
                     </Button>
-                    <Button variant="outline" size="sm" className="w-full justify-start">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full justify-start"
+                    >
                       <FileText className="w-4 h-4 mr-2" />
                       Generate Documentation
                     </Button>
-                    <Button variant="outline" size="sm" className="w-full justify-start">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full justify-start"
+                    >
                       <Search className="w-4 h-4 mr-2" />
                       Explain Code
                     </Button>
@@ -782,8 +868,8 @@ class DataProcessor {
                   <CardContent className="space-y-4">
                     <div>
                       <label className="text-sm font-medium">Theme</label>
-                      <select 
-                        value={theme} 
+                      <select
+                        value={theme}
                         onChange={(e) => setTheme(e.target.value as any)}
                         className="w-full mt-1 px-3 py-2 text-sm border rounded-md"
                       >
@@ -792,11 +878,11 @@ class DataProcessor {
                         <option value="vs">Classic</option>
                       </select>
                     </div>
-                    
+
                     <div>
                       <label className="text-sm font-medium">Font Size</label>
-                      <select 
-                        value={fontSize} 
+                      <select
+                        value={fontSize}
                         onChange={(e) => setFontSize(Number(e.target.value))}
                         className="w-full mt-1 px-3 py-2 text-sm border rounded-md"
                       >
@@ -809,37 +895,39 @@ class DataProcessor {
 
                     <div className="space-y-2">
                       <label className="flex items-center gap-2">
-                        <input 
-                          type="checkbox" 
+                        <input
+                          type="checkbox"
                           checked={showMinimap}
                           onChange={(e) => setShowMinimap(e.target.checked)}
                         />
                         <span className="text-sm">Show Minimap</span>
                       </label>
-                      
+
                       <label className="flex items-center gap-2">
-                        <input 
-                          type="checkbox" 
+                        <input
+                          type="checkbox"
                           checked={autoComplete}
                           onChange={(e) => setAutoComplete(e.target.checked)}
                         />
                         <span className="text-sm">AI Auto-completion</span>
                       </label>
-                      
+
                       <label className="flex items-center gap-2">
-                        <input 
-                          type="checkbox" 
+                        <input
+                          type="checkbox"
                           checked={autoSave}
                           onChange={(e) => setAutoSave(e.target.checked)}
                         />
                         <span className="text-sm">Auto Save</span>
                       </label>
-                      
+
                       <label className="flex items-center gap-2">
-                        <input 
-                          type="checkbox" 
-                          checked={wordWrap === 'on'}
-                          onChange={(e) => setWordWrap(e.target.checked ? 'on' : 'off')}
+                        <input
+                          type="checkbox"
+                          checked={wordWrap === "on"}
+                          onChange={(e) =>
+                            setWordWrap(e.target.checked ? "on" : "off")
+                          }
                         />
                         <span className="text-sm">Word Wrap</span>
                       </label>

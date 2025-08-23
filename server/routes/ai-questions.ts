@@ -4,7 +4,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!);
 
 interface GenerateQuestionRequest {
-  difficulty?: 'Easy' | 'Medium' | 'Hard';
+  difficulty?: "Easy" | "Medium" | "Hard";
   topic?: string;
   language?: string;
 }
@@ -12,7 +12,7 @@ interface GenerateQuestionRequest {
 interface GeneratedQuestion {
   title: string;
   description: string;
-  difficulty: 'Easy' | 'Medium' | 'Hard';
+  difficulty: "Easy" | "Medium" | "Hard";
   starter_code: string;
   test_cases: Array<{
     input: string;
@@ -30,7 +30,11 @@ interface GenerateQuestionResponse {
 
 export const handleGenerateQuestion: RequestHandler = async (req, res) => {
   try {
-    const { difficulty = 'Medium', topic = 'algorithms', language = 'Python' } = req.body as GenerateQuestionRequest;
+    const {
+      difficulty = "Medium",
+      topic = "algorithms",
+      language = "Python",
+    } = req.body as GenerateQuestionRequest;
 
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
@@ -78,26 +82,30 @@ Generate a completely new problem - don't use common problems like Two Sum or Fi
     // Extract JSON from the response
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      throw new Error('Failed to extract valid JSON from AI response');
+      throw new Error("Failed to extract valid JSON from AI response");
     }
 
     const questionData = JSON.parse(jsonMatch[0]) as GeneratedQuestion;
 
     // Validate the response structure
-    if (!questionData.title || !questionData.description || !questionData.starter_code) {
-      throw new Error('Invalid question structure received from AI');
+    if (
+      !questionData.title ||
+      !questionData.description ||
+      !questionData.starter_code
+    ) {
+      throw new Error("Invalid question structure received from AI");
     }
 
     res.json({
       success: true,
-      question: questionData
+      question: questionData,
     } as GenerateQuestionResponse);
-
   } catch (error) {
-    console.error('Generate question error:', error);
+    console.error("Generate question error:", error);
     res.status(500).json({
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to generate question'
+      error:
+        error instanceof Error ? error.message : "Failed to generate question",
     } as GenerateQuestionResponse);
   }
 };
@@ -106,10 +114,10 @@ export const handleAnalyzeCode: RequestHandler = async (req, res) => {
   try {
     const { code, problem_description } = req.body;
 
-    if (!code || typeof code !== 'string') {
+    if (!code || typeof code !== "string") {
       return res.status(400).json({
         success: false,
-        error: 'Code is required'
+        error: "Code is required",
       });
     }
 
@@ -118,7 +126,7 @@ export const handleAnalyzeCode: RequestHandler = async (req, res) => {
     const prompt = `
 Analyze this Python code solution and provide detailed feedback:
 
-Problem Context: ${problem_description || 'General code analysis'}
+Problem Context: ${problem_description || "General code analysis"}
 
 Code to analyze:
 \`\`\`python
@@ -150,21 +158,20 @@ Be constructive and educational in your feedback.
     // Extract JSON from the response
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      throw new Error('Failed to extract valid JSON from AI response');
+      throw new Error("Failed to extract valid JSON from AI response");
     }
 
     const analysisData = JSON.parse(jsonMatch[0]);
 
     res.json({
       success: true,
-      analysis: analysisData
+      analysis: analysisData,
     });
-
   } catch (error) {
-    console.error('Code analysis error:', error);
+    console.error("Code analysis error:", error);
     res.status(500).json({
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to analyze code'
+      error: error instanceof Error ? error.message : "Failed to analyze code",
     });
   }
 };
@@ -178,7 +185,7 @@ export const handleGetHint: RequestHandler = async (req, res) => {
     const hintPrompts = {
       1: "Give a gentle nudge in the right direction without revealing the solution",
       2: "Provide a more specific hint about the algorithm or approach to use",
-      3: "Give a detailed explanation of the solution strategy"
+      3: "Give a detailed explanation of the solution strategy",
     };
 
     const prompt = `
@@ -187,7 +194,7 @@ ${problem_description}
 
 Their current code attempt:
 \`\`\`python
-${code || 'No code written yet'}
+${code || "No code written yet"}
 \`\`\`
 
 Hint level requested: ${hint_level} (${hintPrompts[hint_level as keyof typeof hintPrompts]})
@@ -209,21 +216,20 @@ Make the hint appropriate for the requested level and educational.
     // Extract JSON from the response
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      throw new Error('Failed to extract valid JSON from AI response');
+      throw new Error("Failed to extract valid JSON from AI response");
     }
 
     const hintData = JSON.parse(jsonMatch[0]);
 
     res.json({
       success: true,
-      hint: hintData
+      hint: hintData,
     });
-
   } catch (error) {
-    console.error('Get hint error:', error);
+    console.error("Get hint error:", error);
     res.status(500).json({
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to generate hint'
+      error: error instanceof Error ? error.message : "Failed to generate hint",
     });
   }
 };
