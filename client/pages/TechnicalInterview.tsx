@@ -91,8 +91,14 @@ export default function TechnicalInterview() {
     setIsStarting(false);
   };
 
-  const handleVideoAnswer = async (transcribedText: string) => {
+  const handleVideoAnswer = async (transcribedText: string, analysis?: any) => {
     if (!transcribedText.trim() || !session || isLoading) return;
+
+    // Store analysis data if available for future use
+    if (analysis) {
+      console.log('Answer analysis:', analysis);
+      // Could store this in session state or send to server for tracking
+    }
 
     await sendMessageInternal(transcribedText);
   };
