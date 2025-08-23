@@ -400,7 +400,7 @@ export default function BehavioralInterview() {
     <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/10 flex flex-col">
       {/* Header */}
       <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+        <div className="container mx-auto px-4 py-2 lg:py-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
@@ -416,60 +416,64 @@ export default function BehavioralInterview() {
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="flex items-center gap-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="outline" className="flex items-center gap-1 text-xs">
                 <Clock className="w-3 h-3" />
                 {session.status === "active" ? "In Progress" : "Completed"}
               </Badge>
               {session.status === "completed" && session.score && (
-                <Badge variant="secondary" className="flex items-center gap-1">
+                <Badge variant="secondary" className="flex items-center gap-1 text-xs">
                   <Star className="w-3 h-3" />
                   {session.score}/100
                 </Badge>
               )}
               {session.status === "active" && (
-                <div className="flex items-center gap-1 ml-2">
+                <div className="flex items-center gap-1">
                   <Button
                     variant={interviewMode === "video" ? "default" : "outline"}
                     size="sm"
                     onClick={() => setInterviewMode("video")}
-                    className="h-8"
+                    className="h-7 text-xs px-2"
                   >
                     <Video className="w-3 h-3 mr-1" />
-                    Video
+                    <span className="hidden sm:inline">Video</span>
                   </Button>
                   <Button
                     variant={interviewMode === "chat" ? "default" : "outline"}
                     size="sm"
                     onClick={() => setInterviewMode("chat")}
-                    className="h-8"
+                    className="h-7 text-xs px-2"
                   >
                     <MessageCircle className="w-3 h-3 mr-1" />
-                    Chat
+                    <span className="hidden sm:inline">Chat</span>
                   </Button>
                 </div>
               )}
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             {session.status === "active" && (
               <Button
                 variant="outline"
                 size="sm"
                 onClick={endInterview}
                 disabled={isLoading}
+                className="text-xs px-2 sm:px-3"
               >
-                End Interview
+                <span className="hidden sm:inline">End Interview</span>
+                <span className="sm:hidden">End</span>
               </Button>
             )}
             <Button
               variant="outline"
               size="sm"
               onClick={() => navigate("/student/dashboard")}
+              className="text-xs px-2 sm:px-3"
             >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Dashboard
+              <ArrowLeft className="w-4 h-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Dashboard</span>
+              <span className="sm:hidden">Back</span>
             </Button>
           </div>
         </div>
