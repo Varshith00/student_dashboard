@@ -141,10 +141,23 @@ export const handleGetStudents: RequestHandler = async (req, res) => {
   try {
     const professor = (req as any).user;
 
-    // In a real app, fetch students assigned to this professor
-    const students = studentProfiles.map((student) => {
+    if (professor.role !== 'professor') {
+      return res.status(403).json({
+        success: false,
+        error: "Access denied. Only professors can view students."
+      });
+    }
+
+    // Load all users and filter students mapped to this professor
+    const allUsers = loadUsers();
+    const mappedStudents = allUsers.filter(
+      user => user.role === 'student' && user.professorId === professor.id
+    );
+
+    // Process each student's data
+    const students = mappedStudents.map((student) => {
       const studentAssignments = assignments.filter(
-        (a) => a.studentId === student.id,
+        (a) => a.studentId === student.id && a.professorId === professor.id,
       );
       const completedAssignments = studentAssignments.filter(
         (a) => a.status === "completed",
@@ -159,21 +172,31 @@ export const handleGetStudents: RequestHandler = async (req, res) => {
         0,
       );
 
+      // Calculate last active (for demo, using created date with some random offset)
+      const lastActiveTime = new Date(student.createdAt);
+      lastActiveTime.setTime(lastActiveTime.getTime() + Math.random() * 7 * 24 * 60 * 60 * 1000); // Add random time up to 7 days
+
       return {
-        ...student,
+        id: student.id,
+        name: student.name,
+        email: student.email,
         progress: Math.round(averageScore),
         problemsSolved: completedAssignments.length,
         totalAssignments: studentAssignments.length,
         averageScore: Math.round(averageScore),
         totalTimeSpent,
+        interviewScore: Math.round(75 + Math.random() * 25), // Mock interview score
         status:
-          new Date(student.lastActive) >
-          new Date(Date.now() - 24 * 60 * 60 * 1000)
+          lastActiveTime > new Date(Date.now() - 24 * 60 * 60 * 1000)
             ? "active"
             : "inactive",
+        lastActive: lastActiveTime.toLocaleDateString(),
+        currentProblem: studentAssignments.find(a => a.status === 'in_progress')?.problemId ||
+                      (studentAssignments.length > 0 ? "No active problem" : "Not started"),
         currentAssignments: studentAssignments.filter(
           (a) => a.status !== "completed",
         ),
+        joinedAt: student.createdAt,
       };
     });
 
