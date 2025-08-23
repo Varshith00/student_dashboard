@@ -1,6 +1,8 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
+import { createServer as createHttpServer } from "http";
+import { Server } from "socket.io";
 import { handleDemo } from "./routes/demo";
 import { handleExecutePython } from "./routes/execute-python";
 import { handleExecuteJavaScript } from "./routes/execute-javascript";
@@ -51,6 +53,66 @@ import {
 
 export function createServer() {
   const app = express();
+  const httpServer = createHttpServer(app);
+  const io = new Server(httpServer, {
+    cors: {
+      origin: "*",
+      methods: ["GET", "POST"]
+    }
+  });
+
+  // Socket.io connection handling
+  io.on('connection', (socket) => {
+    console.log('User connected:', socket.id);
+
+    // Join collaboration session
+    socket.on('join-session', (sessionId) => {
+      socket.join(sessionId);
+      console.log(`Socket ${socket.id} joined session ${sessionId}`);
+    });
+
+    // Leave collaboration session
+    socket.on('leave-session', (sessionId) => {
+      socket.leave(sessionId);
+      console.log(`Socket ${socket.id} left session ${sessionId}`);
+    });
+
+    // Handle code changes
+    socket.on('code-change', (data) => {
+      const { sessionId, code, cursor, participantId } = data;
+      // Broadcast to all other participants in the session
+      socket.to(sessionId).emit('code-update', {
+        code,
+        cursor,
+        participantId
+      });
+    });
+
+    // Handle cursor position updates
+    socket.on('cursor-update', (data) => {
+      const { sessionId, cursor, participantId } = data;
+      socket.to(sessionId).emit('cursor-update', {
+        cursor,
+        participantId
+      });
+    });
+
+    // Handle participant status updates
+    socket.on('participant-update', (data) => {
+      const { sessionId, participantId, status } = data;
+      socket.to(sessionId).emit('participant-update', {
+        participantId,
+        status
+      });
+    });
+
+    socket.on('disconnect', () => {
+      console.log('User disconnected:', socket.id);
+    });
+  });
+
+  // Make io instance available to routes
+  app.set('io', io);
 
   // Middleware
   app.use(cors());
@@ -164,5 +226,5 @@ export function createServer() {
   app.post("/api/collaboration/update", authMiddleware, updateCode);
   app.post("/api/collaboration/leave", authMiddleware, leaveSession);
 
-  return app;
+  return { app, httpServer, io };
 }
