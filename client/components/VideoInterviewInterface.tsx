@@ -28,11 +28,14 @@ interface VideoInterviewInterfaceProps {
   focus?: string[];
 }
 
-export default function VideoInterviewInterface({ 
-  question, 
-  onAnswerSubmit, 
+export default function VideoInterviewInterface({
+  question,
+  onAnswerSubmit,
   isLoading = false,
-  disabled = false 
+  disabled = false,
+  interviewType,
+  difficulty,
+  focus = []
 }: VideoInterviewInterfaceProps) {
   const [isVideoEnabled, setIsVideoEnabled] = useState(true);
   const [isAudioEnabled, setIsAudioEnabled] = useState(true);
