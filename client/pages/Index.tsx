@@ -57,12 +57,12 @@ export default function Index() {
             prepare students for tech careers with one unified system.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/login">
+            <Link to="/student/login">
               <Button size="lg" className="text-lg px-8">
                 Start Learning <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </Link>
-            <Link to="/login">
+            <Link to="/professor/login">
               <Button variant="outline" size="lg" className="text-lg px-8">
                 I'm a Professor <UserCheck className="ml-2 w-5 h-5" />
               </Button>
