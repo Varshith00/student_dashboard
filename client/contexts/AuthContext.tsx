@@ -13,6 +13,7 @@ interface AuthContextType {
   register: (email: string, password: string, name: string, role: 'student' | 'professor') => Promise<{ success: boolean; message?: string }>;
   logout: () => void;
   isLoading: boolean;
+  setAuthData: (user: User, token: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -87,6 +88,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  // Alternative login function for direct user/token setting (for separate login pages)
+  const setAuthData = (user: User, token: string) => {
+    localStorage.setItem('authToken', token);
+    setUser(user);
+  };
+
   const register = async (email: string, password: string, name: string, role: 'student' | 'professor') => {
     try {
       const response = await fetch('/api/auth/register', {
@@ -123,6 +130,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     register,
     logout,
     isLoading,
+    setAuthData,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
