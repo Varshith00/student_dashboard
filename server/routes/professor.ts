@@ -4,6 +4,33 @@ import path from "path";
 import { readFileSync, writeFileSync, existsSync } from "fs";
 import { join } from "path";
 
+// User interface matching auth.ts
+interface User {
+  id: string;
+  email: string;
+  password: string;
+  name: string;
+  role: 'student' | 'professor';
+  professorId?: string; // For students - which professor they're mapped to
+  createdAt: string;
+}
+
+const USERS_FILE = join(process.cwd(), 'server/data/users.json');
+
+// Helper functions for user data
+const loadUsers = (): User[] => {
+  try {
+    if (!existsSync(USERS_FILE)) {
+      return [];
+    }
+    const data = readFileSync(USERS_FILE, 'utf8');
+    return JSON.parse(data);
+  } catch (error) {
+    console.error('Error loading users:', error);
+    return [];
+  }
+};
+
 // In-memory storage for demo (in production, use a proper database)
 interface Assignment {
   id: string;
