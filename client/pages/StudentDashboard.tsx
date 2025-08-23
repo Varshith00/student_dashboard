@@ -114,6 +114,22 @@ export default function StudentDashboard() {
             <TrendingUp className="w-4 h-4 mr-2" />
             Progress
           </Button>
+          <Button
+            variant={activeTab === 'pair-programming' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('pair-programming')}
+            className="whitespace-nowrap"
+          >
+            <Users2 className="w-4 h-4 mr-2" />
+            Pair Programming
+          </Button>
+          <Button
+            variant={activeTab === 'web-editor' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('web-editor')}
+            className="whitespace-nowrap"
+          >
+            <Monitor className="w-4 h-4 mr-2" />
+            Web Editor
+          </Button>
         </div>
 
         {activeTab === 'overview' && (
