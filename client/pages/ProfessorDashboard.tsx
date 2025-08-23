@@ -431,6 +431,65 @@ export default function ProfessorDashboard() {
 
         {activeTab === 'analytics' && (
           <div className="space-y-6">
+            {/* Key Metrics Overview */}
+            <div className="grid md:grid-cols-4 gap-6">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center">
+                    <Users className="w-8 h-8 text-primary" />
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-muted-foreground">Total Students</p>
+                      <p className="text-2xl font-bold">{students.length}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center">
+                    <Calendar className="w-8 h-8 text-accent" />
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-muted-foreground">Active Assignments</p>
+                      <p className="text-2xl font-bold">
+                        {assignments.filter(a => a.status !== 'completed').length}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center">
+                    <TrendingUp className="w-8 h-8 text-success" />
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-muted-foreground">Completion Rate</p>
+                      <p className="text-2xl font-bold">
+                        {assignments.length > 0
+                          ? Math.round((assignments.filter(a => a.status === 'completed').length / assignments.length) * 100)
+                          : 0}%
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center">
+                    <Clock className="w-8 h-8 text-warning" />
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-muted-foreground">Avg. Time Spent</p>
+                      <p className="text-2xl font-bold">
+                        {assignments.length > 0
+                          ? Math.round(assignments.reduce((sum, a) => sum + a.timeSpent, 0) / assignments.length)
+                          : 0}min
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Class Performance Analytics */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -444,72 +503,181 @@ export default function ProfessorDashboard() {
               <CardContent>
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <h3 className="font-semibold mb-3">Overall Class Progress</h3>
+                    <h3 className="font-semibold mb-3">Student Progress Distribution</h3>
                     <div className="space-y-4">
-                      <div>
-                        <div className="flex justify-between mb-2">
-                          <span className="text-sm">Python Programming</span>
-                          <span className="text-sm text-muted-foreground">82%</span>
-                        </div>
-                        <Progress value={82} className="h-2" />
-                      </div>
-                      <div>
-                        <div className="flex justify-between mb-2">
-                          <span className="text-sm">Data Structures</span>
-                          <span className="text-sm text-muted-foreground">75%</span>
-                        </div>
-                        <Progress value={75} className="h-2" />
-                      </div>
-                      <div>
-                        <div className="flex justify-between mb-2">
-                          <span className="text-sm">Algorithms</span>
-                          <span className="text-sm text-muted-foreground">68%</span>
-                        </div>
-                        <Progress value={68} className="h-2" />
-                      </div>
-                      <div>
-                        <div className="flex justify-between mb-2">
-                          <span className="text-sm">Interview Readiness</span>
-                          <span className="text-sm text-muted-foreground">71%</span>
-                        </div>
-                        <Progress value={71} className="h-2" />
-                      </div>
+                      {(() => {
+                        const excellent = students.filter(s => s.progress >= 90).length;
+                        const good = students.filter(s => s.progress >= 80 && s.progress < 90).length;
+                        const average = students.filter(s => s.progress >= 70 && s.progress < 80).length;
+                        const needsHelp = students.filter(s => s.progress < 70).length;
+
+                        return (
+                          <>
+                            <div className="flex items-center justify-between p-3 bg-success/5 rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <div className="w-3 h-3 bg-success rounded-full"></div>
+                                <span>Excellent (90-100%)</span>
+                              </div>
+                              <span className="font-semibold">{excellent} students</span>
+                            </div>
+                            <div className="flex items-center justify-between p-3 bg-primary/5 rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <div className="w-3 h-3 bg-primary rounded-full"></div>
+                                <span>Good (80-89%)</span>
+                              </div>
+                              <span className="font-semibold">{good} students</span>
+                            </div>
+                            <div className="flex items-center justify-between p-3 bg-warning/5 rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <div className="w-3 h-3 bg-warning rounded-full"></div>
+                                <span>Average (70-79%)</span>
+                              </div>
+                              <span className="font-semibold">{average} students</span>
+                            </div>
+                            <div className="flex items-center justify-between p-3 bg-destructive/5 rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <div className="w-3 h-3 bg-destructive rounded-full"></div>
+                                <span>Needs Help (&lt;70%)</span>
+                              </div>
+                              <span className="font-semibold">{needsHelp} students</span>
+                            </div>
+                          </>
+                        );
+                      })()}
                     </div>
                   </div>
-                  
+
                   <div>
-                    <h3 className="font-semibold mb-3">Performance Distribution</h3>
+                    <h3 className="font-semibold mb-3">Assignment Status Overview</h3>
                     <div className="space-y-4">
                       <div className="flex items-center justify-between p-3 bg-success/5 rounded-lg">
                         <div className="flex items-center gap-3">
-                          <div className="w-3 h-3 bg-success rounded-full"></div>
-                          <span>Excellent (90-100%)</span>
+                          <CheckCircle className="w-5 h-5 text-success" />
+                          <span>Completed</span>
                         </div>
-                        <span className="font-semibold">6 students</span>
+                        <span className="font-semibold">
+                          {assignments.filter(a => a.status === 'completed').length}
+                        </span>
                       </div>
                       <div className="flex items-center justify-between p-3 bg-primary/5 rounded-lg">
                         <div className="flex items-center gap-3">
-                          <div className="w-3 h-3 bg-primary rounded-full"></div>
-                          <span>Good (80-89%)</span>
+                          <Clock className="w-5 h-5 text-primary" />
+                          <span>In Progress</span>
                         </div>
-                        <span className="font-semibold">8 students</span>
+                        <span className="font-semibold">
+                          {assignments.filter(a => a.status === 'in_progress').length}
+                        </span>
                       </div>
                       <div className="flex items-center justify-between p-3 bg-warning/5 rounded-lg">
                         <div className="flex items-center gap-3">
-                          <div className="w-3 h-3 bg-warning rounded-full"></div>
-                          <span>Average (70-79%)</span>
+                          <Target className="w-5 h-5 text-warning" />
+                          <span>Assigned</span>
                         </div>
-                        <span className="font-semibold">7 students</span>
+                        <span className="font-semibold">
+                          {assignments.filter(a => a.status === 'assigned').length}
+                        </span>
                       </div>
                       <div className="flex items-center justify-between p-3 bg-destructive/5 rounded-lg">
                         <div className="flex items-center gap-3">
-                          <div className="w-3 h-3 bg-destructive rounded-full"></div>
-                          <span>Needs Help (&lt;70%)</span>
+                          <AlertCircle className="w-5 h-5 text-destructive" />
+                          <span>Overdue</span>
                         </div>
-                        <span className="font-semibold">3 students</span>
+                        <span className="font-semibold">
+                          {assignments.filter(a =>
+                            a.status !== 'completed' && a.dueDate && new Date(a.dueDate) < new Date()
+                          ).length}
+                        </span>
                       </div>
                     </div>
                   </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Individual Student Analytics */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Top Performing Students</CardTitle>
+                <CardDescription>
+                  Students with highest completion rates and scores
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {students
+                    .sort((a, b) => b.progress - a.progress)
+                    .slice(0, 5)
+                    .map((student, index) => (
+                      <div key={student.id} className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex items-center gap-4">
+                          <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+                            <span className="text-sm font-semibold text-primary">#{index + 1}</span>
+                          </div>
+                          <div>
+                            <p className="font-medium">{student.name}</p>
+                            <p className="text-sm text-muted-foreground">{student.email}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-6">
+                          <div className="text-center">
+                            <p className="font-bold text-lg">{student.progress}%</p>
+                            <p className="text-xs text-muted-foreground">Progress</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="font-bold text-lg">{student.problemsSolved}</p>
+                            <p className="text-xs text-muted-foreground">Solved</p>
+                          </div>
+                          <Badge variant={student.status === 'active' ? 'default' : 'secondary'}>
+                            {student.status}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Recent Activity */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent Activity</CardTitle>
+                <CardDescription>
+                  Latest student submissions and completions
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {assignments
+                    .filter(a => a.status === 'completed')
+                    .sort((a, b) => new Date(b.completedDate || '').getTime() - new Date(a.completedDate || '').getTime())
+                    .slice(0, 6)
+                    .map((assignment) => (
+                      <div key={assignment.id} className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg">
+                        <CheckCircle className="w-6 h-6 text-success" />
+                        <div className="flex-1">
+                          <p className="font-medium">
+                            {assignment.studentName} completed "{assignment.problemId.split('-').map((word: string) =>
+                              word.charAt(0).toUpperCase() + word.slice(1)
+                            ).join(' ')}"
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {assignment.completedDate && new Date(assignment.completedDate).toLocaleDateString()} •
+                            Score: {assignment.score}% •
+                            Time: {assignment.timeSpent}min
+                          </p>
+                        </div>
+                        <Badge variant="default">
+                          {assignment.score && assignment.score >= 90 ? 'Excellent' :
+                           assignment.score && assignment.score >= 80 ? 'Good' :
+                           assignment.score && assignment.score >= 70 ? 'Average' : 'Needs Review'}
+                        </Badge>
+                      </div>
+                    ))}
+                  {assignments.filter(a => a.status === 'completed').length === 0 && (
+                    <p className="text-center text-muted-foreground py-8">
+                      No completed assignments yet.
+                    </p>
+                  )}
                 </div>
               </CardContent>
             </Card>
