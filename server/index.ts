@@ -37,6 +37,7 @@ import {
   handleGetStudentDetails,
   handleUpdateAssignmentProgress,
   handleDeleteAssignment,
+  handleGetStudentAssignments,
 } from "./routes/professor";
 
 export function createServer() {
@@ -137,6 +138,9 @@ export function createServer() {
     authMiddleware,
     handleDeleteAssignment,
   );
+
+  // Student routes
+  app.get("/api/student/assignments", authMiddleware, handleGetStudentAssignments);
 
   return app;
 }
