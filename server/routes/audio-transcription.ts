@@ -7,7 +7,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 interface TranscriptionRequest {
   audioBlob: string; // base64 encoded audio
-  interviewType: 'technical' | 'behavioral';
+  interviewType: "technical" | "behavioral";
   question: string;
   difficulty?: string;
   focus?: string[];
@@ -24,18 +24,24 @@ interface TranscriptionResponse {
 
 export const handleAudioTranscription: RequestHandler = async (req, res) => {
   try {
-    const { audioBlob, interviewType, question, difficulty, focus }: TranscriptionRequest = req.body;
+    const {
+      audioBlob,
+      interviewType,
+      question,
+      difficulty,
+      focus,
+    }: TranscriptionRequest = req.body;
 
     if (!audioBlob || !interviewType || !question) {
       return res.status(400).json({
         success: false,
-        error: 'Missing required fields: audioBlob, interviewType, question'
+        error: "Missing required fields: audioBlob, interviewType, question",
       });
     }
 
     // Convert base64 audio to buffer
-    const audioBuffer = Buffer.from(audioBlob, 'base64');
-    
+    const audioBuffer = Buffer.from(audioBlob, "base64");
+
     // For now, we'll focus on text analysis since Gemini API doesn't directly support audio transcription
     // In a production environment, you might want to use Google Cloud Speech-to-Text API
     // For this implementation, we'll assume the transcription is already done client-side
@@ -46,42 +52,42 @@ export const handleAudioTranscription: RequestHandler = async (req, res) => {
       transcription: "Client-side transcription will be used", // Placeholder
       score: 0,
       feedback: "",
-      suggestions: []
+      suggestions: [],
     };
 
     res.json(response);
-
   } catch (error) {
-    console.error('Audio transcription error:', error);
+    console.error("Audio transcription error:", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to process audio transcription'
+      error: "Failed to process audio transcription",
     });
   }
 };
 
 export const handleAnswerAnalysis: RequestHandler = async (req, res) => {
   try {
-    const { 
-      transcription, 
-      question, 
-      interviewType, 
-      difficulty = 'mid', 
-      focus = [] 
+    const {
+      transcription,
+      question,
+      interviewType,
+      difficulty = "mid",
+      focus = [],
     } = req.body;
 
     if (!transcription || !question || !interviewType) {
       return res.status(400).json({
         success: false,
-        error: 'Missing required fields: transcription, question, interviewType'
+        error:
+          "Missing required fields: transcription, question, interviewType",
       });
     }
 
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-    let analysisPrompt = '';
+    let analysisPrompt = "";
 
-    if (interviewType === 'technical') {
+    if (interviewType === "technical") {
       analysisPrompt = `
 You are an expert technical interviewer evaluating a candidate's response. Analyze the following:
 
@@ -91,7 +97,7 @@ CANDIDATE'S ANSWER: ${transcription}
 
 INTERVIEW DETAILS:
 - Difficulty Level: ${difficulty}
-- Focus Areas: ${focus.join(', ')}
+- Focus Areas: ${focus.join(", ")}
 
 Provide a detailed analysis in JSON format with this structure:
 {
@@ -123,7 +129,7 @@ QUESTION: ${question}
 
 CANDIDATE'S ANSWER: ${transcription}
 
-FOCUS AREAS: ${focus.join(', ')}
+FOCUS AREAS: ${focus.join(", ")}
 
 Provide a detailed analysis in JSON format with this structure:
 {
@@ -160,29 +166,31 @@ Be constructive, specific, and provide actionable feedback for behavioral interv
     let analysis = {
       score: 75,
       feedback: "Good response with room for improvement.",
-      suggestions: ["Practice more specific examples", "Work on clarity of communication"],
+      suggestions: [
+        "Practice more specific examples",
+        "Work on clarity of communication",
+      ],
       strengths: ["Clear thinking", "Good communication"],
-      weaknesses: ["Could be more specific", "Need more details"]
+      weaknesses: ["Could be more specific", "Need more details"],
     };
 
     if (jsonMatch) {
       try {
         analysis = JSON.parse(jsonMatch[0]);
       } catch (e) {
-        console.warn('Failed to parse analysis JSON:', e);
+        console.warn("Failed to parse analysis JSON:", e);
       }
     }
 
     res.json({
       success: true,
-      ...analysis
+      ...analysis,
     });
-
   } catch (error) {
-    console.error('Answer analysis error:', error);
+    console.error("Answer analysis error:", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to analyze answer'
+      error: "Failed to analyze answer",
     });
   }
 };
@@ -194,7 +202,7 @@ export const handleBatchAnswerAnalysis: RequestHandler = async (req, res) => {
     if (!answers || !Array.isArray(answers) || answers.length === 0) {
       return res.status(400).json({
         success: false,
-        error: 'Missing or invalid answers array'
+        error: "Missing or invalid answers array",
       });
     }
 
@@ -204,14 +212,18 @@ export const handleBatchAnswerAnalysis: RequestHandler = async (req, res) => {
 You are an expert interviewer conducting a comprehensive evaluation of a candidate's entire interview performance.
 
 INTERVIEW TYPE: ${interviewType}
-${difficulty ? `DIFFICULTY LEVEL: ${difficulty}` : ''}
-${focus && focus.length > 0 ? `FOCUS AREAS: ${focus.join(', ')}` : ''}
+${difficulty ? `DIFFICULTY LEVEL: ${difficulty}` : ""}
+${focus && focus.length > 0 ? `FOCUS AREAS: ${focus.join(", ")}` : ""}
 
 COMPLETE INTERVIEW CONVERSATION:
-${answers.map((answer: any, index: number) => `
+${answers
+  .map(
+    (answer: any, index: number) => `
 Q${index + 1}: ${answer.question}
 A${index + 1}: ${answer.transcription}
-`).join('\n')}
+`,
+  )
+  .join("\n")}
 
 Provide a comprehensive analysis in JSON format:
 {
@@ -225,17 +237,21 @@ Provide a comprehensive analysis in JSON format:
     }
   ],
   "skillBreakdown": {
-    ${interviewType === 'technical' ? `
+    ${
+      interviewType === "technical"
+        ? `
     "technicalKnowledge": "Number from 0-100",
     "problemSolving": "Number from 0-100",
     "codeQuality": "Number from 0-100",
     "systemDesign": "Number from 0-100"
-    ` : `
+    `
+        : `
     "criticalThinking": "Number from 0-100",
     "communication": "Number from 0-100",
     "situationalJudgment": "Number from 0-100",
     "starMethodUsage": "Number from 0-100"
-    `}
+    `
+    }
   },
   "recommendations": ["Array of 5-7 specific recommendations"],
   "nextSteps": ["Array of 3-5 suggested next steps for improvement"]
@@ -256,41 +272,43 @@ Evaluate comprehensively and provide actionable insights for the candidate's gro
       questionScores: answers.map((_: any, index: number) => ({
         questionIndex: index,
         score: 75,
-        feedback: "Good response"
+        feedback: "Good response",
       })),
-      skillBreakdown: interviewType === 'technical' ? {
-        technicalKnowledge: 75,
-        problemSolving: 75,
-        codeQuality: 75,
-        systemDesign: 75
-      } : {
-        criticalThinking: 75,
-        communication: 75,
-        situationalJudgment: 75,
-        starMethodUsage: 75
-      },
+      skillBreakdown:
+        interviewType === "technical"
+          ? {
+              technicalKnowledge: 75,
+              problemSolving: 75,
+              codeQuality: 75,
+              systemDesign: 75,
+            }
+          : {
+              criticalThinking: 75,
+              communication: 75,
+              situationalJudgment: 75,
+              starMethodUsage: 75,
+            },
       recommendations: ["Practice more", "Improve communication"],
-      nextSteps: ["Study specific topics", "Practice more interviews"]
+      nextSteps: ["Study specific topics", "Practice more interviews"],
     };
 
     if (jsonMatch) {
       try {
         batchAnalysis = JSON.parse(jsonMatch[0]);
       } catch (e) {
-        console.warn('Failed to parse batch analysis JSON:', e);
+        console.warn("Failed to parse batch analysis JSON:", e);
       }
     }
 
     res.json({
       success: true,
-      ...batchAnalysis
+      ...batchAnalysis,
     });
-
   } catch (error) {
-    console.error('Batch answer analysis error:', error);
+    console.error("Batch answer analysis error:", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to analyze interview answers'
+      error: "Failed to analyze interview answers",
     });
   }
 };

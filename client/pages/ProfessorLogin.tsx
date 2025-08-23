@@ -1,6 +1,12 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +20,7 @@ import {
   Users,
   BarChart3,
   Calendar,
-  Award
+  Award,
 } from "lucide-react";
 
 export default function ProfessorLogin() {
@@ -22,7 +28,7 @@ export default function ProfessorLogin() {
   const { user, login, isLoading } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
-    password: ""
+    password: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -38,9 +44,9 @@ export default function ProfessorLogin() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
     setError(""); // Clear error when user types
   };
@@ -62,7 +68,9 @@ export default function ProfessorLogin() {
         login(data.user, data.token);
         navigate("/professor/dashboard");
       } else if (data.success && data.user.role !== "professor") {
-        setError("This login is for professors only. Please use the student login.");
+        setError(
+          "This login is for professors only. Please use the student login.",
+        );
       } else {
         setError(data.error || "Invalid credentials");
       }
@@ -118,7 +126,8 @@ export default function ProfessorLogin() {
                 Welcome Back, Professor!
               </h1>
               <p className="text-xl text-muted-foreground">
-                Monitor student progress, assign problems, and track class performance with comprehensive analytics.
+                Monitor student progress, assign problems, and track class
+                performance with comprehensive analytics.
               </p>
             </div>
 
@@ -160,7 +169,7 @@ export default function ProfessorLogin() {
                       disabled={isSubmitting}
                     />
                   </div>
-                  
+
                   {error && (
                     <div className="p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md">
                       {error}
@@ -200,10 +209,16 @@ export default function ProfessorLogin() {
             {/* Demo Credentials */}
             <Card className="max-w-md mx-auto lg:mx-0 bg-muted/30">
               <CardContent className="p-4">
-                <h4 className="font-semibold text-sm mb-2">Demo Professor Account:</h4>
+                <h4 className="font-semibold text-sm mb-2">
+                  Demo Professor Account:
+                </h4>
                 <div className="text-sm text-muted-foreground space-y-1">
-                  <p><strong>Email:</strong> professor@demo.com</p>
-                  <p><strong>Password:</strong> professor123</p>
+                  <p>
+                    <strong>Email:</strong> professor@demo.com
+                  </p>
+                  <p>
+                    <strong>Password:</strong> professor123
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -219,9 +234,12 @@ export default function ProfessorLogin() {
                       <Users className="w-6 h-6 text-accent" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-lg mb-2">Student Management</h3>
+                      <h3 className="font-semibold text-lg mb-2">
+                        Student Management
+                      </h3>
                       <p className="text-muted-foreground">
-                        Monitor individual student progress, track completion rates, and identify students who need help.
+                        Monitor individual student progress, track completion
+                        rates, and identify students who need help.
                       </p>
                     </div>
                   </div>
@@ -235,9 +253,12 @@ export default function ProfessorLogin() {
                       <Calendar className="w-6 h-6 text-primary" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-lg mb-2">Assignment System</h3>
+                      <h3 className="font-semibold text-lg mb-2">
+                        Assignment System
+                      </h3>
                       <p className="text-muted-foreground">
-                        Assign coding problems to individual students or entire classes with due dates and automatic tracking.
+                        Assign coding problems to individual students or entire
+                        classes with due dates and automatic tracking.
                       </p>
                     </div>
                   </div>
@@ -251,9 +272,12 @@ export default function ProfessorLogin() {
                       <BarChart3 className="w-6 h-6 text-success" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-lg mb-2">Analytics Dashboard</h3>
+                      <h3 className="font-semibold text-lg mb-2">
+                        Analytics Dashboard
+                      </h3>
                       <p className="text-muted-foreground">
-                        Comprehensive analytics on class performance, completion rates, and detailed student insights.
+                        Comprehensive analytics on class performance, completion
+                        rates, and detailed student insights.
                       </p>
                     </div>
                   </div>
@@ -267,9 +291,12 @@ export default function ProfessorLogin() {
                       <Award className="w-6 h-6 text-warning" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-lg mb-2">Progress Monitoring</h3>
+                      <h3 className="font-semibold text-lg mb-2">
+                        Progress Monitoring
+                      </h3>
                       <p className="text-muted-foreground">
-                        Real-time monitoring of student interview performance and coding problem completion.
+                        Real-time monitoring of student interview performance
+                        and coding problem completion.
                       </p>
                     </div>
                   </div>

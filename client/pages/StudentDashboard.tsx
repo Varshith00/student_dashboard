@@ -28,7 +28,7 @@ import {
   Users2,
   Monitor,
   Sparkles,
-  Award
+  Award,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -549,9 +549,7 @@ export default function StudentDashboard() {
           </div>
         )}
 
-        {activeTab === "progress" && (
-          <StudentAnalyticsDashboard />
-        )}
+        {activeTab === "progress" && <StudentAnalyticsDashboard />}
 
         {activeTab === "pair-programming" && (
           <div className="space-y-6">

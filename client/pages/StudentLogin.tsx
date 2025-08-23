@@ -1,6 +1,12 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +20,7 @@ import {
   BookOpen,
   Brain,
   Target,
-  Code
+  Code,
 } from "lucide-react";
 
 export default function StudentLogin() {
@@ -22,7 +28,7 @@ export default function StudentLogin() {
   const { user, login, isLoading } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
-    password: ""
+    password: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -38,9 +44,9 @@ export default function StudentLogin() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
     setError(""); // Clear error when user types
   };
@@ -62,7 +68,9 @@ export default function StudentLogin() {
         login(data.user, data.token);
         navigate("/student/dashboard");
       } else if (data.success && data.user.role !== "student") {
-        setError("This login is for students only. Please use the professor login.");
+        setError(
+          "This login is for students only. Please use the professor login.",
+        );
       } else {
         setError(data.error || "Invalid credentials");
       }
@@ -118,7 +126,8 @@ export default function StudentLogin() {
                 Welcome Back, Student!
               </h1>
               <p className="text-xl text-muted-foreground">
-                Continue your journey to master technical skills and ace your interviews.
+                Continue your journey to master technical skills and ace your
+                interviews.
               </p>
             </div>
 
@@ -160,7 +169,7 @@ export default function StudentLogin() {
                       disabled={isSubmitting}
                     />
                   </div>
-                  
+
                   {error && (
                     <div className="p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md">
                       {error}
@@ -200,10 +209,16 @@ export default function StudentLogin() {
             {/* Demo Credentials */}
             <Card className="max-w-md mx-auto lg:mx-0 bg-muted/30">
               <CardContent className="p-4">
-                <h4 className="font-semibold text-sm mb-2">Demo Student Account:</h4>
+                <h4 className="font-semibold text-sm mb-2">
+                  Demo Student Account:
+                </h4>
                 <div className="text-sm text-muted-foreground space-y-1">
-                  <p><strong>Email:</strong> student@demo.com</p>
-                  <p><strong>Password:</strong> student123</p>
+                  <p>
+                    <strong>Email:</strong> student@demo.com
+                  </p>
+                  <p>
+                    <strong>Password:</strong> student123
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -219,9 +234,12 @@ export default function StudentLogin() {
                       <Code className="w-6 h-6 text-primary" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-lg mb-2">Coding Practice</h3>
+                      <h3 className="font-semibold text-lg mb-2">
+                        Coding Practice
+                      </h3>
                       <p className="text-muted-foreground">
-                        Solve problems with real Python execution, get instant feedback, and track your progress.
+                        Solve problems with real Python execution, get instant
+                        feedback, and track your progress.
                       </p>
                     </div>
                   </div>
@@ -235,9 +253,12 @@ export default function StudentLogin() {
                       <Brain className="w-6 h-6 text-accent" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-lg mb-2">AI Mock Interviews</h3>
+                      <h3 className="font-semibold text-lg mb-2">
+                        AI Mock Interviews
+                      </h3>
                       <p className="text-muted-foreground">
-                        Practice with AI-powered video interviews that analyze your responses and provide detailed feedback.
+                        Practice with AI-powered video interviews that analyze
+                        your responses and provide detailed feedback.
                       </p>
                     </div>
                   </div>
@@ -251,9 +272,12 @@ export default function StudentLogin() {
                       <Target className="w-6 h-6 text-success" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-lg mb-2">Progress Tracking</h3>
+                      <h3 className="font-semibold text-lg mb-2">
+                        Progress Tracking
+                      </h3>
                       <p className="text-muted-foreground">
-                        Monitor your improvement with detailed analytics, skill assessments, and achievement tracking.
+                        Monitor your improvement with detailed analytics, skill
+                        assessments, and achievement tracking.
                       </p>
                     </div>
                   </div>
@@ -267,9 +291,12 @@ export default function StudentLogin() {
                       <BookOpen className="w-6 h-6 text-warning" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-lg mb-2">Assignment Management</h3>
+                      <h3 className="font-semibold text-lg mb-2">
+                        Assignment Management
+                      </h3>
                       <p className="text-muted-foreground">
-                        Receive assignments from professors and track your completion status in real-time.
+                        Receive assignments from professors and track your
+                        completion status in real-time.
                       </p>
                     </div>
                   </div>

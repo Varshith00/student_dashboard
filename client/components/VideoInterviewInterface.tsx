@@ -15,7 +15,7 @@ import {
   Pause,
   RotateCcw,
   Brain,
-  TrendingUp
+  TrendingUp,
 } from "lucide-react";
 
 interface VideoInterviewInterfaceProps {
@@ -23,7 +23,7 @@ interface VideoInterviewInterfaceProps {
   onAnswerSubmit: (transcribedText: string, analysis?: any) => void;
   isLoading?: boolean;
   disabled?: boolean;
-  interviewType: 'technical' | 'behavioral';
+  interviewType: "technical" | "behavioral";
   difficulty?: string;
   focus?: string[];
 }
@@ -35,7 +35,7 @@ export default function VideoInterviewInterface({
   disabled = false,
   interviewType,
   difficulty,
-  focus = []
+  focus = [],
 }: VideoInterviewInterfaceProps) {
   const [isVideoEnabled, setIsVideoEnabled] = useState(true);
   const [isAudioEnabled, setIsAudioEnabled] = useState(true);
@@ -48,7 +48,7 @@ export default function VideoInterviewInterface({
   const [analysisResult, setAnalysisResult] = useState<any>(null);
   const [hasMediaPermission, setHasMediaPermission] = useState(false);
   const [mediaError, setMediaError] = useState<string>("");
-  
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -62,7 +62,9 @@ export default function VideoInterviewInterface({
       try {
         // Check if getUserMedia is supported
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-          setMediaError("Camera/microphone access is not supported in this browser.");
+          setMediaError(
+            "Camera/microphone access is not supported in this browser.",
+          );
           return;
         }
 
@@ -70,13 +72,13 @@ export default function VideoInterviewInterface({
           video: {
             width: { ideal: 1280 },
             height: { ideal: 720 },
-            facingMode: "user"
+            facingMode: "user",
           },
           audio: {
             echoCancellation: true,
             noiseSuppression: true,
-            sampleRate: 44100
-          }
+            sampleRate: 44100,
+          },
         });
 
         streamRef.current = stream;
@@ -86,7 +88,7 @@ export default function VideoInterviewInterface({
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
           // Ensure video plays
-          videoRef.current.play().catch(e => {
+          videoRef.current.play().catch((e) => {
             console.log("Video autoplay prevented:", e);
           });
         }
@@ -97,18 +99,22 @@ export default function VideoInterviewInterface({
         switch (error.name) {
           case "NotAllowedError":
           case "PermissionDeniedError":
-            errorMessage += "Please allow camera and microphone permissions and refresh the page.";
+            errorMessage +=
+              "Please allow camera and microphone permissions and refresh the page.";
             break;
           case "NotFoundError":
           case "DevicesNotFoundError":
-            errorMessage += "No camera or microphone found. Please check your devices.";
+            errorMessage +=
+              "No camera or microphone found. Please check your devices.";
             break;
           case "NotSupportedError":
-            errorMessage += "Camera/microphone access is not supported in this browser.";
+            errorMessage +=
+              "Camera/microphone access is not supported in this browser.";
             break;
           case "NotReadableError":
           case "TrackStartError":
-            errorMessage += "Camera/microphone is already in use by another application.";
+            errorMessage +=
+              "Camera/microphone is already in use by another application.";
             break;
           default:
             errorMessage += "Please check your device settings and try again.";
@@ -125,24 +131,25 @@ export default function VideoInterviewInterface({
     return () => {
       clearTimeout(timer);
       if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current.getTracks().forEach((track) => track.stop());
       }
     };
   }, []);
 
   // Initialize speech recognition
   useEffect(() => {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
+      const SpeechRecognition =
+        window.SpeechRecognition || window.webkitSpeechRecognition;
       recognitionRef.current = new SpeechRecognition();
-      
+
       recognitionRef.current.continuous = true;
       recognitionRef.current.interimResults = true;
-      recognitionRef.current.lang = 'en-US';
+      recognitionRef.current.lang = "en-US";
 
       recognitionRef.current.onresult = (event) => {
-        let finalTranscript = '';
-        let interimTranscript = '';
+        let finalTranscript = "";
+        let interimTranscript = "";
 
         for (let i = event.resultIndex; i < event.results.length; i++) {
           const transcript = event.results[i][0].transcript;
@@ -153,14 +160,14 @@ export default function VideoInterviewInterface({
           }
         }
 
-        setTranscribedText(prev => {
+        setTranscribedText((prev) => {
           const newText = prev + finalTranscript;
           return newText;
         });
       };
 
       recognitionRef.current.onerror = (event) => {
-        console.error('Speech recognition error:', event.error);
+        console.error("Speech recognition error:", event.error);
       };
     }
   }, []);
@@ -169,7 +176,7 @@ export default function VideoInterviewInterface({
   useEffect(() => {
     if (isRecording && !isPaused) {
       recordingIntervalRef.current = setInterval(() => {
-        setRecordingTime(prev => prev + 1);
+        setRecordingTime((prev) => prev + 1);
       }, 1000);
     } else {
       if (recordingIntervalRef.current) {
@@ -210,7 +217,7 @@ export default function VideoInterviewInterface({
 
       // Start MediaRecorder for audio backup
       mediaRecorderRef.current = new MediaRecorder(streamRef.current, {
-        mimeType: 'audio/webm;codecs=opus'
+        mimeType: "audio/webm;codecs=opus",
       });
 
       audioChunksRef.current = [];
@@ -241,10 +248,10 @@ export default function VideoInterviewInterface({
     if (recognitionRef.current && isRecording) {
       recognitionRef.current.stop();
       setIsPaused(!isPaused);
-      
+
       if (!isPaused) {
         // Pausing - stop recognition
-        if (mediaRecorderRef.current?.state === 'recording') {
+        if (mediaRecorderRef.current?.state === "recording") {
           mediaRecorderRef.current.pause();
         }
       } else {
@@ -252,7 +259,7 @@ export default function VideoInterviewInterface({
         if (recognitionRef.current) {
           recognitionRef.current.start();
         }
-        if (mediaRecorderRef.current?.state === 'paused') {
+        if (mediaRecorderRef.current?.state === "paused") {
           mediaRecorderRef.current.resume();
         }
       }
@@ -260,7 +267,10 @@ export default function VideoInterviewInterface({
   };
 
   const stopRecording = () => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+    if (
+      mediaRecorderRef.current &&
+      mediaRecorderRef.current.state !== "inactive"
+    ) {
       mediaRecorderRef.current.stop();
     }
 
@@ -285,14 +295,14 @@ export default function VideoInterviewInterface({
 
     try {
       // Call AI analysis API
-      const response = await authFetch('/api/audio/analyze-answer', {
-        method: 'POST',
+      const response = await authFetch("/api/audio/analyze-answer", {
+        method: "POST",
         body: JSON.stringify({
           transcription: transcribedText.trim(),
           question: question,
           interviewType: interviewType,
           difficulty: difficulty,
-          focus: focus
+          focus: focus,
         }),
       });
 
@@ -306,7 +316,7 @@ export default function VideoInterviewInterface({
         onAnswerSubmit(transcribedText.trim());
       }
     } catch (error) {
-      console.error('Analysis error:', error);
+      console.error("Analysis error:", error);
       // Fallback to basic submission without analysis
       onAnswerSubmit(transcribedText.trim());
     } finally {
@@ -318,7 +328,7 @@ export default function VideoInterviewInterface({
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   return (
@@ -350,17 +360,20 @@ export default function VideoInterviewInterface({
                   <VideoOff className="w-16 h-16 text-muted-foreground" />
                 </div>
               )}
-              
+
               {/* Recording indicator */}
               {isRecording && (
                 <div className="absolute top-4 left-4 flex items-center gap-2">
-                  <div className={`w-3 h-3 rounded-full ${isPaused ? 'bg-warning animate-pulse' : 'bg-destructive animate-pulse'}`} />
+                  <div
+                    className={`w-3 h-3 rounded-full ${isPaused ? "bg-warning animate-pulse" : "bg-destructive animate-pulse"}`}
+                  />
                   <Badge variant={isPaused ? "secondary" : "destructive"}>
-                    {isPaused ? 'PAUSED' : 'RECORDING'} {formatTime(recordingTime)}
+                    {isPaused ? "PAUSED" : "RECORDING"}{" "}
+                    {formatTime(recordingTime)}
                   </Badge>
                 </div>
               )}
-              
+
               {/* Controls overlay */}
               <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
                 <div className="flex items-center gap-2 bg-background/90 backdrop-blur rounded-full p-2">
@@ -370,7 +383,11 @@ export default function VideoInterviewInterface({
                     onClick={toggleVideo}
                     className="rounded-full w-10 h-10 p-0"
                   >
-                    {isVideoEnabled ? <Video className="w-4 h-4" /> : <VideoOff className="w-4 h-4" />}
+                    {isVideoEnabled ? (
+                      <Video className="w-4 h-4" />
+                    ) : (
+                      <VideoOff className="w-4 h-4" />
+                    )}
                   </Button>
                   <Button
                     variant="outline"
@@ -378,7 +395,11 @@ export default function VideoInterviewInterface({
                     onClick={toggleAudio}
                     className="rounded-full w-10 h-10 p-0"
                   >
-                    {isAudioEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+                    {isAudioEnabled ? (
+                      <Volume2 className="w-4 h-4" />
+                    ) : (
+                      <VolumeX className="w-4 h-4" />
+                    )}
                   </Button>
                 </div>
               </div>
@@ -394,8 +415,8 @@ export default function VideoInterviewInterface({
               <h4 className="font-semibold">Recording Controls</h4>
               <div className="flex items-center gap-2">
                 {!isRecording ? (
-                  <Button 
-                    onClick={startRecording} 
+                  <Button
+                    onClick={startRecording}
                     disabled={disabled || isLoading}
                     className="flex-1"
                   >
@@ -404,22 +425,26 @@ export default function VideoInterviewInterface({
                   </Button>
                 ) : (
                   <>
-                    <Button 
-                      onClick={pauseRecording} 
+                    <Button
+                      onClick={pauseRecording}
                       variant="outline"
                       disabled={disabled}
                     >
-                      {isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
+                      {isPaused ? (
+                        <Play className="w-4 h-4" />
+                      ) : (
+                        <Pause className="w-4 h-4" />
+                      )}
                     </Button>
-                    <Button 
-                      onClick={stopRecording} 
+                    <Button
+                      onClick={stopRecording}
                       variant="destructive"
                       disabled={disabled}
                     >
                       <MicOff className="w-4 h-4" />
                     </Button>
-                    <Button 
-                      onClick={resetRecording} 
+                    <Button
+                      onClick={resetRecording}
                       variant="outline"
                       disabled={disabled}
                     >
@@ -446,7 +471,7 @@ export default function VideoInterviewInterface({
                   <p className="text-sm leading-relaxed">{transcribedText}</p>
                 ) : (
                   <p className="text-sm text-muted-foreground italic">
-                    {isRecording 
+                    {isRecording
                       ? "Start speaking... Your answer will appear here in real-time."
                       : "Click 'Start Recording Answer' and begin speaking your response."}
                   </p>
@@ -457,14 +482,22 @@ export default function VideoInterviewInterface({
             {/* Submit Button */}
             <Button
               onClick={submitAnswer}
-              disabled={!transcribedText.trim() || disabled || isLoading || isRecording || isAnalyzing}
+              disabled={
+                !transcribedText.trim() ||
+                disabled ||
+                isLoading ||
+                isRecording ||
+                isAnalyzing
+              }
               className="w-full"
               size="lg"
             >
               {isLoading || isAnalyzing ? (
                 <>
                   <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-2" />
-                  {isAnalyzing ? 'Analyzing with AI...' : 'Processing Answer...'}
+                  {isAnalyzing
+                    ? "Analyzing with AI..."
+                    : "Processing Answer..."}
                 </>
               ) : (
                 <>
@@ -495,33 +528,49 @@ export default function VideoInterviewInterface({
                     </div>
                   )}
 
-                  {analysisResult.suggestions && analysisResult.suggestions.length > 0 && (
-                    <div className="space-y-2 mt-3">
-                      <h6 className="font-medium text-sm">Suggestions for Improvement:</h6>
-                      <ul className="text-sm text-muted-foreground space-y-1">
-                        {analysisResult.suggestions.map((suggestion: string, index: number) => (
-                          <li key={index} className="flex items-start gap-2">
-                            <TrendingUp className="w-3 h-3 mt-0.5 text-accent" />
-                            {suggestion}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
+                  {analysisResult.suggestions &&
+                    analysisResult.suggestions.length > 0 && (
+                      <div className="space-y-2 mt-3">
+                        <h6 className="font-medium text-sm">
+                          Suggestions for Improvement:
+                        </h6>
+                        <ul className="text-sm text-muted-foreground space-y-1">
+                          {analysisResult.suggestions.map(
+                            (suggestion: string, index: number) => (
+                              <li
+                                key={index}
+                                className="flex items-start gap-2"
+                              >
+                                <TrendingUp className="w-3 h-3 mt-0.5 text-accent" />
+                                {suggestion}
+                              </li>
+                            ),
+                          )}
+                        </ul>
+                      </div>
+                    )}
 
-                  {analysisResult.strengths && analysisResult.strengths.length > 0 && (
-                    <div className="space-y-2 mt-3">
-                      <h6 className="font-medium text-sm text-success">Strengths:</h6>
-                      <ul className="text-sm text-muted-foreground space-y-1">
-                        {analysisResult.strengths.map((strength: string, index: number) => (
-                          <li key={index} className="flex items-start gap-2">
-                            <span className="w-1 h-1 rounded-full bg-success mt-2" />
-                            {strength}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
+                  {analysisResult.strengths &&
+                    analysisResult.strengths.length > 0 && (
+                      <div className="space-y-2 mt-3">
+                        <h6 className="font-medium text-sm text-success">
+                          Strengths:
+                        </h6>
+                        <ul className="text-sm text-muted-foreground space-y-1">
+                          {analysisResult.strengths.map(
+                            (strength: string, index: number) => (
+                              <li
+                                key={index}
+                                className="flex items-start gap-2"
+                              >
+                                <span className="w-1 h-1 rounded-full bg-success mt-2" />
+                                {strength}
+                              </li>
+                            ),
+                          )}
+                        </ul>
+                      </div>
+                    )}
                 </CardContent>
               </Card>
             )}

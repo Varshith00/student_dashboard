@@ -10,7 +10,7 @@ interface Assignment {
   problemId: string;
   assignedDate: string;
   dueDate?: string;
-  status: 'assigned' | 'in_progress' | 'completed' | 'overdue';
+  status: "assigned" | "in_progress" | "completed" | "overdue";
   score?: number;
   completedDate?: string;
   attempts: number;
@@ -28,7 +28,7 @@ interface StudentProgress {
   lastActive: string;
   currentAssignments: Assignment[];
   recentActivity: {
-    type: 'problem_started' | 'problem_completed' | 'interview_completed';
+    type: "problem_started" | "problem_completed" | "interview_completed";
     problemId?: string;
     score?: number;
     timestamp: string;
@@ -40,15 +40,15 @@ const assignments: Assignment[] = [
   {
     id: "assign_1",
     professorId: "prof_1",
-    studentId: "student_1", 
+    studentId: "student_1",
     problemId: "two-sum",
     assignedDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
     dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days from now
-    status: 'completed',
+    status: "completed",
     score: 85,
     completedDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
     attempts: 2,
-    timeSpent: 45
+    timeSpent: 45,
   },
   {
     id: "assign_2",
@@ -57,10 +57,10 @@ const assignments: Assignment[] = [
     problemId: "binary-search",
     assignedDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
     dueDate: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000).toISOString(), // 6 days from now
-    status: 'in_progress',
+    status: "in_progress",
     attempts: 1,
-    timeSpent: 30
-  }
+    timeSpent: 30,
+  },
 ];
 
 const studentProfiles = [
@@ -68,41 +68,50 @@ const studentProfiles = [
     id: "student_1",
     name: "Alex Johnson",
     email: "alex.johnson@university.edu",
-    lastActive: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() // 2 hours ago
+    lastActive: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
   },
   {
-    id: "student_2", 
+    id: "student_2",
     name: "Sarah Chen",
     email: "sarah.chen@university.edu",
-    lastActive: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString() // 1 day ago
+    lastActive: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
   },
   {
     id: "student_3",
-    name: "Michael Rodriguez", 
+    name: "Michael Rodriguez",
     email: "michael.r@university.edu",
-    lastActive: new Date(Date.now() - 30 * 60 * 1000).toISOString() // 30 minutes ago
+    lastActive: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30 minutes ago
   },
   {
     id: "student_4",
     name: "Emily Davis",
-    email: "emily.davis@university.edu", 
-    lastActive: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString() // 3 hours ago
-  }
+    email: "emily.davis@university.edu",
+    lastActive: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(), // 3 hours ago
+  },
 ];
 
 // Get all students for a professor
 export const handleGetStudents: RequestHandler = async (req, res) => {
   try {
     const professor = (req as any).user;
-    
+
     // In a real app, fetch students assigned to this professor
-    const students = studentProfiles.map(student => {
-      const studentAssignments = assignments.filter(a => a.studentId === student.id);
-      const completedAssignments = studentAssignments.filter(a => a.status === 'completed');
-      const averageScore = completedAssignments.length > 0 
-        ? completedAssignments.reduce((sum, a) => sum + (a.score || 0), 0) / completedAssignments.length 
-        : 0;
-      const totalTimeSpent = studentAssignments.reduce((sum, a) => sum + a.timeSpent, 0);
+    const students = studentProfiles.map((student) => {
+      const studentAssignments = assignments.filter(
+        (a) => a.studentId === student.id,
+      );
+      const completedAssignments = studentAssignments.filter(
+        (a) => a.status === "completed",
+      );
+      const averageScore =
+        completedAssignments.length > 0
+          ? completedAssignments.reduce((sum, a) => sum + (a.score || 0), 0) /
+            completedAssignments.length
+          : 0;
+      const totalTimeSpent = studentAssignments.reduce(
+        (sum, a) => sum + a.timeSpent,
+        0,
+      );
 
       return {
         ...student,
@@ -111,21 +120,26 @@ export const handleGetStudents: RequestHandler = async (req, res) => {
         totalAssignments: studentAssignments.length,
         averageScore: Math.round(averageScore),
         totalTimeSpent,
-        status: new Date(student.lastActive) > new Date(Date.now() - 24 * 60 * 60 * 1000) ? 'active' : 'inactive',
-        currentAssignments: studentAssignments.filter(a => a.status !== 'completed')
+        status:
+          new Date(student.lastActive) >
+          new Date(Date.now() - 24 * 60 * 60 * 1000)
+            ? "active"
+            : "inactive",
+        currentAssignments: studentAssignments.filter(
+          (a) => a.status !== "completed",
+        ),
       };
     });
 
     res.json({
       success: true,
-      students
+      students,
     });
-
   } catch (error) {
-    console.error('Get students error:', error);
+    console.error("Get students error:", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to fetch students'
+      error: "Failed to fetch students",
     });
   }
 };
@@ -139,12 +153,12 @@ export const handleAssignProblem: RequestHandler = async (req, res) => {
     if (!studentId || !problemId) {
       return res.status(400).json({
         success: false,
-        error: 'Missing required fields: studentId, problemId'
+        error: "Missing required fields: studentId, problemId",
       });
     }
 
     const assignmentId = `assign_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+
     const newAssignment: Assignment = {
       id: assignmentId,
       professorId: professor.id,
@@ -152,9 +166,9 @@ export const handleAssignProblem: RequestHandler = async (req, res) => {
       problemId,
       assignedDate: new Date().toISOString(),
       dueDate: dueDate ? new Date(dueDate).toISOString() : undefined,
-      status: 'assigned',
+      status: "assigned",
       attempts: 0,
-      timeSpent: 0
+      timeSpent: 0,
     };
 
     assignments.push(newAssignment);
@@ -162,14 +176,13 @@ export const handleAssignProblem: RequestHandler = async (req, res) => {
     res.json({
       success: true,
       assignment: newAssignment,
-      message: 'Problem assigned successfully'
+      message: "Problem assigned successfully",
     });
-
   } catch (error) {
-    console.error('Assign problem error:', error);
+    console.error("Assign problem error:", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to assign problem'
+      error: "Failed to assign problem",
     });
   }
 };
@@ -180,10 +193,15 @@ export const handleBulkAssignProblem: RequestHandler = async (req, res) => {
     const professor = (req as any).user;
     const { studentIds, problemId, dueDate } = req.body;
 
-    if (!studentIds || !Array.isArray(studentIds) || studentIds.length === 0 || !problemId) {
+    if (
+      !studentIds ||
+      !Array.isArray(studentIds) ||
+      studentIds.length === 0 ||
+      !problemId
+    ) {
       return res.status(400).json({
         success: false,
-        error: 'Missing required fields: studentIds (array), problemId'
+        error: "Missing required fields: studentIds (array), problemId",
       });
     }
 
@@ -191,7 +209,7 @@ export const handleBulkAssignProblem: RequestHandler = async (req, res) => {
 
     for (const studentId of studentIds) {
       const assignmentId = `assign_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
+
       const newAssignment: Assignment = {
         id: assignmentId,
         professorId: professor.id,
@@ -199,9 +217,9 @@ export const handleBulkAssignProblem: RequestHandler = async (req, res) => {
         problemId,
         assignedDate: new Date().toISOString(),
         dueDate: dueDate ? new Date(dueDate).toISOString() : undefined,
-        status: 'assigned',
+        status: "assigned",
         attempts: 0,
-        timeSpent: 0
+        timeSpent: 0,
       };
 
       assignments.push(newAssignment);
@@ -211,14 +229,13 @@ export const handleBulkAssignProblem: RequestHandler = async (req, res) => {
     res.json({
       success: true,
       assignments: newAssignments,
-      message: `Problem assigned to ${studentIds.length} students successfully`
+      message: `Problem assigned to ${studentIds.length} students successfully`,
     });
-
   } catch (error) {
-    console.error('Bulk assign problem error:', error);
+    console.error("Bulk assign problem error:", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to assign problem to students'
+      error: "Failed to assign problem to students",
     });
   }
 };
@@ -227,29 +244,32 @@ export const handleBulkAssignProblem: RequestHandler = async (req, res) => {
 export const handleGetAssignments: RequestHandler = async (req, res) => {
   try {
     const professor = (req as any).user;
-    
-    const professorAssignments = assignments.filter(a => a.professorId === professor.id);
-    
+
+    const professorAssignments = assignments.filter(
+      (a) => a.professorId === professor.id,
+    );
+
     // Enrich assignments with student info
-    const enrichedAssignments = professorAssignments.map(assignment => {
-      const student = studentProfiles.find(s => s.id === assignment.studentId);
+    const enrichedAssignments = professorAssignments.map((assignment) => {
+      const student = studentProfiles.find(
+        (s) => s.id === assignment.studentId,
+      );
       return {
         ...assignment,
-        studentName: student?.name || 'Unknown Student',
-        studentEmail: student?.email || 'Unknown Email'
+        studentName: student?.name || "Unknown Student",
+        studentEmail: student?.email || "Unknown Email",
       };
     });
 
     res.json({
       success: true,
-      assignments: enrichedAssignments
+      assignments: enrichedAssignments,
     });
-
   } catch (error) {
-    console.error('Get assignments error:', error);
+    console.error("Get assignments error:", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to fetch assignments'
+      error: "Failed to fetch assignments",
     });
   }
 };
@@ -258,53 +278,77 @@ export const handleGetAssignments: RequestHandler = async (req, res) => {
 export const handleGetClassAnalytics: RequestHandler = async (req, res) => {
   try {
     const professor = (req as any).user;
-    
-    const professorAssignments = assignments.filter(a => a.professorId === professor.id);
-    const uniqueStudents = [...new Set(professorAssignments.map(a => a.studentId))];
-    
+
+    const professorAssignments = assignments.filter(
+      (a) => a.professorId === professor.id,
+    );
+    const uniqueStudents = [
+      ...new Set(professorAssignments.map((a) => a.studentId)),
+    ];
+
     const analytics = {
       totalStudents: uniqueStudents.length,
       totalAssignments: professorAssignments.length,
-      completedAssignments: professorAssignments.filter(a => a.status === 'completed').length,
-      inProgressAssignments: professorAssignments.filter(a => a.status === 'in_progress').length,
-      overdueAssignments: professorAssignments.filter(a => 
-        a.status !== 'completed' && a.dueDate && new Date(a.dueDate) < new Date()
+      completedAssignments: professorAssignments.filter(
+        (a) => a.status === "completed",
+      ).length,
+      inProgressAssignments: professorAssignments.filter(
+        (a) => a.status === "in_progress",
+      ).length,
+      overdueAssignments: professorAssignments.filter(
+        (a) =>
+          a.status !== "completed" &&
+          a.dueDate &&
+          new Date(a.dueDate) < new Date(),
       ).length,
       averageScore: professorAssignments
-        .filter(a => a.score !== undefined)
+        .filter((a) => a.score !== undefined)
         .reduce((sum, a, _, arr) => sum + (a.score || 0) / arr.length, 0),
-      totalTimeSpent: professorAssignments.reduce((sum, a) => sum + a.timeSpent, 0),
-      studentProgress: uniqueStudents.map(studentId => {
-        const student = studentProfiles.find(s => s.id === studentId);
-        const studentAssignments = professorAssignments.filter(a => a.studentId === studentId);
-        const completedAssignments = studentAssignments.filter(a => a.status === 'completed');
-        
+      totalTimeSpent: professorAssignments.reduce(
+        (sum, a) => sum + a.timeSpent,
+        0,
+      ),
+      studentProgress: uniqueStudents.map((studentId) => {
+        const student = studentProfiles.find((s) => s.id === studentId);
+        const studentAssignments = professorAssignments.filter(
+          (a) => a.studentId === studentId,
+        );
+        const completedAssignments = studentAssignments.filter(
+          (a) => a.status === "completed",
+        );
+
         return {
           studentId,
-          studentName: student?.name || 'Unknown',
-          studentEmail: student?.email || 'Unknown',
+          studentName: student?.name || "Unknown",
+          studentEmail: student?.email || "Unknown",
           totalAssignments: studentAssignments.length,
           completedAssignments: completedAssignments.length,
-          averageScore: completedAssignments.length > 0 
-            ? completedAssignments.reduce((sum, a) => sum + (a.score || 0), 0) / completedAssignments.length 
-            : 0,
-          totalTimeSpent: studentAssignments.reduce((sum, a) => sum + a.timeSpent, 0),
-          lastActive: student?.lastActive || new Date().toISOString()
+          averageScore:
+            completedAssignments.length > 0
+              ? completedAssignments.reduce(
+                  (sum, a) => sum + (a.score || 0),
+                  0,
+                ) / completedAssignments.length
+              : 0,
+          totalTimeSpent: studentAssignments.reduce(
+            (sum, a) => sum + a.timeSpent,
+            0,
+          ),
+          lastActive: student?.lastActive || new Date().toISOString(),
         };
       }),
-      problemStats: {}
+      problemStats: {},
     };
 
     res.json({
       success: true,
-      analytics
+      analytics,
     });
-
   } catch (error) {
-    console.error('Get class analytics error:', error);
+    console.error("Get class analytics error:", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to fetch class analytics'
+      error: "Failed to fetch class analytics",
     });
   }
 };
@@ -315,29 +359,41 @@ export const handleGetStudentDetails: RequestHandler = async (req, res) => {
     const { studentId } = req.params;
     const professor = (req as any).user;
 
-    const student = studentProfiles.find(s => s.id === studentId);
+    const student = studentProfiles.find((s) => s.id === studentId);
     if (!student) {
       return res.status(404).json({
         success: false,
-        error: 'Student not found'
+        error: "Student not found",
       });
     }
 
     const studentAssignments = assignments.filter(
-      a => a.studentId === studentId && a.professorId === professor.id
-    );
-    
-    const completedAssignments = studentAssignments.filter(a => a.status === 'completed');
-    const inProgressAssignments = studentAssignments.filter(a => a.status === 'in_progress');
-    const overdueAssignments = studentAssignments.filter(a => 
-      a.status !== 'completed' && a.dueDate && new Date(a.dueDate) < new Date()
+      (a) => a.studentId === studentId && a.professorId === professor.id,
     );
 
-    const averageScore = completedAssignments.length > 0 
-      ? completedAssignments.reduce((sum, a) => sum + (a.score || 0), 0) / completedAssignments.length 
-      : 0;
+    const completedAssignments = studentAssignments.filter(
+      (a) => a.status === "completed",
+    );
+    const inProgressAssignments = studentAssignments.filter(
+      (a) => a.status === "in_progress",
+    );
+    const overdueAssignments = studentAssignments.filter(
+      (a) =>
+        a.status !== "completed" &&
+        a.dueDate &&
+        new Date(a.dueDate) < new Date(),
+    );
 
-    const totalTimeSpent = studentAssignments.reduce((sum, a) => sum + a.timeSpent, 0);
+    const averageScore =
+      completedAssignments.length > 0
+        ? completedAssignments.reduce((sum, a) => sum + (a.score || 0), 0) /
+          completedAssignments.length
+        : 0;
+
+    const totalTimeSpent = studentAssignments.reduce(
+      (sum, a) => sum + a.timeSpent,
+      0,
+    );
 
     const studentDetails = {
       ...student,
@@ -349,48 +405,54 @@ export const handleGetStudentDetails: RequestHandler = async (req, res) => {
         overdueAssignments: overdueAssignments.length,
         averageScore: Math.round(averageScore),
         totalTimeSpent,
-        completionRate: studentAssignments.length > 0 
-          ? Math.round((completedAssignments.length / studentAssignments.length) * 100) 
-          : 0
-      }
+        completionRate:
+          studentAssignments.length > 0
+            ? Math.round(
+                (completedAssignments.length / studentAssignments.length) * 100,
+              )
+            : 0,
+      },
     };
 
     res.json({
       success: true,
-      student: studentDetails
+      student: studentDetails,
     });
-
   } catch (error) {
-    console.error('Get student details error:', error);
+    console.error("Get student details error:", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to fetch student details'
+      error: "Failed to fetch student details",
     });
   }
 };
 
 // Update assignment status (when student works on problems)
-export const handleUpdateAssignmentProgress: RequestHandler = async (req, res) => {
+export const handleUpdateAssignmentProgress: RequestHandler = async (
+  req,
+  res,
+) => {
   try {
     const { assignmentId } = req.params;
     const { status, score, timeSpent } = req.body;
 
-    const assignmentIndex = assignments.findIndex(a => a.id === assignmentId);
+    const assignmentIndex = assignments.findIndex((a) => a.id === assignmentId);
     if (assignmentIndex === -1) {
       return res.status(404).json({
         success: false,
-        error: 'Assignment not found'
+        error: "Assignment not found",
       });
     }
 
     const assignment = assignments[assignmentIndex];
-    
+
     // Update assignment
     if (status) assignment.status = status;
     if (score !== undefined) assignment.score = score;
     if (timeSpent !== undefined) assignment.timeSpent += timeSpent;
-    if (status === 'completed') assignment.completedDate = new Date().toISOString();
-    
+    if (status === "completed")
+      assignment.completedDate = new Date().toISOString();
+
     assignment.attempts += 1;
 
     assignments[assignmentIndex] = assignment;
@@ -398,14 +460,13 @@ export const handleUpdateAssignmentProgress: RequestHandler = async (req, res) =
     res.json({
       success: true,
       assignment,
-      message: 'Assignment progress updated'
+      message: "Assignment progress updated",
     });
-
   } catch (error) {
-    console.error('Update assignment progress error:', error);
+    console.error("Update assignment progress error:", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to update assignment progress'
+      error: "Failed to update assignment progress",
     });
   }
 };
@@ -417,13 +478,13 @@ export const handleDeleteAssignment: RequestHandler = async (req, res) => {
     const professor = (req as any).user;
 
     const assignmentIndex = assignments.findIndex(
-      a => a.id === assignmentId && a.professorId === professor.id
+      (a) => a.id === assignmentId && a.professorId === professor.id,
     );
-    
+
     if (assignmentIndex === -1) {
       return res.status(404).json({
         success: false,
-        error: 'Assignment not found'
+        error: "Assignment not found",
       });
     }
 
@@ -431,14 +492,13 @@ export const handleDeleteAssignment: RequestHandler = async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Assignment deleted successfully'
+      message: "Assignment deleted successfully",
     });
-
   } catch (error) {
-    console.error('Delete assignment error:', error);
+    console.error("Delete assignment error:", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to delete assignment'
+      error: "Failed to delete assignment",
     });
   }
 };

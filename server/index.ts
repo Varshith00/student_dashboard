@@ -100,16 +100,8 @@ export function createServer() {
   );
 
   // Audio analysis routes
-  app.post(
-    "/api/audio/transcribe",
-    authMiddleware,
-    handleAudioTranscription,
-  );
-  app.post(
-    "/api/audio/analyze-answer",
-    authMiddleware,
-    handleAnswerAnalysis,
-  );
+  app.post("/api/audio/transcribe", authMiddleware, handleAudioTranscription);
+  app.post("/api/audio/analyze-answer", authMiddleware, handleAnswerAnalysis);
   app.post(
     "/api/audio/analyze-batch",
     authMiddleware,
@@ -117,11 +109,7 @@ export function createServer() {
   );
 
   // Professor routes
-  app.get(
-    "/api/professor/students",
-    authMiddleware,
-    handleGetStudents,
-  );
+  app.get("/api/professor/students", authMiddleware, handleGetStudents);
   app.post(
     "/api/professor/assign-problem",
     authMiddleware,
@@ -132,16 +120,8 @@ export function createServer() {
     authMiddleware,
     handleBulkAssignProblem,
   );
-  app.get(
-    "/api/professor/assignments",
-    authMiddleware,
-    handleGetAssignments,
-  );
-  app.get(
-    "/api/professor/analytics",
-    authMiddleware,
-    handleGetClassAnalytics,
-  );
+  app.get("/api/professor/assignments", authMiddleware, handleGetAssignments);
+  app.get("/api/professor/analytics", authMiddleware, handleGetClassAnalytics);
   app.get(
     "/api/professor/students/:studentId",
     authMiddleware,
