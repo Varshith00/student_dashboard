@@ -1,6 +1,35 @@
 import { RequestHandler } from "express";
 import fs from "fs";
 import path from "path";
+import { readFileSync, writeFileSync, existsSync } from "fs";
+import { join } from "path";
+
+// User interface matching auth.ts
+interface User {
+  id: string;
+  email: string;
+  password: string;
+  name: string;
+  role: "student" | "professor";
+  professorId?: string; // For students - which professor they're mapped to
+  createdAt: string;
+}
+
+const USERS_FILE = join(process.cwd(), "server/data/users.json");
+
+// Helper functions for user data
+const loadUsers = (): User[] => {
+  try {
+    if (!existsSync(USERS_FILE)) {
+      return [];
+    }
+    const data = readFileSync(USERS_FILE, "utf8");
+    return JSON.parse(data);
+  } catch (error) {
+    console.error("Error loading users:", error);
+    return [];
+  }
+};
 
 // In-memory storage for demo (in production, use a proper database)
 interface Assignment {
@@ -35,87 +64,117 @@ interface StudentProgress {
   }[];
 }
 
-// Mock data storage - Add demo assignments for our demo students
+// Mock data storage - Demo assignments for clean demo students
 const assignments: Assignment[] = [
   {
     id: "assign_1",
-    professorId: "demo-professor-001",
-    studentId: "17559437070308qm4bodu", // demostudent@demo.com ID
+    professorId: "professor@demo.com",
+    studentId: "demo-student-001", // Alex Rodriguez
     problemId: "two-sum",
     assignedDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
     dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days from now
-    status: "assigned",
-    attempts: 0,
-    timeSpent: 0,
+    status: "completed",
+    score: 95,
+    completedDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+    attempts: 1,
+    timeSpent: 35,
   },
   {
     id: "assign_2",
-    professorId: "demo-professor-001",
-    studentId: "17559437070308qm4bodu", // demostudent@demo.com ID
+    professorId: "professor@demo.com",
+    studentId: "demo-student-001", // Alex Rodriguez
     problemId: "binary-search",
     assignedDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
     dueDate: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000).toISOString(), // 6 days from now
     status: "in_progress",
     attempts: 1,
-    timeSpent: 30,
+    timeSpent: 45,
   },
   {
     id: "assign_3",
-    professorId: "demo-professor-001",
-    studentId: "17559437070308qm4bodu", // demostudent@demo.com ID
-    problemId: "valid-parentheses",
+    professorId: "professor@demo.com",
+    studentId: "demo-student-002", // Emma Thompson
+    problemId: "two-sum",
     assignedDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
     dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days from now
     status: "completed",
+    score: 88,
+    completedDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
+    attempts: 2,
+    timeSpent: 55,
+  },
+  {
+    id: "assign_4",
+    professorId: "professor@demo.com",
+    studentId: "demo-student-002", // Emma Thompson
+    problemId: "valid-parentheses",
+    assignedDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+    dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days from now
+    status: "assigned",
+    attempts: 0,
+    timeSpent: 0,
+  },
+  {
+    id: "assign_5",
+    professorId: "professor@demo.com",
+    studentId: "demo-student-003", // David Kim
+    problemId: "linked-list-cycle",
+    assignedDate: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(), // 4 days ago
+    dueDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago (overdue)
+    status: "in_progress",
+    attempts: 3,
+    timeSpent: 120,
+  },
+  {
+    id: "assign_6",
+    professorId: "prof1@gmail.com",
+    studentId: "demo-student-004", // Priya Patel
+    problemId: "merge-sorted-arrays",
+    assignedDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
+    dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days from now
+    status: "completed",
     score: 92,
-    completedDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+    completedDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
     attempts: 1,
-    timeSpent: 25,
+    timeSpent: 40,
+  },
+  {
+    id: "assign_7",
+    professorId: "prof1@gmail.com",
+    studentId: "demo-student-005", // Marcus Williams
+    problemId: "fibonacci-sequence",
+    assignedDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
+    dueDate: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString(), // 4 days from now
+    status: "in_progress",
+    attempts: 2,
+    timeSpent: 75,
   },
 ];
 
-const studentProfiles = [
-  {
-    id: "17559437070308qm4bodu", // demostudent@demo.com actual ID
-    name: "Demo Student",
-    email: "demostudent@demo.com",
-    lastActive: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30 minutes ago
-  },
-  {
-    id: "student_1",
-    name: "Alex Johnson",
-    email: "alex.johnson@university.edu",
-    lastActive: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
-  },
-  {
-    id: "student_2",
-    name: "Sarah Chen",
-    email: "sarah.chen@university.edu",
-    lastActive: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
-  },
-  {
-    id: "student_3",
-    name: "Michael Rodriguez",
-    email: "michael.r@university.edu",
-    lastActive: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30 minutes ago
-  },
-  {
-    id: "student_4",
-    name: "Emily Davis",
-    email: "emily.davis@university.edu",
-    lastActive: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(), // 3 hours ago
-  },
-];
+// Removed old mock student profiles - now using real user data from users.json
 
 // Get all students for a professor
 export const handleGetStudents: RequestHandler = async (req, res) => {
   try {
     const professor = (req as any).user;
 
-    // In a real app, fetch students assigned to this professor
-    const students = studentProfiles.map((student) => {
+    if (professor.role !== "professor") {
+      return res.status(403).json({
+        success: false,
+        error: "Access denied. Only professors can view students.",
+      });
+    }
+
+    // Load all users and filter students mapped to this professor by email
+    const allUsers = loadUsers();
+    const mappedStudents = allUsers.filter(
+      (user) => user.role === "student" && user.professorId === professor.email,
+    );
+
+    // Process each student's data
+    const students = mappedStudents.map((student) => {
       const studentAssignments = assignments.filter(
-        (a) => a.studentId === student.id,
+        (a) => a.studentId === student.id && a.professorId === professor.id,
       );
       const completedAssignments = studentAssignments.filter(
         (a) => a.status === "completed",
@@ -130,21 +189,35 @@ export const handleGetStudents: RequestHandler = async (req, res) => {
         0,
       );
 
+      // Calculate last active (for demo, using created date with some random offset)
+      const lastActiveTime = new Date(student.createdAt);
+      lastActiveTime.setTime(
+        lastActiveTime.getTime() + Math.random() * 7 * 24 * 60 * 60 * 1000,
+      ); // Add random time up to 7 days
+
       return {
-        ...student,
+        id: student.id,
+        name: student.name,
+        email: student.email,
         progress: Math.round(averageScore),
         problemsSolved: completedAssignments.length,
         totalAssignments: studentAssignments.length,
         averageScore: Math.round(averageScore),
         totalTimeSpent,
+        interviewScore: Math.round(75 + Math.random() * 25), // Mock interview score
         status:
-          new Date(student.lastActive) >
-          new Date(Date.now() - 24 * 60 * 60 * 1000)
+          lastActiveTime > new Date(Date.now() - 24 * 60 * 60 * 1000)
             ? "active"
             : "inactive",
+        lastActive: lastActiveTime.toLocaleDateString(),
+        currentProblem:
+          studentAssignments.find((a) => a.status === "in_progress")
+            ?.problemId ||
+          (studentAssignments.length > 0 ? "No active problem" : "Not started"),
         currentAssignments: studentAssignments.filter(
           (a) => a.status !== "completed",
         ),
+        joinedAt: student.createdAt,
       };
     });
 
@@ -262,14 +335,24 @@ export const handleGetAssignments: RequestHandler = async (req, res) => {
   try {
     const professor = (req as any).user;
 
+    if (professor.role !== "professor") {
+      return res.status(403).json({
+        success: false,
+        error: "Access denied. Only professors can view assignments.",
+      });
+    }
+
     const professorAssignments = assignments.filter(
       (a) => a.professorId === professor.id,
     );
 
+    // Load all users to get student names
+    const allUsers = loadUsers();
+
     // Enrich assignments with student info
     const enrichedAssignments = professorAssignments.map((assignment) => {
-      const student = studentProfiles.find(
-        (s) => s.id === assignment.studentId,
+      const student = allUsers.find(
+        (user) => user.id === assignment.studentId && user.role === "student",
       );
       return {
         ...assignment,
@@ -296,19 +379,31 @@ export const handleGetClassAnalytics: RequestHandler = async (req, res) => {
   try {
     const professor = (req as any).user;
 
+    if (professor.role !== "professor") {
+      return res.status(403).json({
+        success: false,
+        error: "Access denied. Only professors can view analytics.",
+      });
+    }
+
+    // Get students mapped to this professor by email
+    const allUsers = loadUsers();
+    const mappedStudents = allUsers.filter(
+      (user) => user.role === "student" && user.professorId === professor.email,
+    );
+
     const professorAssignments = assignments.filter(
       (a) => a.professorId === professor.id,
     );
-    const uniqueStudents = [
-      ...new Set(professorAssignments.map((a) => a.studentId)),
-    ];
+
+    const completedAssignments = professorAssignments.filter(
+      (a) => a.status === "completed",
+    );
 
     const analytics = {
-      totalStudents: uniqueStudents.length,
+      totalStudents: mappedStudents.length,
       totalAssignments: professorAssignments.length,
-      completedAssignments: professorAssignments.filter(
-        (a) => a.status === "completed",
-      ).length,
+      completedAssignments: completedAssignments.length,
       inProgressAssignments: professorAssignments.filter(
         (a) => a.status === "in_progress",
       ).length,
@@ -318,40 +413,41 @@ export const handleGetClassAnalytics: RequestHandler = async (req, res) => {
           a.dueDate &&
           new Date(a.dueDate) < new Date(),
       ).length,
-      averageScore: professorAssignments
-        .filter((a) => a.score !== undefined)
-        .reduce((sum, a, _, arr) => sum + (a.score || 0) / arr.length, 0),
+      averageScore:
+        completedAssignments.length > 0
+          ? completedAssignments.reduce((sum, a) => sum + (a.score || 0), 0) /
+            completedAssignments.length
+          : 0,
       totalTimeSpent: professorAssignments.reduce(
         (sum, a) => sum + a.timeSpent,
         0,
       ),
-      studentProgress: uniqueStudents.map((studentId) => {
-        const student = studentProfiles.find((s) => s.id === studentId);
+      studentProgress: mappedStudents.map((student) => {
         const studentAssignments = professorAssignments.filter(
-          (a) => a.studentId === studentId,
+          (a) => a.studentId === student.id,
         );
-        const completedAssignments = studentAssignments.filter(
+        const studentCompletedAssignments = studentAssignments.filter(
           (a) => a.status === "completed",
         );
 
         return {
-          studentId,
-          studentName: student?.name || "Unknown",
-          studentEmail: student?.email || "Unknown",
+          studentId: student.id,
+          studentName: student.name,
+          studentEmail: student.email,
           totalAssignments: studentAssignments.length,
-          completedAssignments: completedAssignments.length,
+          completedAssignments: studentCompletedAssignments.length,
           averageScore:
-            completedAssignments.length > 0
-              ? completedAssignments.reduce(
+            studentCompletedAssignments.length > 0
+              ? studentCompletedAssignments.reduce(
                   (sum, a) => sum + (a.score || 0),
                   0,
-                ) / completedAssignments.length
+                ) / studentCompletedAssignments.length
               : 0,
           totalTimeSpent: studentAssignments.reduce(
             (sum, a) => sum + a.timeSpent,
             0,
           ),
-          lastActive: student?.lastActive || new Date().toISOString(),
+          lastActive: student.createdAt, // Using creation date for demo
         };
       }),
       problemStats: {},
@@ -376,11 +472,26 @@ export const handleGetStudentDetails: RequestHandler = async (req, res) => {
     const { studentId } = req.params;
     const professor = (req as any).user;
 
-    const student = studentProfiles.find((s) => s.id === studentId);
+    if (professor.role !== "professor") {
+      return res.status(403).json({
+        success: false,
+        error: "Access denied. Only professors can view student details.",
+      });
+    }
+
+    // Load all users to find the student
+    const allUsers = loadUsers();
+    const student = allUsers.find(
+      (user) =>
+        user.id === studentId &&
+        user.role === "student" &&
+        user.professorId === professor.email,
+    );
+
     if (!student) {
       return res.status(404).json({
         success: false,
-        error: "Student not found",
+        error: "Student not found or not assigned to you",
       });
     }
 
@@ -413,7 +524,10 @@ export const handleGetStudentDetails: RequestHandler = async (req, res) => {
     );
 
     const studentDetails = {
-      ...student,
+      id: student.id,
+      name: student.name,
+      email: student.email,
+      createdAt: student.createdAt,
       assignments: studentAssignments,
       stats: {
         totalAssignments: studentAssignments.length,

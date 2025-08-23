@@ -11,8 +11,10 @@ import {
 } from "./routes/ai-questions";
 import {
   handleRegister,
+  handleStudentRegister,
   handleLogin,
   handleGetUser,
+  handleGetProfessor,
   authMiddleware,
 } from "./routes/auth";
 import {
@@ -39,6 +41,13 @@ import {
   handleDeleteAssignment,
   handleGetStudentAssignments,
 } from "./routes/professor";
+import {
+  createSession,
+  joinSession,
+  updateCode,
+  getSession,
+  leaveSession,
+} from "./routes/collaboration";
 
 export function createServer() {
   const app = express();
@@ -58,8 +67,10 @@ export function createServer() {
 
   // Authentication routes
   app.post("/api/auth/register", handleRegister);
+  app.post("/api/auth/student-register", handleStudentRegister);
   app.post("/api/auth/login", handleLogin);
   app.get("/api/auth/user", authMiddleware, handleGetUser);
+  app.get("/api/auth/professor/:professorEmail", handleGetProfessor);
 
   // Protected routes (require authentication)
   app.post("/api/execute-python", authMiddleware, handleExecutePython);
@@ -145,6 +156,13 @@ export function createServer() {
     authMiddleware,
     handleGetStudentAssignments,
   );
+
+  // Collaboration routes
+  app.post("/api/collaboration/create", authMiddleware, createSession);
+  app.post("/api/collaboration/join", authMiddleware, joinSession);
+  app.get("/api/collaboration/:sessionId", authMiddleware, getSession);
+  app.post("/api/collaboration/update", authMiddleware, updateCode);
+  app.post("/api/collaboration/leave", authMiddleware, leaveSession);
 
   return app;
 }
