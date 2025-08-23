@@ -314,14 +314,24 @@ export const handleGetAssignments: RequestHandler = async (req, res) => {
   try {
     const professor = (req as any).user;
 
+    if (professor.role !== 'professor') {
+      return res.status(403).json({
+        success: false,
+        error: "Access denied. Only professors can view assignments."
+      });
+    }
+
     const professorAssignments = assignments.filter(
       (a) => a.professorId === professor.id,
     );
 
+    // Load all users to get student names
+    const allUsers = loadUsers();
+
     // Enrich assignments with student info
     const enrichedAssignments = professorAssignments.map((assignment) => {
-      const student = studentProfiles.find(
-        (s) => s.id === assignment.studentId,
+      const student = allUsers.find(
+        (user) => user.id === assignment.studentId && user.role === 'student',
       );
       return {
         ...assignment,
