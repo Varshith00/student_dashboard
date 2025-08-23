@@ -67,6 +67,11 @@ const findUserByEmail = (email: string): User | undefined => {
   return users.find(user => user.email.toLowerCase() === email.toLowerCase());
 };
 
+const findUserById = (id: string): User | undefined => {
+  const users = loadUsers();
+  return users.find(user => user.id === id);
+};
+
 const generateToken = (user: User): string => {
   return jwt.sign(
     { 
