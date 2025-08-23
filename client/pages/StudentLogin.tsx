@@ -25,7 +25,7 @@ import {
 
 export default function StudentLogin() {
   const navigate = useNavigate();
-  const { user, login, isLoading } = useAuth();
+  const { user, login, setAuthData, isLoading } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -65,14 +65,14 @@ export default function StudentLogin() {
       const data = await response.json();
 
       if (data.success && data.user.role === "student") {
-        login(data.user, data.token);
+        setAuthData(data.user, data.token);
         navigate("/student/dashboard");
       } else if (data.success && data.user.role !== "student") {
         setError(
           "This login is for students only. Please use the professor login.",
         );
       } else {
-        setError(data.error || "Invalid credentials");
+        setError(data.message || "Invalid credentials");
       }
     } catch (error) {
       setError("Login failed. Please try again.");
