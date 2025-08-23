@@ -151,11 +151,8 @@ print(f"Result: {result}")
   const analyzeCode = async () => {
     setIsLoadingAI(true);
     try {
-      const response = await fetch('/api/ai/analyze-code', {
+      const response = await authFetch('/api/ai/analyze-code', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({
           code,
           problem_description: problem?.description || 'General code analysis'
