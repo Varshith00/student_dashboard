@@ -1,106 +1,63 @@
 [
   {
-    "id": "17559173791842muudobe0",
-    "email": "gandup@dsce.edu",
-    "password": "$2b$10$9rFkWWROJiHliD1br3A38eUVEjFz3eCsjW26YJ0iARWdfnGX/rYdy",
-    "name": "akaza",
-    "role": "professor",
-    "createdAt": "2025-08-23T02:49:39.184Z"
-  },
-  {
-    "id": "1755921807649lwycrcslw",
-    "email": "gandus@dsce.edu",
-    "password": "$2b$10$wAfBEAZTYvIsHnPkOyU3J.ioJJ2UyEuFyu4Rm7FXJbX3Fub5UVvXm",
-    "name": "gandu",
-    "role": "student",
-    "createdAt": "2025-08-23T04:03:27.649Z"
-  },
-  {
-    "id": "1755933690267y5p1pigck",
-    "email": "gandu@dsc.edu",
-    "password": "$2b$10$WpFHJ05uYY8VuESAriORHuZubAYkApGhLyMKMjdaiy2hPhx4kd/e6",
-    "name": "gandhu",
-    "role": "student",
-    "createdAt": "2025-08-23T07:21:30.267Z"
-  },
-  {
-    "id": "1755943388211s2gm0c8ce",
-    "email": "gandu2@dsce.edu",
-    "password": "$2b$10$aeERXTmsRPP25YSzgakRqeLkxwXySZb5UTrNTGnhrJzkA5QwIXgfu",
-    "name": "vishnu",
-    "role": "student",
-    "createdAt": "2025-08-23T10:03:08.211Z"
-  },
-  {
-    "id": "demo-student-001",
-    "email": "student@demo.com",
-    "password": "$2b$10$K8U9r0X9Y3nX9Y3nX9Y3n.G7eX9Y3nX9Y3nX9Y3nX9Y3nX9Y3nX9Y",
-    "name": "Demo Student",
-    "role": "student",
-    "createdAt": "2025-01-01T00:00:00.000Z"
-  },
-  {
     "id": "demo-professor-001",
     "email": "professor@demo.com",
     "password": "$2b$10$L9V0s1Y0Z4oY0Z4oY0Z4o.H8fY0Z4oY0Z4oY0Z4oY0Z4oY0Z4oY0Z4o",
-    "name": "Demo Professor",
+    "name": "Dr. Sarah Johnson",
     "role": "professor",
     "createdAt": "2025-01-01T00:00:00.000Z"
   },
   {
-    "id": "1755943697209bf4wrkank",
-    "email": "test-student@demo.com",
-    "password": "$2b$10$Ap1bOl62q2K/6h5CyXgQKufuY5QYWz02JsWh/VV9Ilqsw3IncrCdy",
-    "name": "Test Student",
-    "role": "student",
-    "createdAt": "2025-08-23T10:08:17.209Z"
-  },
-  {
-    "id": "175594370703081qm4bodu",
-    "email": "demostudent@demo.com",
-    "password": "$2b$10$KypOa0lAIGmsZsstWhr7VeALv1CgXw1T7oCZ7vxj44JpbHedALtXS",
-    "name": "Demo Student",
-    "role": "student",
-    "createdAt": "2025-08-23T10:08:27.030Z"
-  },
-  {
-    "id": "1755943707150q9f1piref",
-    "email": "demoprofessor@demo.com",
-    "password": "$2b$10$8YQ/SMzD8GZQS4pGf.8I/eza5.eUQyvjqmL45FUCmCWnyCXLGWaX6",
-    "name": "Demo Professor",
-    "role": "professor",
-    "createdAt": "2025-08-23T10:08:27.150Z"
-  },
-  {
-    "id": "1755944725692lfm8jd2oz",
-    "email": "varun@gmail.com",
-    "password": "$2b$10$aYoAwz4E43KZFb/Ca97o6uTtCSTvqSmeuNev5lDJeI6P7Wt8s8KDi",
-    "name": "qwertyuiop",
-    "role": "professor",
-    "createdAt": "2025-08-23T10:25:25.692Z"
-  },
-  {
-    "id": "1755947875493aep51zw0i",
-    "email": "abhi1@gmail.com",
-    "password": "$2b$10$u4gYEYoOu5S8zGzUnBsn5.CXqe7sNyMfvJsdVh6S6ciPRB3cpv3Hu",
-    "name": "Abhiram",
-    "role": "student",
-    "createdAt": "2025-08-23T11:17:55.493Z"
-  },
-  {
-    "id": "1755947925244brau960rc",
-    "email": "abhi2@gmail.com",
-    "password": "$2b$10$XDSJJ1OV43OkqcAEg3lCg.hf4M4jmVrQMi..2PoqXmpcVUEjlTu.u",
-    "name": "Abhiram 2",
-    "role": "student",
-    "createdAt": "2025-08-23T11:18:45.244Z"
-  },
-  {
-    "id": "1755947965589q43pi0isy",
+    "id": "prof1@gmail.com-id",
     "email": "prof1@gmail.com",
     "password": "$2b$10$YMCY4uF6LbPfiDAc7RZ/eO8qPxsfysud2lKhudhyPYHqyb18S4gqS",
-    "name": "Abhiram Profe",
+    "name": "Prof. Michael Chen",
     "role": "professor",
-    "createdAt": "2025-08-23T11:19:25.589Z"
+    "createdAt": "2025-01-15T09:00:00.000Z"
+  },
+  {
+    "id": "demo-student-001",
+    "email": "student1@demo.com",
+    "password": "$2b$10$K8U9r0X9Y3nX9Y3nX9Y3n.G7eX9Y3nX9Y3nX9Y3nX9Y3nX9Y3nX9Y",
+    "name": "Alex Rodriguez",
+    "role": "student",
+    "professorId": "demo-professor-001",
+    "createdAt": "2025-01-02T10:00:00.000Z"
+  },
+  {
+    "id": "demo-student-002",
+    "email": "student2@demo.com",
+    "password": "$2b$10$K8U9r0X9Y3nX9Y3nX9Y3n.G7eX9Y3nX9Y3nX9Y3nX9Y3nX9Y3nX9Y",
+    "name": "Emma Thompson",
+    "role": "student",
+    "professorId": "demo-professor-001",
+    "createdAt": "2025-01-03T11:00:00.000Z"
+  },
+  {
+    "id": "demo-student-003",
+    "email": "student3@demo.com",
+    "password": "$2b$10$K8U9r0X9Y3nX9Y3nX9Y3n.G7eX9Y3nX9Y3nX9Y3nX9Y3nX9Y3nX9Y",
+    "name": "David Kim",
+    "role": "student",
+    "professorId": "demo-professor-001",
+    "createdAt": "2025-01-04T12:00:00.000Z"
+  },
+  {
+    "id": "demo-student-004",
+    "email": "student4@demo.com",
+    "password": "$2b$10$K8U9r0X9Y3nX9Y3nX9Y3n.G7eX9Y3nX9Y3nX9Y3nX9Y3nX9Y3nX9Y",
+    "name": "Priya Patel",
+    "role": "student",
+    "professorId": "prof1@gmail.com-id",
+    "createdAt": "2025-01-16T13:00:00.000Z"
+  },
+  {
+    "id": "demo-student-005",
+    "email": "student5@demo.com",
+    "password": "$2b$10$K8U9r0X9Y3nX9Y3nX9Y3n.G7eX9Y3nX9Y3nX9Y3nX9Y3nX9Y3nX9Y",
+    "name": "Marcus Williams",
+    "role": "student",
+    "professorId": "prof1@gmail.com-id",
+    "createdAt": "2025-01-17T14:00:00.000Z"
   }
 ]
