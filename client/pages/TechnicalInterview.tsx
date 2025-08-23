@@ -413,12 +413,18 @@ export default function TechnicalInterview() {
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="outline" className="flex items-center gap-1 text-xs">
+              <Badge
+                variant="outline"
+                className="flex items-center gap-1 text-xs"
+              >
                 <Clock className="w-3 h-3" />
                 {session.status === "active" ? "In Progress" : "Completed"}
               </Badge>
               {session.status === "completed" && session.score && (
-                <Badge variant="secondary" className="flex items-center gap-1 text-xs">
+                <Badge
+                  variant="secondary"
+                  className="flex items-center gap-1 text-xs"
+                >
                   <Star className="w-3 h-3" />
                   {session.score}/100
                 </Badge>
@@ -657,7 +663,8 @@ export default function TechnicalInterview() {
                     </div>
                     <div className="text-center mt-2">
                       <p className="text-sm text-muted-foreground">
-                        You will be automatically redirected to the dashboard in a few seconds...
+                        You will be automatically redirected to the dashboard in
+                        a few seconds...
                       </p>
                     </div>
                   </CardContent>

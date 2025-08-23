@@ -45,7 +45,7 @@ interface Assignment {
   problemId: string;
   assignedDate: string;
   dueDate?: string;
-  status: 'assigned' | 'in_progress' | 'completed' | 'overdue';
+  status: "assigned" | "in_progress" | "completed" | "overdue";
   score?: number;
   completedDate?: string;
   attempts: number;
@@ -66,7 +66,9 @@ export default function StudentDashboard() {
   const { user, logout, isLoading } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
   const [assignments, setAssignments] = useState<Assignment[]>([]);
-  const [assignmentSummary, setAssignmentSummary] = useState<AssignmentSummary>({ total: 0, pending: 0, inProgress: 0, completed: 0, overdue: 0 });
+  const [assignmentSummary, setAssignmentSummary] = useState<AssignmentSummary>(
+    { total: 0, pending: 0, inProgress: 0, completed: 0, overdue: 0 },
+  );
   const [assignmentsLoading, setAssignmentsLoading] = useState(false);
 
   // Redirect if not logged in or not a student
@@ -86,35 +88,48 @@ export default function StudentDashboard() {
   const fetchAssignments = async () => {
     setAssignmentsLoading(true);
     try {
-      const response = await authFetch('/api/student/assignments');
+      const response = await authFetch("/api/student/assignments");
       const data = await response.json();
 
       if (data.success) {
         setAssignments(data.assignments || []);
-        setAssignmentSummary(data.summary || { total: 0, pending: 0, inProgress: 0, completed: 0, overdue: 0 });
+        setAssignmentSummary(
+          data.summary || {
+            total: 0,
+            pending: 0,
+            inProgress: 0,
+            completed: 0,
+            overdue: 0,
+          },
+        );
       } else {
-        console.error('Failed to fetch assignments:', data.error);
+        console.error("Failed to fetch assignments:", data.error);
       }
     } catch (error) {
-      console.error('Error fetching assignments:', error);
+      console.error("Error fetching assignments:", error);
     } finally {
       setAssignmentsLoading(false);
     }
   };
 
   const getProblemByIdFromList = (problemId: string) => {
-    return problems.find(p => p.id === problemId) || {
-      id: problemId,
-      title: problemId.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
-      difficulty: 'Medium' as const,
-      tags: ['Unknown'],
-      description: 'Problem description not available',
-      examples: [],
-      constraints: [],
-      starter_code: { python: '', javascript: '' },
-      solution: { python: '', javascript: '' },
-      test_cases: []
-    };
+    return (
+      problems.find((p) => p.id === problemId) || {
+        id: problemId,
+        title: problemId
+          .split("-")
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(" "),
+        difficulty: "Medium" as const,
+        tags: ["Unknown"],
+        description: "Problem description not available",
+        examples: [],
+        constraints: [],
+        starter_code: { python: "", javascript: "" },
+        solution: { python: "", javascript: "" },
+        test_cases: [],
+      }
+    );
   };
 
   const formatDueDate = (dueDate: string) => {
@@ -124,33 +139,41 @@ export default function StudentDashboard() {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
     if (diffDays < 0) {
-      return `Overdue by ${Math.abs(diffDays)} day${Math.abs(diffDays) !== 1 ? 's' : ''}`;
+      return `Overdue by ${Math.abs(diffDays)} day${Math.abs(diffDays) !== 1 ? "s" : ""}`;
     } else if (diffDays === 0) {
-      return 'Due today';
+      return "Due today";
     } else if (diffDays === 1) {
-      return 'Due tomorrow';
+      return "Due tomorrow";
     } else {
       return `Due in ${diffDays} days`;
     }
   };
 
   const getStatusColor = (status: string, isOverdue?: boolean) => {
-    if (isOverdue) return 'destructive';
+    if (isOverdue) return "destructive";
     switch (status) {
-      case 'assigned': return 'secondary';
-      case 'in_progress': return 'warning';
-      case 'completed': return 'success';
-      default: return 'secondary';
+      case "assigned":
+        return "secondary";
+      case "in_progress":
+        return "warning";
+      case "completed":
+        return "success";
+      default:
+        return "secondary";
     }
   };
 
   const getStatusText = (status: string, isOverdue?: boolean) => {
-    if (isOverdue) return 'Overdue';
+    if (isOverdue) return "Overdue";
     switch (status) {
-      case 'assigned': return 'New';
-      case 'in_progress': return 'In Progress';
-      case 'completed': return 'Completed';
-      default: return status;
+      case "assigned":
+        return "New";
+      case "in_progress":
+        return "In Progress";
+      case "completed":
+        return "Completed";
+      default:
+        return status;
     }
   };
 
@@ -257,7 +280,10 @@ export default function StudentDashboard() {
             <span className="hidden sm:inline">Assignments</span>
             <span className="sm:hidden">Tasks</span>
             {assignmentSummary.pending + assignmentSummary.overdue > 0 && (
-              <Badge className="ml-1 h-4 w-4 p-0 text-xs sm:h-5 sm:w-5" variant="destructive">
+              <Badge
+                className="ml-1 h-4 w-4 p-0 text-xs sm:h-5 sm:w-5"
+                variant="destructive"
+              >
                 {assignmentSummary.pending + assignmentSummary.overdue}
               </Badge>
             )}
@@ -405,7 +431,8 @@ export default function StudentDashboard() {
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <FileText className="w-5 h-5 text-warning" />
                     Assignments
-                    {assignmentSummary.pending + assignmentSummary.overdue > 0 && (
+                    {assignmentSummary.pending + assignmentSummary.overdue >
+                      0 && (
                       <Badge className="ml-1" variant="destructive">
                         {assignmentSummary.pending + assignmentSummary.overdue}
                       </Badge>
@@ -427,7 +454,8 @@ export default function StudentDashboard() {
                     </Button>
                     {assignmentSummary.overdue > 0 && (
                       <div className="text-xs text-destructive font-medium text-center">
-                        {assignmentSummary.overdue} overdue assignment{assignmentSummary.overdue !== 1 ? 's' : ''}
+                        {assignmentSummary.overdue} overdue assignment
+                        {assignmentSummary.overdue !== 1 ? "s" : ""}
                       </div>
                     )}
                   </div>
@@ -867,7 +895,8 @@ export default function StudentDashboard() {
                   My Assignments
                 </CardTitle>
                 <CardDescription>
-                  Problems assigned by your professors with due dates and progress tracking
+                  Problems assigned by your professors with due dates and
+                  progress tracking
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -888,13 +917,17 @@ export default function StudentDashboard() {
                     <div className="text-2xl font-bold text-warning mb-1">
                       {assignmentSummary.inProgress}
                     </div>
-                    <div className="text-sm text-muted-foreground">In Progress</div>
+                    <div className="text-sm text-muted-foreground">
+                      In Progress
+                    </div>
                   </div>
                   <div className="text-center p-4 bg-success/20 rounded-lg">
                     <div className="text-2xl font-bold text-success mb-1">
                       {assignmentSummary.completed}
                     </div>
-                    <div className="text-sm text-muted-foreground">Completed</div>
+                    <div className="text-sm text-muted-foreground">
+                      Completed
+                    </div>
                   </div>
                   <div className="text-center p-4 bg-destructive/20 rounded-lg">
                     <div className="text-2xl font-bold text-destructive mb-1">
@@ -907,20 +940,27 @@ export default function StudentDashboard() {
                 {assignmentsLoading ? (
                   <div className="text-center py-8">
                     <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>
-                    <p className="text-muted-foreground">Loading assignments...</p>
+                    <p className="text-muted-foreground">
+                      Loading assignments...
+                    </p>
                   </div>
                 ) : assignments.length === 0 ? (
                   <div className="text-center py-12">
                     <FileText className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
-                    <h3 className="text-lg font-semibold mb-2">No Assignments Yet</h3>
+                    <h3 className="text-lg font-semibold mb-2">
+                      No Assignments Yet
+                    </h3>
                     <p className="text-muted-foreground">
-                      Your professors haven't assigned any problems yet. Check back later!
+                      Your professors haven't assigned any problems yet. Check
+                      back later!
                     </p>
                   </div>
                 ) : (
                   <div className="space-y-4">
                     {assignments.map((assignment) => {
-                      const problem = getProblemByIdFromList(assignment.problemId);
+                      const problem = getProblemByIdFromList(
+                        assignment.problemId,
+                      );
                       const getDifficultyColor = () => {
                         switch (problem.difficulty) {
                           case "Easy":
@@ -935,69 +975,114 @@ export default function StudentDashboard() {
                       };
 
                       return (
-                        <Card key={assignment.id} className={`border ${assignment.isOverdue ? 'border-destructive/50' : 'border-border'} hover:border-primary/50 transition-colors`}>
+                        <Card
+                          key={assignment.id}
+                          className={`border ${assignment.isOverdue ? "border-destructive/50" : "border-border"} hover:border-primary/50 transition-colors`}
+                        >
                           <CardContent className="p-4">
                             <div className="flex items-start justify-between">
                               <div className="flex-1">
                                 <div className="flex items-center gap-3 mb-2">
                                   <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                                    <Target className={`w-6 h-6 ${getDifficultyColor()}`} />
+                                    <Target
+                                      className={`w-6 h-6 ${getDifficultyColor()}`}
+                                    />
                                   </div>
                                   <div className="flex-1">
-                                    <h3 className="font-semibold text-lg">{problem.title}</h3>
+                                    <h3 className="font-semibold text-lg">
+                                      {problem.title}
+                                    </h3>
                                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                       <User className="w-4 h-4" />
-                                      <span>Assigned by {assignment.professorName}</span>
+                                      <span>
+                                        Assigned by {assignment.professorName}
+                                      </span>
                                       <span>•</span>
                                       <Clock className="w-4 h-4" />
-                                      <span>Assigned {new Date(assignment.assignedDate).toLocaleDateString()}</span>
+                                      <span>
+                                        Assigned{" "}
+                                        {new Date(
+                                          assignment.assignedDate,
+                                        ).toLocaleDateString()}
+                                      </span>
                                     </div>
                                   </div>
                                 </div>
 
                                 <div className="flex items-center gap-4 text-sm">
                                   <div className="flex items-center gap-1">
-                                    <span className="text-muted-foreground">Difficulty:</span>
-                                    <Badge variant="outline" className={getDifficultyColor()}>
+                                    <span className="text-muted-foreground">
+                                      Difficulty:
+                                    </span>
+                                    <Badge
+                                      variant="outline"
+                                      className={getDifficultyColor()}
+                                    >
                                       {problem.difficulty}
                                     </Badge>
                                   </div>
                                   <div className="flex items-center gap-1">
-                                    <span className="text-muted-foreground">Attempts:</span>
-                                    <span className="font-medium">{assignment.attempts}</span>
+                                    <span className="text-muted-foreground">
+                                      Attempts:
+                                    </span>
+                                    <span className="font-medium">
+                                      {assignment.attempts}
+                                    </span>
                                   </div>
                                   <div className="flex items-center gap-1">
-                                    <span className="text-muted-foreground">Time spent:</span>
-                                    <span className="font-medium">{assignment.timeSpent}m</span>
+                                    <span className="text-muted-foreground">
+                                      Time spent:
+                                    </span>
+                                    <span className="font-medium">
+                                      {assignment.timeSpent}m
+                                    </span>
                                   </div>
                                   {assignment.score && (
                                     <div className="flex items-center gap-1">
-                                      <span className="text-muted-foreground">Score:</span>
-                                      <span className="font-medium text-success">{assignment.score}%</span>
+                                      <span className="text-muted-foreground">
+                                        Score:
+                                      </span>
+                                      <span className="font-medium text-success">
+                                        {assignment.score}%
+                                      </span>
                                     </div>
                                   )}
                                 </div>
                               </div>
 
                               <div className="flex flex-col items-end gap-2">
-                                <Badge variant={getStatusColor(assignment.status, assignment.isOverdue)}>
-                                  {assignment.isOverdue && <AlertCircle className="w-3 h-3 mr-1" />}
-                                  {getStatusText(assignment.status, assignment.isOverdue)}
+                                <Badge
+                                  variant={getStatusColor(
+                                    assignment.status,
+                                    assignment.isOverdue,
+                                  )}
+                                >
+                                  {assignment.isOverdue && (
+                                    <AlertCircle className="w-3 h-3 mr-1" />
+                                  )}
+                                  {getStatusText(
+                                    assignment.status,
+                                    assignment.isOverdue,
+                                  )}
                                 </Badge>
 
                                 {assignment.dueDate && (
-                                  <div className={`text-sm ${
-                                    assignment.isOverdue
-                                      ? 'text-destructive font-medium'
-                                      : 'text-muted-foreground'
-                                  }`}>
+                                  <div
+                                    className={`text-sm ${
+                                      assignment.isOverdue
+                                        ? "text-destructive font-medium"
+                                        : "text-muted-foreground"
+                                    }`}
+                                  >
                                     {formatDueDate(assignment.dueDate)}
                                   </div>
                                 )}
 
-                                <Link to={`/student/coding/${assignment.problemId}`}>
+                                <Link
+                                  to={`/student/coding/${assignment.problemId}`}
+                                >
                                   <Button size="sm" className="mt-2">
-                                    {assignment.status === 'completed' ? (
+                                    {assignment.status === "completed" ? (
                                       <>
                                         <CheckCircle className="w-4 h-4 mr-2" />
                                         Review
@@ -1005,7 +1090,9 @@ export default function StudentDashboard() {
                                     ) : (
                                       <>
                                         <Play className="w-4 h-4 mr-2" />
-                                        {assignment.status === 'assigned' ? 'Start' : 'Continue'}
+                                        {assignment.status === "assigned"
+                                          ? "Start"
+                                          : "Continue"}
                                       </>
                                     )}
                                   </Button>

@@ -140,7 +140,11 @@ export function createServer() {
   );
 
   // Student routes
-  app.get("/api/student/assignments", authMiddleware, handleGetStudentAssignments);
+  app.get(
+    "/api/student/assignments",
+    authMiddleware,
+    handleGetStudentAssignments,
+  );
 
   return app;
 }

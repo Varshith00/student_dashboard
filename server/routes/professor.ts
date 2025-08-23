@@ -525,10 +525,10 @@ export const handleGetStudentAssignments: RequestHandler = async (req, res) => {
   try {
     const student = (req as any).user;
 
-    if (student.role !== 'student') {
+    if (student.role !== "student") {
       return res.status(403).json({
         success: false,
-        error: 'Access denied. Only students can view their assignments.'
+        error: "Access denied. Only students can view their assignments.",
       });
     }
 
@@ -542,37 +542,50 @@ export const handleGetStudentAssignments: RequestHandler = async (req, res) => {
       // In a real app, you'd fetch professor details from the database
       const professor = {
         id: assignment.professorId,
-        name: assignment.professorId === 'prof_1' ? 'Dr. Smith' : 'Dr. Johnson',
-        email: assignment.professorId === 'prof_1' ? 'dr.smith@university.edu' : 'dr.johnson@university.edu'
+        name: assignment.professorId === "prof_1" ? "Dr. Smith" : "Dr. Johnson",
+        email:
+          assignment.professorId === "prof_1"
+            ? "dr.smith@university.edu"
+            : "dr.johnson@university.edu",
       };
 
       return {
         ...assignment,
         professorName: professor.name,
         professorEmail: professor.email,
-        isOverdue: assignment.dueDate && new Date(assignment.dueDate) < new Date() && assignment.status !== 'completed'
+        isOverdue:
+          assignment.dueDate &&
+          new Date(assignment.dueDate) < new Date() &&
+          assignment.status !== "completed",
       };
     });
 
     // Sort by assigned date (newest first)
-    enrichedAssignments.sort((a, b) => new Date(b.assignedDate).getTime() - new Date(a.assignedDate).getTime());
+    enrichedAssignments.sort(
+      (a, b) =>
+        new Date(b.assignedDate).getTime() - new Date(a.assignedDate).getTime(),
+    );
 
     res.json({
       success: true,
       assignments: enrichedAssignments,
       summary: {
         total: enrichedAssignments.length,
-        pending: enrichedAssignments.filter(a => a.status === 'assigned').length,
-        inProgress: enrichedAssignments.filter(a => a.status === 'in_progress').length,
-        completed: enrichedAssignments.filter(a => a.status === 'completed').length,
-        overdue: enrichedAssignments.filter(a => a.isOverdue).length
-      }
+        pending: enrichedAssignments.filter((a) => a.status === "assigned")
+          .length,
+        inProgress: enrichedAssignments.filter(
+          (a) => a.status === "in_progress",
+        ).length,
+        completed: enrichedAssignments.filter((a) => a.status === "completed")
+          .length,
+        overdue: enrichedAssignments.filter((a) => a.isOverdue).length,
+      },
     });
   } catch (error) {
-    console.error('Get student assignments error:', error);
+    console.error("Get student assignments error:", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to fetch assignments'
+      error: "Failed to fetch assignments",
     });
   }
 };

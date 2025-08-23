@@ -81,7 +81,12 @@ export default function ProfessorLogin() {
     try {
       if (isRegistering) {
         // Registration
-        const result = await register(formData.email, formData.password, formData.name, "professor");
+        const result = await register(
+          formData.email,
+          formData.password,
+          formData.name,
+          "professor",
+        );
         if (result.success) {
           navigate("/professor/dashboard");
         } else {
@@ -111,7 +116,11 @@ export default function ProfessorLogin() {
         }
       }
     } catch (error) {
-      setError(isRegistering ? "Registration failed. Please try again." : "Login failed. Please try again.");
+      setError(
+        isRegistering
+          ? "Registration failed. Please try again."
+          : "Login failed. Please try again.",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -170,15 +179,16 @@ export default function ProfessorLogin() {
             <Card className="w-full max-w-md mx-auto lg:mx-0">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                <User className="w-5 h-5 text-accent" />
-                {isRegistering ? "Create Professor Account" : "Professor Login"}
-              </CardTitle>
-              <CardDescription>
-                {isRegistering
-                  ? "Join TechPrep and start managing your students"
-                  : "Access your teaching dashboard and manage student progress"
-                }
-              </CardDescription>
+                  <User className="w-5 h-5 text-accent" />
+                  {isRegistering
+                    ? "Create Professor Account"
+                    : "Professor Login"}
+                </CardTitle>
+                <CardDescription>
+                  {isRegistering
+                    ? "Join TechPrep and start managing your students"
+                    : "Access your teaching dashboard and manage student progress"}
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -216,7 +226,11 @@ export default function ProfessorLogin() {
                       id="password"
                       name="password"
                       type="password"
-                      placeholder={isRegistering ? "Create a password (min 6 characters)" : "••••••••"}
+                      placeholder={
+                        isRegistering
+                          ? "Create a password (min 6 characters)"
+                          : "••••••••"
+                      }
                       value={formData.password}
                       onChange={handleInputChange}
                       required
@@ -253,7 +267,9 @@ export default function ProfessorLogin() {
                     {isSubmitting ? (
                       <>
                         <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-2" />
-                        {isRegistering ? "Creating account..." : "Signing in..."}
+                        {isRegistering
+                          ? "Creating account..."
+                          : "Signing in..."}
                       </>
                     ) : (
                       <>
@@ -266,14 +282,21 @@ export default function ProfessorLogin() {
 
                 <div className="mt-6 text-center">
                   <p className="text-sm text-muted-foreground">
-                    {isRegistering ? "Already have an account?" : "Don't have an account?"}{" "}
+                    {isRegistering
+                      ? "Already have an account?"
+                      : "Don't have an account?"}{" "}
                     <Button
                       variant="link"
                       className="p-0 h-auto"
                       onClick={() => {
                         setIsRegistering(!isRegistering);
                         setError("");
-                        setFormData({ email: "", password: "", confirmPassword: "", name: "" });
+                        setFormData({
+                          email: "",
+                          password: "",
+                          confirmPassword: "",
+                          name: "",
+                        });
                       }}
                       type="button"
                     >

@@ -70,7 +70,11 @@ export default function VideoInterviewInterface({
         }
 
         // Check if we're running on HTTP (not HTTPS)
-        if (location.protocol === 'http:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+        if (
+          location.protocol === "http:" &&
+          location.hostname !== "localhost" &&
+          location.hostname !== "127.0.0.1"
+        ) {
           setMediaError(
             "Camera/microphone access requires HTTPS. This demo may not work on HTTP connections. Please note: In a production environment, ensure your site is served over HTTPS.",
           );
@@ -101,9 +105,13 @@ export default function VideoInterviewInterface({
           videoRef.current.play().catch((e) => {
             console.log("Video autoplay prevented:", e);
             // Try to play again after user interaction
-            videoRef.current?.addEventListener('click', () => {
-              videoRef.current?.play();
-            }, { once: true });
+            videoRef.current?.addEventListener(
+              "click",
+              () => {
+                videoRef.current?.play();
+              },
+              { once: true },
+            );
           });
         }
       } catch (error: any) {
@@ -114,35 +122,39 @@ export default function VideoInterviewInterface({
         switch (error.name) {
           case "NotAllowedError":
           case "PermissionDeniedError":
-            errorMessage +=
-              "Camera and microphone permissions were denied.";
-            suggestion = "Please click the camera icon in your browser's address bar and allow permissions, then refresh the page.";
+            errorMessage += "Camera and microphone permissions were denied.";
+            suggestion =
+              "Please click the camera icon in your browser's address bar and allow permissions, then refresh the page.";
             break;
           case "NotFoundError":
           case "DevicesNotFoundError":
-            errorMessage +=
-              "No camera or microphone found.";
-            suggestion = "Please connect a camera and microphone to your device and refresh the page.";
+            errorMessage += "No camera or microphone found.";
+            suggestion =
+              "Please connect a camera and microphone to your device and refresh the page.";
             break;
           case "NotSupportedError":
             errorMessage +=
               "Camera/microphone access is not supported in this browser.";
-            suggestion = "Please use a modern browser like Chrome, Firefox, or Safari.";
+            suggestion =
+              "Please use a modern browser like Chrome, Firefox, or Safari.";
             break;
           case "NotReadableError":
           case "TrackStartError":
             errorMessage +=
               "Camera/microphone is already in use by another application.";
-            suggestion = "Please close other applications that might be using your camera/microphone and refresh the page.";
+            suggestion =
+              "Please close other applications that might be using your camera/microphone and refresh the page.";
             break;
           case "OverconstrainedError":
             errorMessage +=
               "Your camera/microphone doesn't support the required settings.";
-            suggestion = "Your device may not support the video/audio quality requirements.";
+            suggestion =
+              "Your device may not support the video/audio quality requirements.";
             break;
           default:
             errorMessage += "An unexpected error occurred.";
-            suggestion = "Please check your device settings, ensure your camera and microphone are working, and try again.";
+            suggestion =
+              "Please check your device settings, ensure your camera and microphone are working, and try again.";
         }
 
         if (suggestion) {
@@ -168,7 +180,10 @@ export default function VideoInterviewInterface({
   // Initialize speech recognition
   useEffect(() => {
     const initializeSpeechRecognition = () => {
-      if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
+      if (
+        "webkitSpeechRecognition" in window ||
+        "SpeechRecognition" in window
+      ) {
         try {
           const SpeechRecognition =
             window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -205,20 +220,20 @@ export default function VideoInterviewInterface({
 
             // Handle specific errors
             switch (event.error) {
-              case 'not-allowed':
-                console.warn('Speech recognition permission denied');
+              case "not-allowed":
+                console.warn("Speech recognition permission denied");
                 break;
-              case 'no-speech':
-                console.warn('No speech detected');
+              case "no-speech":
+                console.warn("No speech detected");
                 break;
-              case 'audio-capture':
-                console.warn('Audio capture failed');
+              case "audio-capture":
+                console.warn("Audio capture failed");
                 break;
-              case 'network':
-                console.warn('Network error for speech recognition');
+              case "network":
+                console.warn("Network error for speech recognition");
                 break;
               default:
-                console.warn('Speech recognition error:', event.error);
+                console.warn("Speech recognition error:", event.error);
             }
           };
 
@@ -228,20 +243,19 @@ export default function VideoInterviewInterface({
               try {
                 recognitionRef.current.start();
               } catch (error) {
-                console.warn('Failed to restart speech recognition:', error);
+                console.warn("Failed to restart speech recognition:", error);
               }
             }
           };
 
           recognitionRef.current.onstart = () => {
-            console.log('Speech recognition started');
+            console.log("Speech recognition started");
           };
-
         } catch (error) {
-          console.error('Failed to initialize speech recognition:', error);
+          console.error("Failed to initialize speech recognition:", error);
         }
       } else {
-        console.warn('Speech recognition not supported in this browser');
+        console.warn("Speech recognition not supported in this browser");
       }
     };
 
@@ -290,13 +304,17 @@ export default function VideoInterviewInterface({
   const startRecording = async () => {
     try {
       if (!streamRef.current) {
-        setMediaError("No media stream available. Please ensure camera and microphone permissions are granted.");
+        setMediaError(
+          "No media stream available. Please ensure camera and microphone permissions are granted.",
+        );
         return;
       }
 
       // Check if MediaRecorder is supported
       if (!window.MediaRecorder) {
-        setMediaError("Recording is not supported in this browser. Please use a modern browser.");
+        setMediaError(
+          "Recording is not supported in this browser. Please use a modern browser.",
+        );
         return;
       }
 
@@ -313,8 +331,9 @@ export default function VideoInterviewInterface({
       }
 
       // Start MediaRecorder for audio backup
-      mediaRecorderRef.current = new MediaRecorder(streamRef.current,
-        mimeType ? { mimeType } : undefined
+      mediaRecorderRef.current = new MediaRecorder(
+        streamRef.current,
+        mimeType ? { mimeType } : undefined,
       );
 
       audioChunksRef.current = [];
@@ -348,7 +367,9 @@ export default function VideoInterviewInterface({
       setTranscribedText("");
     } catch (error) {
       console.error("Error starting recording:", error);
-      setMediaError("Failed to start recording. Please check your microphone permissions and try again.");
+      setMediaError(
+        "Failed to start recording. Please check your microphone permissions and try again.",
+      );
     }
   };
 
@@ -472,7 +493,9 @@ export default function VideoInterviewInterface({
       }
     } catch (error: any) {
       console.error("Retry error:", error);
-      setMediaError("Still unable to access camera/microphone. You can continue with text-only mode by switching to Chat view.");
+      setMediaError(
+        "Still unable to access camera/microphone. You can continue with text-only mode by switching to Chat view.",
+      );
       setHasMediaPermission(false);
     } finally {
       setIsRetryingMedia(false);
@@ -516,8 +539,12 @@ export default function VideoInterviewInterface({
                     <div className="w-16 h-16 bg-warning/20 rounded-full flex items-center justify-center mx-auto mb-4">
                       <VideoOff className="w-8 h-8 text-warning" />
                     </div>
-                    <h4 className="font-semibold mb-2 text-foreground">Camera/Microphone Access Issue</h4>
-                    <p className="text-sm text-muted-foreground mb-4">{mediaError}</p>
+                    <h4 className="font-semibold mb-2 text-foreground">
+                      Camera/Microphone Access Issue
+                    </h4>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      {mediaError}
+                    </p>
                     <div className="space-y-2">
                       <Button
                         onClick={retryMediaAccess}
@@ -531,11 +558,12 @@ export default function VideoInterviewInterface({
                             Retrying...
                           </>
                         ) : (
-                          'Try Again'
+                          "Try Again"
                         )}
                       </Button>
                       <p className="text-xs text-muted-foreground">
-                        You can also continue with Chat mode instead of Video mode
+                        You can also continue with Chat mode instead of Video
+                        mode
                       </p>
                     </div>
                   </div>
@@ -593,7 +621,9 @@ export default function VideoInterviewInterface({
           <CardContent className="p-4 space-y-4">
             {/* Recording Controls */}
             <div className="space-y-2 lg:space-y-3">
-              <h4 className="font-semibold text-sm lg:text-base">Recording Controls</h4>
+              <h4 className="font-semibold text-sm lg:text-base">
+                Recording Controls
+              </h4>
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                 {!isRecording ? (
                   <Button
@@ -604,7 +634,9 @@ export default function VideoInterviewInterface({
                   >
                     <Mic className="w-4 h-4 mr-2" />
                     <span className="hidden sm:inline">
-                      {hasMediaPermission ? "Start Recording Answer" : "Camera/Mic Not Ready"}
+                      {hasMediaPermission
+                        ? "Start Recording Answer"
+                        : "Camera/Mic Not Ready"}
                     </span>
                     <span className="sm:hidden">
                       {hasMediaPermission ? "Record" : "Not Ready"}
@@ -622,12 +654,16 @@ export default function VideoInterviewInterface({
                       {isPaused ? (
                         <>
                           <Play className="w-4 h-4" />
-                          <span className="hidden sm:inline sm:ml-1">Resume</span>
+                          <span className="hidden sm:inline sm:ml-1">
+                            Resume
+                          </span>
                         </>
                       ) : (
                         <>
                           <Pause className="w-4 h-4" />
-                          <span className="hidden sm:inline sm:ml-1">Pause</span>
+                          <span className="hidden sm:inline sm:ml-1">
+                            Pause
+                          </span>
                         </>
                       )}
                     </Button>
@@ -676,7 +712,10 @@ export default function VideoInterviewInterface({
                         variant="outline"
                         size="sm"
                         onClick={() => {
-                          const newText = prompt("Edit your answer:", transcribedText);
+                          const newText = prompt(
+                            "Edit your answer:",
+                            transcribedText,
+                          );
                           if (newText !== null) {
                             setTranscribedText(newText);
                           }
@@ -692,8 +731,8 @@ export default function VideoInterviewInterface({
                       {isRecording
                         ? "Start speaking... Your answer will appear here in real-time."
                         : hasMediaPermission
-                        ? "Click 'Start Recording Answer' and begin speaking your response."
-                        : "You can type your answer manually using the button below."}
+                          ? "Click 'Start Recording Answer' and begin speaking your response."
+                          : "You can type your answer manually using the button below."}
                     </p>
                     {!hasMediaPermission && (
                       <Button
@@ -745,7 +784,8 @@ export default function VideoInterviewInterface({
             {!hasMediaPermission && (
               <div className="text-center">
                 <p className="text-sm text-muted-foreground">
-                  💡 Tip: You can type your answer manually in the transcription box above if camera/microphone access isn't available
+                  💡 Tip: You can type your answer manually in the transcription
+                  box above if camera/microphone access isn't available
                 </p>
               </div>
             )}
