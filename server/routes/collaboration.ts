@@ -1,13 +1,13 @@
 import { RequestHandler } from "express";
-import { 
-  CollaborationSession, 
-  Participant, 
+import {
+  CollaborationSession,
+  Participant,
   CreateSessionRequest,
   CreateSessionResponse,
   JoinSessionRequest,
   JoinSessionResponse,
   UpdateCodeRequest,
-  SessionEvent
+  SessionEvent,
 } from "@shared/api";
 
 // In-memory storage for demo (in production, use a proper database)
@@ -78,7 +78,7 @@ export const createSession: RequestHandler = (req, res) => {
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: 'Authentication required'
+        message: "Authentication required",
       });
     }
 
@@ -87,7 +87,7 @@ export const createSession: RequestHandler = (req, res) => {
     if (!language || !["python", "javascript"].includes(language)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid language specified'
+        message: "Invalid language specified",
       });
     }
 
@@ -102,7 +102,7 @@ export const createSession: RequestHandler = (req, res) => {
       color: participantColors[0],
       isActive: true,
       permission: "write",
-      joinedAt: now
+      joinedAt: now,
     };
 
     const session: CollaborationSession = {
@@ -112,7 +112,7 @@ export const createSession: RequestHandler = (req, res) => {
       code: initialCode || getDefaultCode(language),
       participants: [hostParticipant],
       createdAt: now,
-      lastActivity: now
+      lastActivity: now,
     };
 
     activeSessions.set(sessionId, session);
@@ -120,15 +120,15 @@ export const createSession: RequestHandler = (req, res) => {
 
     const response: CreateSessionResponse = {
       success: true,
-      sessionId: sessionId
+      sessionId: sessionId,
     };
 
     res.json(response);
   } catch (error) {
-    console.error('Error creating collaboration session:', error);
+    console.error("Error creating collaboration session:", error);
     res.status(500).json({
       success: false,
-      message: 'Internal server error'
+      message: "Internal server error",
     });
   }
 };
@@ -139,7 +139,7 @@ export const joinSession: RequestHandler = (req, res) => {
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: 'Authentication required'
+        message: "Authentication required",
       });
     }
 
@@ -149,12 +149,14 @@ export const joinSession: RequestHandler = (req, res) => {
     if (!session) {
       return res.status(404).json({
         success: false,
-        message: 'Session not found'
+        message: "Session not found",
       });
     }
 
     // Check if user is already in session
-    const existingParticipant = session.participants.find(p => p.userId === user.id);
+    const existingParticipant = session.participants.find(
+      (p) => p.userId === user.id,
+    );
     if (existingParticipant) {
       existingParticipant.isActive = true;
       existingParticipant.joinedAt = new Date().toISOString();
@@ -168,7 +170,7 @@ export const joinSession: RequestHandler = (req, res) => {
         color: participantColors[colorIndex],
         isActive: true,
         permission: "write", // All participants can edit by default
-        joinedAt: new Date().toISOString()
+        joinedAt: new Date().toISOString(),
       };
       session.participants.push(newParticipant);
     }
@@ -180,9 +182,11 @@ export const joinSession: RequestHandler = (req, res) => {
     const joinEvent: SessionEvent = {
       type: "participant_join",
       sessionId,
-      participantId: existingParticipant?.id || session.participants[session.participants.length - 1].id,
+      participantId:
+        existingParticipant?.id ||
+        session.participants[session.participants.length - 1].id,
       data: { userName: user.name },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     const events = sessionEvents.get(sessionId) || [];
@@ -192,15 +196,17 @@ export const joinSession: RequestHandler = (req, res) => {
     const response: JoinSessionResponse = {
       success: true,
       session,
-      participantId: existingParticipant?.id || session.participants[session.participants.length - 1].id
+      participantId:
+        existingParticipant?.id ||
+        session.participants[session.participants.length - 1].id,
     };
 
     res.json(response);
   } catch (error) {
-    console.error('Error joining collaboration session:', error);
+    console.error("Error joining collaboration session:", error);
     res.status(500).json({
       success: false,
-      message: 'Internal server error'
+      message: "Internal server error",
     });
   }
 };
@@ -211,40 +217,43 @@ export const updateCode: RequestHandler = (req, res) => {
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: 'Authentication required'
+        message: "Authentication required",
       });
     }
 
-    const { sessionId, participantId, code, cursor }: UpdateCodeRequest = req.body;
+    const { sessionId, participantId, code, cursor }: UpdateCodeRequest =
+      req.body;
     const session = activeSessions.get(sessionId);
 
     if (!session) {
       return res.status(404).json({
         success: false,
-        message: 'Session not found'
+        message: "Session not found",
       });
     }
 
     // Find participant
-    const participant = session.participants.find(p => p.id === participantId && p.userId === user.id);
+    const participant = session.participants.find(
+      (p) => p.id === participantId && p.userId === user.id,
+    );
     if (!participant) {
       return res.status(403).json({
         success: false,
-        message: 'Not authorized to edit this session'
+        message: "Not authorized to edit this session",
       });
     }
 
     if (participant.permission === "read") {
       return res.status(403).json({
         success: false,
-        message: 'Read-only access'
+        message: "Read-only access",
       });
     }
 
     // Update session
     session.code = code;
     session.lastActivity = new Date().toISOString();
-    
+
     // Update participant cursor
     if (cursor) {
       participant.cursor = cursor;
@@ -258,7 +267,7 @@ export const updateCode: RequestHandler = (req, res) => {
       sessionId,
       participantId,
       data: { code, cursor },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     const events = sessionEvents.get(sessionId) || [];
@@ -267,13 +276,13 @@ export const updateCode: RequestHandler = (req, res) => {
 
     res.json({
       success: true,
-      session
+      session,
     });
   } catch (error) {
-    console.error('Error updating code:', error);
+    console.error("Error updating code:", error);
     res.status(500).json({
       success: false,
-      message: 'Internal server error'
+      message: "Internal server error",
     });
   }
 };
@@ -284,7 +293,7 @@ export const getSession: RequestHandler = (req, res) => {
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: 'Authentication required'
+        message: "Authentication required",
       });
     }
 
@@ -294,29 +303,29 @@ export const getSession: RequestHandler = (req, res) => {
     if (!session) {
       return res.status(404).json({
         success: false,
-        message: 'Session not found'
+        message: "Session not found",
       });
     }
 
     // Check if user is participant
-    const participant = session.participants.find(p => p.userId === user.id);
+    const participant = session.participants.find((p) => p.userId === user.id);
     if (!participant) {
       return res.status(403).json({
         success: false,
-        message: 'Not a participant in this session'
+        message: "Not a participant in this session",
       });
     }
 
     res.json({
       success: true,
       session,
-      participantId: participant.id
+      participantId: participant.id,
     });
   } catch (error) {
-    console.error('Error getting session:', error);
+    console.error("Error getting session:", error);
     res.status(500).json({
       success: false,
-      message: 'Internal server error'
+      message: "Internal server error",
     });
   }
 };
@@ -327,7 +336,7 @@ export const leaveSession: RequestHandler = (req, res) => {
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: 'Authentication required'
+        message: "Authentication required",
       });
     }
 
@@ -337,12 +346,14 @@ export const leaveSession: RequestHandler = (req, res) => {
     if (!session) {
       return res.status(404).json({
         success: false,
-        message: 'Session not found'
+        message: "Session not found",
       });
     }
 
     // Find and deactivate participant
-    const participant = session.participants.find(p => p.id === participantId && p.userId === user.id);
+    const participant = session.participants.find(
+      (p) => p.id === participantId && p.userId === user.id,
+    );
     if (participant) {
       participant.isActive = false;
     }
@@ -356,7 +367,7 @@ export const leaveSession: RequestHandler = (req, res) => {
       sessionId,
       participantId,
       data: { userName: user.name },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     const events = sessionEvents.get(sessionId) || [];
@@ -364,13 +375,13 @@ export const leaveSession: RequestHandler = (req, res) => {
     sessionEvents.set(sessionId, events);
 
     res.json({
-      success: true
+      success: true,
     });
   } catch (error) {
-    console.error('Error leaving session:', error);
+    console.error("Error leaving session:", error);
     res.status(500).json({
       success: false,
-      message: 'Internal server error'
+      message: "Internal server error",
     });
   }
 };
@@ -378,7 +389,7 @@ export const leaveSession: RequestHandler = (req, res) => {
 // Clean up inactive sessions (call this periodically)
 export const cleanupSessions = () => {
   const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-  
+
   for (const [sessionId, session] of activeSessions.entries()) {
     if (session.lastActivity < oneHourAgo) {
       activeSessions.delete(sessionId);

@@ -29,7 +29,9 @@ import { toast } from "sonner";
 
 export default function PairProgramming() {
   const navigate = useNavigate();
-  const [selectedLanguage, setSelectedLanguage] = useState<"python" | "javascript">("python");
+  const [selectedLanguage, setSelectedLanguage] = useState<
+    "python" | "javascript"
+  >("python");
   const [joinSessionId, setJoinSessionId] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
@@ -102,7 +104,9 @@ export default function PairProgramming() {
             <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
               <Users className="w-6 h-6 text-primary-foreground" />
             </div>
-            <h1 className="text-2xl font-bold text-foreground">Pair Programming</h1>
+            <h1 className="text-2xl font-bold text-foreground">
+              Pair Programming
+            </h1>
           </div>
         </div>
       </header>
@@ -117,8 +121,8 @@ export default function PairProgramming() {
             Code Together, Learn Together
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Start a collaborative coding session with your peers. Share code in real-time, 
-            get AI-powered suggestions, and solve problems together.
+            Start a collaborative coding session with your peers. Share code in
+            real-time, get AI-powered suggestions, and solve problems together.
           </p>
         </div>
 
@@ -131,15 +135,20 @@ export default function PairProgramming() {
               </div>
               <CardTitle className="text-2xl">Create New Session</CardTitle>
               <CardDescription>
-                Start a new collaborative coding session and invite others to join
+                Start a new collaborative coding session and invite others to
+                join
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-3">
-                <Label className="text-base font-semibold">Choose Programming Language</Label>
+                <Label className="text-base font-semibold">
+                  Choose Programming Language
+                </Label>
                 <RadioGroup
                   value={selectedLanguage}
-                  onValueChange={(value) => setSelectedLanguage(value as "python" | "javascript")}
+                  onValueChange={(value) =>
+                    setSelectedLanguage(value as "python" | "javascript")
+                  }
                   className="grid grid-cols-2 gap-4"
                 >
                   <div className="flex items-center space-x-2 border rounded-lg p-3 hover:bg-muted/50 transition-colors">
@@ -153,7 +162,10 @@ export default function PairProgramming() {
                   </div>
                   <div className="flex items-center space-x-2 border rounded-lg p-3 hover:bg-muted/50 transition-colors">
                     <RadioGroupItem value="javascript" id="javascript" />
-                    <Label htmlFor="javascript" className="flex-1 cursor-pointer">
+                    <Label
+                      htmlFor="javascript"
+                      className="flex-1 cursor-pointer"
+                    >
                       <div className="flex items-center gap-2">
                         <Code className="w-4 h-4" />
                         JavaScript
@@ -164,7 +176,9 @@ export default function PairProgramming() {
               </div>
 
               <div className="space-y-3">
-                <Label className="text-base font-semibold">Features Included</Label>
+                <Label className="text-base font-semibold">
+                  Features Included
+                </Label>
                 <div className="space-y-2 text-sm text-muted-foreground">
                   <div className="flex items-center gap-2">
                     <Users className="w-4 h-4 text-primary" />
@@ -231,7 +245,9 @@ export default function PairProgramming() {
               </div>
 
               <div className="space-y-3">
-                <Label className="text-base font-semibold">What You Can Do</Label>
+                <Label className="text-base font-semibold">
+                  What You Can Do
+                </Label>
                 <div className="space-y-2 text-sm text-muted-foreground">
                   <div className="flex items-center gap-2">
                     <Copy className="w-4 h-4 text-accent" />
@@ -274,7 +290,9 @@ export default function PairProgramming() {
         {/* Features Section */}
         <div className="mt-16">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold mb-4">Powerful Collaboration Features</h2>
+            <h2 className="text-3xl font-bold mb-4">
+              Powerful Collaboration Features
+            </h2>
             <p className="text-lg text-muted-foreground">
               Everything you need for effective pair programming
             </p>

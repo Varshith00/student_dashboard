@@ -67,5 +67,23 @@
     "name": "DAYANANDA SAGAR",
     "role": "professor",
     "createdAt": "2025-08-23T13:09:53.259Z"
+  },
+  {
+    "id": "1755955045175yryrv6nwc",
+    "email": "abhi@123",
+    "password": "$2b$10$PNuY6ZLAxDFg1Nm1cKk/B.3qg2glfui41/TlDJY2uWxoL4vpKWqgu",
+    "name": "Abhiram",
+    "role": "student",
+    "professorId": "prof1@gmail.com",
+    "createdAt": "2025-08-23T13:17:25.175Z"
+  },
+  {
+    "id": "1755955070947retxsci6t",
+    "email": "abhi@1234",
+    "password": "$2b$10$niLIle6UrCB4kFT/himExuJBa9bRoQ.u70vjF.uwmdl2T9z6EEZOa",
+    "name": "Abhiram Guru",
+    "role": "student",
+    "professorId": "prof1@gmail.com",
+    "createdAt": "2025-08-23T13:17:50.947Z"
   }
 ]

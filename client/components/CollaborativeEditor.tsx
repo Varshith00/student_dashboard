@@ -53,7 +53,7 @@ export default function CollaborativeEditor({
 }: CollaborativeEditorProps) {
   const editorRef = useRef<any>(null);
   const navigate = useNavigate();
-  
+
   // Core editor state
   const [code, setCode] = useState("");
   const [output, setOutput] = useState("");
@@ -181,13 +181,15 @@ console.log(\`Result: \${result}\`);
         setParticipantId(data.participantId);
         setCode(data.session.code);
         setIsConnected(true);
-        
+
         // Set permission based on participant data
-        const participant = data.session.participants.find(p => p.id === data.participantId);
+        const participant = data.session.participants.find(
+          (p) => p.id === data.participantId,
+        );
         if (participant) {
           setPermission(participant.permission);
         }
-        
+
         toast.success("Successfully joined collaboration session!");
       } else {
         toast.error(data.message || "Failed to join session");
@@ -358,7 +360,7 @@ console.log(\`Result: \${result}\`);
 
   const copySessionLink = () => {
     if (!session) return;
-    
+
     const link = `${window.location.origin}/student/collaboration/${session.id}`;
     navigator.clipboard.writeText(link);
     toast.success("Session link copied to clipboard!");
@@ -366,7 +368,7 @@ console.log(\`Result: \${result}\`);
 
   const copySessionId = () => {
     if (!session) return;
-    
+
     navigator.clipboard.writeText(session.id);
     toast.success("Session ID copied to clipboard!");
   };
@@ -386,7 +388,7 @@ console.log(\`Result: \${result}\`);
           participantId,
         }),
       });
-      
+
       toast.success("Left collaboration session");
       navigate("/student/dashboard");
     } catch (error) {
@@ -462,7 +464,11 @@ console.log(\`Result: \${result}\`);
             </div>
             <div className="text-center">
               <p className="text-sm text-muted-foreground mb-2">Or</p>
-              <Button variant="outline" onClick={createNewSession} className="w-full">
+              <Button
+                variant="outline"
+                onClick={createNewSession}
+                className="w-full"
+              >
                 Create New Session
               </Button>
             </div>
@@ -504,18 +510,18 @@ console.log(\`Result: \${result}\`);
             {/* Participants */}
             <div className="flex items-center gap-1 border-r pr-2 mr-2">
               {session.participants
-                .filter(p => p.isActive)
+                .filter((p) => p.isActive)
                 .map((participant) => (
-                <div
-                  key={participant.id}
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold text-white relative"
-                  style={{ backgroundColor: participant.color }}
-                  title={participant.name}
-                >
-                  {participant.name.charAt(0).toUpperCase()}
-                  <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-success rounded-full border-2 border-background"></div>
-                </div>
-              ))}
+                  <div
+                    key={participant.id}
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold text-white relative"
+                    style={{ backgroundColor: participant.color }}
+                    title={participant.name}
+                  >
+                    {participant.name.charAt(0).toUpperCase()}
+                    <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-success rounded-full border-2 border-background"></div>
+                  </div>
+                ))}
               <Button variant="outline" size="sm" onClick={copySessionLink}>
                 <UserPlus className="w-4 h-4" />
               </Button>
@@ -571,7 +577,8 @@ console.log(\`Result: \${result}\`);
               <div className="flex items-center gap-2">
                 <Code className="w-5 h-5 text-primary" />
                 <span className="font-semibold">
-                  {session.language === "python" ? "Python" : "JavaScript"} Editor
+                  {session.language === "python" ? "Python" : "JavaScript"}{" "}
+                  Editor
                 </span>
                 <Badge
                   variant={permission === "write" ? "default" : "secondary"}
@@ -711,8 +718,8 @@ console.log(\`Result: \${result}\`);
                 </pre>
               ) : (
                 <p className="text-muted-foreground text-sm">
-                  Click "Run Code" to execute your {session.language} code. Output will
-                  appear here.
+                  Click "Run Code" to execute your {session.language} code.
+                  Output will appear here.
                 </p>
               )}
             </div>
@@ -776,7 +783,8 @@ console.log(\`Result: \${result}\`);
               <Alert>
                 <UserPlus className="h-4 w-4" />
                 <AlertDescription>
-                  Share the session ID or use the Share button to invite more collaborators
+                  Share the session ID or use the Share button to invite more
+                  collaborators
                 </AlertDescription>
               </Alert>
             </TabsContent>
@@ -815,17 +823,19 @@ console.log(\`Result: \${result}\`);
                       Get Hint
                     </Button>
                   </div>
-                  
+
                   {isAnalyzing && (
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <div className="animate-spin w-4 h-4 border-2 border-primary border-t-transparent rounded-full"></div>
                       Analyzing code...
                     </div>
                   )}
-                  
+
                   {aiSuggestion && (
                     <div className="p-3 bg-background rounded-lg border">
-                      <h4 className="font-medium text-sm mb-2">AI Suggestion:</h4>
+                      <h4 className="font-medium text-sm mb-2">
+                        AI Suggestion:
+                      </h4>
                       <p className="text-sm text-muted-foreground whitespace-pre-wrap">
                         {aiSuggestion}
                       </p>
@@ -848,7 +858,9 @@ console.log(\`Result: \${result}\`);
                     <label className="text-sm font-medium">Language</label>
                     <div className="mt-1">
                       <Badge variant="outline">
-                        {session.language === "python" ? "Python" : "JavaScript"}
+                        {session.language === "python"
+                          ? "Python"
+                          : "JavaScript"}
                       </Badge>
                     </div>
                   </div>
@@ -874,18 +886,32 @@ console.log(\`Result: \${result}\`);
                       <code className="flex-1 bg-muted px-2 py-1 rounded text-xs">
                         {session.id}
                       </code>
-                      <Button variant="outline" size="sm" onClick={copySessionId}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={copySessionId}
+                      >
                         <Copy className="w-3 h-3" />
                       </Button>
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Button variant="outline" size="sm" className="w-full" onClick={copySessionLink}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                      onClick={copySessionLink}
+                    >
                       <Share className="w-4 h-4 mr-2" />
                       Share Session Link
                     </Button>
-                    <Button variant="destructive" size="sm" className="w-full" onClick={handleLeaveSession}>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      className="w-full"
+                      onClick={handleLeaveSession}
+                    >
                       <LogOut className="w-4 h-4 mr-2" />
                       Leave Session
                     </Button>

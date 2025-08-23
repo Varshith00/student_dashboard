@@ -10,12 +10,12 @@ interface User {
   email: string;
   password: string;
   name: string;
-  role: 'student' | 'professor';
+  role: "student" | "professor";
   professorId?: string; // For students - which professor they're mapped to
   createdAt: string;
 }
 
-const USERS_FILE = join(process.cwd(), 'server/data/users.json');
+const USERS_FILE = join(process.cwd(), "server/data/users.json");
 
 // Helper functions for user data
 const loadUsers = (): User[] => {
@@ -23,10 +23,10 @@ const loadUsers = (): User[] => {
     if (!existsSync(USERS_FILE)) {
       return [];
     }
-    const data = readFileSync(USERS_FILE, 'utf8');
+    const data = readFileSync(USERS_FILE, "utf8");
     return JSON.parse(data);
   } catch (error) {
-    console.error('Error loading users:', error);
+    console.error("Error loading users:", error);
     return [];
   }
 };
@@ -158,17 +158,17 @@ export const handleGetStudents: RequestHandler = async (req, res) => {
   try {
     const professor = (req as any).user;
 
-    if (professor.role !== 'professor') {
+    if (professor.role !== "professor") {
       return res.status(403).json({
         success: false,
-        error: "Access denied. Only professors can view students."
+        error: "Access denied. Only professors can view students.",
       });
     }
 
     // Load all users and filter students mapped to this professor by email
     const allUsers = loadUsers();
     const mappedStudents = allUsers.filter(
-      user => user.role === 'student' && user.professorId === professor.email
+      (user) => user.role === "student" && user.professorId === professor.email,
     );
 
     // Process each student's data
@@ -191,7 +191,9 @@ export const handleGetStudents: RequestHandler = async (req, res) => {
 
       // Calculate last active (for demo, using created date with some random offset)
       const lastActiveTime = new Date(student.createdAt);
-      lastActiveTime.setTime(lastActiveTime.getTime() + Math.random() * 7 * 24 * 60 * 60 * 1000); // Add random time up to 7 days
+      lastActiveTime.setTime(
+        lastActiveTime.getTime() + Math.random() * 7 * 24 * 60 * 60 * 1000,
+      ); // Add random time up to 7 days
 
       return {
         id: student.id,
@@ -208,8 +210,10 @@ export const handleGetStudents: RequestHandler = async (req, res) => {
             ? "active"
             : "inactive",
         lastActive: lastActiveTime.toLocaleDateString(),
-        currentProblem: studentAssignments.find(a => a.status === 'in_progress')?.problemId ||
-                      (studentAssignments.length > 0 ? "No active problem" : "Not started"),
+        currentProblem:
+          studentAssignments.find((a) => a.status === "in_progress")
+            ?.problemId ||
+          (studentAssignments.length > 0 ? "No active problem" : "Not started"),
         currentAssignments: studentAssignments.filter(
           (a) => a.status !== "completed",
         ),
@@ -331,10 +335,10 @@ export const handleGetAssignments: RequestHandler = async (req, res) => {
   try {
     const professor = (req as any).user;
 
-    if (professor.role !== 'professor') {
+    if (professor.role !== "professor") {
       return res.status(403).json({
         success: false,
-        error: "Access denied. Only professors can view assignments."
+        error: "Access denied. Only professors can view assignments.",
       });
     }
 
@@ -348,7 +352,7 @@ export const handleGetAssignments: RequestHandler = async (req, res) => {
     // Enrich assignments with student info
     const enrichedAssignments = professorAssignments.map((assignment) => {
       const student = allUsers.find(
-        (user) => user.id === assignment.studentId && user.role === 'student',
+        (user) => user.id === assignment.studentId && user.role === "student",
       );
       return {
         ...assignment,
@@ -375,17 +379,17 @@ export const handleGetClassAnalytics: RequestHandler = async (req, res) => {
   try {
     const professor = (req as any).user;
 
-    if (professor.role !== 'professor') {
+    if (professor.role !== "professor") {
       return res.status(403).json({
         success: false,
-        error: "Access denied. Only professors can view analytics."
+        error: "Access denied. Only professors can view analytics.",
       });
     }
 
     // Get students mapped to this professor by email
     const allUsers = loadUsers();
     const mappedStudents = allUsers.filter(
-      user => user.role === 'student' && user.professorId === professor.email
+      (user) => user.role === "student" && user.professorId === professor.email,
     );
 
     const professorAssignments = assignments.filter(
@@ -409,9 +413,11 @@ export const handleGetClassAnalytics: RequestHandler = async (req, res) => {
           a.dueDate &&
           new Date(a.dueDate) < new Date(),
       ).length,
-      averageScore: completedAssignments.length > 0
-        ? completedAssignments.reduce((sum, a) => sum + (a.score || 0), 0) / completedAssignments.length
-        : 0,
+      averageScore:
+        completedAssignments.length > 0
+          ? completedAssignments.reduce((sum, a) => sum + (a.score || 0), 0) /
+            completedAssignments.length
+          : 0,
       totalTimeSpent: professorAssignments.reduce(
         (sum, a) => sum + a.timeSpent,
         0,
@@ -466,17 +472,20 @@ export const handleGetStudentDetails: RequestHandler = async (req, res) => {
     const { studentId } = req.params;
     const professor = (req as any).user;
 
-    if (professor.role !== 'professor') {
+    if (professor.role !== "professor") {
       return res.status(403).json({
         success: false,
-        error: "Access denied. Only professors can view student details."
+        error: "Access denied. Only professors can view student details.",
       });
     }
 
     // Load all users to find the student
     const allUsers = loadUsers();
     const student = allUsers.find(
-      (user) => user.id === studentId && user.role === 'student' && user.professorId === professor.email
+      (user) =>
+        user.id === studentId &&
+        user.role === "student" &&
+        user.professorId === professor.email,
     );
 
     if (!student) {

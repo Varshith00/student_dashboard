@@ -1,12 +1,26 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { GraduationCap, Laptop, Eye, EyeOff, UserPlus, CheckCircle, Search } from "lucide-react";
+import {
+  GraduationCap,
+  Laptop,
+  Eye,
+  EyeOff,
+  UserPlus,
+  CheckCircle,
+  Search,
+} from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -21,7 +35,9 @@ export default function StudentLogin() {
   const [isRegistering, setIsRegistering] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [professorEmail, setProfessorEmail] = useState("");
-  const [professorInfo, setProfessorInfo] = useState<ProfessorInfo | null>(null);
+  const [professorInfo, setProfessorInfo] = useState<ProfessorInfo | null>(
+    null,
+  );
   const [isProfessorVerified, setIsProfessorVerified] = useState(false);
   const [isVerifyingProfessor, setIsVerifyingProfessor] = useState(false);
   const navigate = useNavigate();
@@ -30,17 +46,17 @@ export default function StudentLogin() {
   // Redirect if already logged in
   useEffect(() => {
     if (user && !isLoading) {
-      if (user.role === 'student') {
-        navigate('/student/dashboard');
+      if (user.role === "student") {
+        navigate("/student/dashboard");
       } else {
-        navigate('/professor/dashboard');
+        navigate("/professor/dashboard");
       }
     }
   }, [user, isLoading, navigate]);
 
   const verifyProfessor = async () => {
     if (!professorEmail.trim()) {
-      setError('Please enter a professor email');
+      setError("Please enter a professor email");
       return;
     }
 
@@ -48,7 +64,9 @@ export default function StudentLogin() {
     setError(null);
 
     try {
-      const response = await fetch(`/api/auth/professor/${encodeURIComponent(professorEmail)}`);
+      const response = await fetch(
+        `/api/auth/professor/${encodeURIComponent(professorEmail)}`,
+      );
       const data = await response.json();
 
       if (data.success && data.professor) {
@@ -56,12 +74,12 @@ export default function StudentLogin() {
         setIsProfessorVerified(true);
         setError(null);
       } else {
-        setError(data.message || 'Professor not found');
+        setError(data.message || "Professor not found");
         setProfessorInfo(null);
         setIsProfessorVerified(false);
       }
     } catch (error) {
-      setError('Failed to verify professor email');
+      setError("Failed to verify professor email");
       setProfessorInfo(null);
       setIsProfessorVerified(false);
     } finally {
@@ -76,25 +94,25 @@ export default function StudentLogin() {
       let result;
       if (isRegistering) {
         if (!name) {
-          setError('Name is required for registration');
+          setError("Name is required for registration");
           return;
         }
         if (!isProfessorVerified) {
-          setError('Please verify your professor ID first');
+          setError("Please verify your professor ID first");
           return;
         }
-        
+
         // Use student registration endpoint
-        const response = await fetch('/api/auth/student-register', {
-          method: 'POST',
+        const response = await fetch("/api/auth/student-register", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             email,
             password,
             name,
-            professorEmail
+            professorEmail,
           }),
         });
 
@@ -112,29 +130,29 @@ export default function StudentLogin() {
       if (result.success) {
         // Navigation will be handled by the useEffect above
       } else {
-        setError(result.message || 'Authentication failed');
+        setError(result.message || "Authentication failed");
       }
     } catch (error) {
-      setError('An unexpected error occurred');
+      setError("An unexpected error occurred");
     }
   };
 
   const AuthForm = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [name, setName] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [name, setName] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
 
     const handleSubmit = (e: React.FormEvent) => {
       e.preventDefault();
 
       if (isRegistering && password !== confirmPassword) {
-        setError('Passwords do not match');
+        setError("Passwords do not match");
         return;
       }
 
       if (isRegistering && password.length < 6) {
-        setError('Password must be at least 6 characters long');
+        setError("Password must be at least 6 characters long");
         return;
       }
 
@@ -147,7 +165,9 @@ export default function StudentLogin() {
           <>
             {/* Professor Email Section */}
             <div className="space-y-3 p-4 bg-muted/30 rounded-lg">
-              <Label className="text-base font-semibold">Professor Information</Label>
+              <Label className="text-base font-semibold">
+                Professor Information
+              </Label>
               <div className="space-y-2">
                 <Label htmlFor="professor-email">Professor Email</Label>
                 <div className="flex gap-2">
@@ -180,8 +200,12 @@ export default function StudentLogin() {
                   <div className="flex items-center gap-2 p-2 bg-success/10 border border-success/20 rounded">
                     <CheckCircle className="w-4 h-4 text-success" />
                     <div className="text-sm">
-                      <span className="font-medium text-success">Professor found: </span>
-                      <span>{professorInfo.name} ({professorInfo.email})</span>
+                      <span className="font-medium text-success">
+                        Professor found:{" "}
+                      </span>
+                      <span>
+                        {professorInfo.name} ({professorInfo.email})
+                      </span>
                     </div>
                   </div>
                 )}
@@ -220,7 +244,11 @@ export default function StudentLogin() {
             <Input
               id="student-password"
               type={showPassword ? "text" : "password"}
-              placeholder={isRegistering ? "Create a password (min 6 characters)" : "Enter your password"}
+              placeholder={
+                isRegistering
+                  ? "Create a password (min 6 characters)"
+                  : "Enter your password"
+              }
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -261,29 +289,31 @@ export default function StudentLogin() {
           </Alert>
         )}
 
-        <Button 
-          type="submit" 
-          className="w-full" 
+        <Button
+          type="submit"
+          className="w-full"
           disabled={isLoading || (isRegistering && !isProfessorVerified)}
         >
-          {isLoading ? (
-            isRegistering ? "Creating account..." : "Signing in..."
-          ) : (
-            isRegistering
+          {isLoading
+            ? isRegistering
+              ? "Creating account..."
+              : "Signing in..."
+            : isRegistering
               ? "Create Student Account"
-              : "Sign in as Student"
-          )}
+              : "Sign in as Student"}
         </Button>
 
         <div className="text-center text-sm text-muted-foreground">
-          {isRegistering ? "Already have an account?" : "Don't have an account?"}{" "}
+          {isRegistering
+            ? "Already have an account?"
+            : "Don't have an account?"}{" "}
           <Button
             variant="link"
             className="p-0 h-auto"
             onClick={() => {
               setIsRegistering(!isRegistering);
               setError(null);
-              setProfessorEmail('');
+              setProfessorEmail("");
               setProfessorInfo(null);
               setIsProfessorVerified(false);
             }}
@@ -306,12 +336,13 @@ export default function StudentLogin() {
             </div>
             <h1 className="text-3xl font-bold text-foreground">TechPrep</h1>
           </Link>
-          <h2 className="text-2xl font-semibold text-foreground">Student Portal</h2>
+          <h2 className="text-2xl font-semibold text-foreground">
+            Student Portal
+          </h2>
           <p className="text-muted-foreground">
             {isRegistering
               ? "Enter your professor's email to join their class and start learning"
-              : "Sign in to access your learning dashboard"
-            }
+              : "Sign in to access your learning dashboard"}
           </p>
         </div>
 
@@ -333,8 +364,7 @@ export default function StudentLogin() {
             <CardDescription className="text-center">
               {isRegistering
                 ? "Enter your professor's ID to get started"
-                : "Access your coding practice and progress tracking"
-              }
+                : "Access your coding practice and progress tracking"}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -344,18 +374,18 @@ export default function StudentLogin() {
               <p className="text-sm text-muted-foreground">
                 {isRegistering
                   ? "Get mapped to your professor and start practicing coding problems"
-                  : "Access your coding practice, progress tracking, and collaboration tools"
-                }
+                  : "Access your coding practice, progress tracking, and collaboration tools"}
               </p>
             </div>
-            
+
             <AuthForm />
 
             {isRegistering && (
               <div className="mt-4 p-3 bg-muted/30 rounded-lg">
                 <h4 className="font-medium text-sm mb-2">Need Help?</h4>
                 <p className="text-xs text-muted-foreground">
-                  Ask your professor for their email address. This email is needed to join their class and access assignments.
+                  Ask your professor for their email address. This email is
+                  needed to join their class and access assignments.
                 </p>
               </div>
             )}
@@ -368,7 +398,10 @@ export default function StudentLogin() {
           </Link>
           <div className="text-sm text-muted-foreground">
             Are you a professor?{" "}
-            <Link to="/professor/login" className="text-primary hover:underline">
+            <Link
+              to="/professor/login"
+              className="text-primary hover:underline"
+            >
               Professor Login
             </Link>
           </div>

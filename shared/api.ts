@@ -65,7 +65,11 @@ export interface UpdateCodeRequest {
 }
 
 export interface SessionEvent {
-  type: "code_update" | "participant_join" | "participant_leave" | "cursor_update";
+  type:
+    | "code_update"
+    | "participant_join"
+    | "participant_leave"
+    | "cursor_update";
   sessionId: string;
   participantId: string;
   data: any;
@@ -95,7 +99,7 @@ export interface StudentRegistrationResponse {
   success: boolean;
   message?: string;
   token?: string;
-  user?: Omit<User, 'password'>;
+  user?: Omit<User, "password">;
 }
 
 export interface ProfessorStudent {
