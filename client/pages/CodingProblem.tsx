@@ -2,12 +2,14 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import CodeEditor from "@/components/CodeEditor";
 import { getProblemById } from "@/data/problems";
+import { useAuth } from "@/contexts/AuthContext";
 import { ArrowLeft, GraduationCap, LogOut, Home } from "lucide-react";
 
 export default function CodingProblem() {
   const { problemId } = useParams<{ problemId: string }>();
   const navigate = useNavigate();
-  
+  const { logout } = useAuth();
+
   const problem = problemId ? getProblemById(problemId) : undefined;
 
   if (!problem) {
