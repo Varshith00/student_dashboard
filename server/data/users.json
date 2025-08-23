@@ -1,1 +1,10 @@
-[]
+[
+  {
+    "id": "17559173791842muudobe0",
+    "email": "gandup@dsce.edu",
+    "password": "$2b$10$9rFkWWROJiHliD1br3A38eUVEjFz3eCsjW26YJ0iARWdfnGX/rYdy",
+    "name": "akaza",
+    "role": "professor",
+    "createdAt": "2025-08-23T02:49:39.184Z"
+  }
+]
