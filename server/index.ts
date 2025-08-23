@@ -28,6 +28,16 @@ import {
   handleAnswerAnalysis,
   handleBatchAnswerAnalysis,
 } from "./routes/audio-transcription";
+import {
+  handleGetStudents,
+  handleAssignProblem,
+  handleBulkAssignProblem,
+  handleGetAssignments,
+  handleGetClassAnalytics,
+  handleGetStudentDetails,
+  handleUpdateAssignmentProgress,
+  handleDeleteAssignment,
+} from "./routes/professor";
 
 export function createServer() {
   const app = express();
