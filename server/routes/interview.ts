@@ -3,56 +3,68 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
+interface QuestionFeedback {
+  question: string;
+  answer: string;
+  feedback: string;
+  strengths: string[];
+  improvements: string[];
+}
+
 interface InterviewSession {
   id: string;
   userId: string;
-  type: 'technical' | 'behavioral';
-  difficulty: 'junior' | 'mid' | 'senior';
+  type: "technical" | "behavioral";
+  difficulty: "junior" | "mid" | "senior";
   focus: string[];
   startTime: string;
   endTime?: string;
-  status: 'active' | 'completed';
+  status: "active" | "completed";
   messages: Message[];
-  score?: number;
-  feedback?: string;
+  questionFeedback?: QuestionFeedback[];
+  overallFeedback?: string;
 }
 
 interface Message {
   id: string;
-  role: 'user' | 'interviewer';
+  role: "user" | "interviewer";
   content: string;
   timestamp: string;
-  type?: 'question' | 'follow-up' | 'evaluation' | 'final';
+  type?: "question" | "follow-up" | "evaluation" | "final";
 }
 
 // In-memory storage for demo (in production, use a proper database)
 const activeSessions: Map<string, InterviewSession> = new Map();
 
 // Technical Interview Handlers
-export const handleStartTechnicalInterview: RequestHandler = async (req, res) => {
+export const handleStartTechnicalInterview: RequestHandler = async (
+  req,
+  res,
+) => {
   try {
     const user = (req as any).user;
-    const { difficulty = 'mid', focus = ['algorithms', 'data-structures'] } = req.body;
+    const { difficulty = "mid", focus = ["algorithms", "data-structures"] } =
+      req.body;
 
     const sessionId = `tech_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     // Generate initial interview question
     const prompt = `
-You are a technical interviewer at a mid-tier technology company conducting a ${difficulty}-level technical interview. 
+You are a technical interviewer at a mid-tier technology company conducting a ${difficulty}-level technical interview.
 
-Interview Focus Areas: ${focus.join(', ')}
+Interview Focus Areas: ${focus.join(", ")}
 Candidate Experience Level: ${difficulty}
 
-Start the interview with a professional greeting and first technical question. Your role is to:
+Start the interview with a casual "hey" greeting and first technical question. Your role is to:
 1. Ask progressively challenging technical questions
 2. Probe deeper based on candidate responses
 3. Test problem-solving approach, not just correct answers
 4. Maintain a friendly but professional tone
 5. Focus on thought process and communication
 
-Begin the interview now with a greeting and your first technical question. Keep it conversational and engaging.
+Begin the interview now with just "hey" as your greeting and your first technical question. Keep it conversational and engaging.
 `;
 
     const result = await model.generateContent(prompt);
@@ -60,22 +72,22 @@ Begin the interview now with a greeting and your first technical question. Keep 
     const initialMessage = response.text();
 
     const initialBotMessage: Message = {
-      id: '1',
-      role: 'interviewer',
+      id: "1",
+      role: "interviewer",
       content: initialMessage,
       timestamp: new Date().toISOString(),
-      type: 'question'
+      type: "question",
     };
 
     const session: InterviewSession = {
       id: sessionId,
       userId: user.id,
-      type: 'technical',
+      type: "technical",
       difficulty,
       focus,
       startTime: new Date().toISOString(),
-      status: 'active',
-      messages: [initialBotMessage]
+      status: "active",
+      messages: [initialBotMessage],
     };
 
     activeSessions.set(sessionId, session);
@@ -88,37 +100,42 @@ Begin the interview now with a greeting and your first technical question. Keep 
         focus: session.focus,
         startTime: session.startTime,
         status: session.status,
-        messages: session.messages
-      }
+        messages: session.messages,
+      },
     });
-
   } catch (error) {
-    console.error('Start technical interview error:', error);
+    console.error("Start technical interview error:", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to start technical interview'
+      error: "Failed to start technical interview",
     });
   }
 };
 
-export const handleTechnicalInterviewMessage: RequestHandler = async (req, res) => {
+export const handleTechnicalInterviewMessage: RequestHandler = async (
+  req,
+  res,
+) => {
   try {
     const { sessionId, message, messageHistory = [] } = req.body;
-    
+
     const session = activeSessions.get(sessionId);
     if (!session) {
       return res.status(404).json({
         success: false,
-        error: 'Interview session not found'
+        error: "Interview session not found",
       });
     }
 
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     // Build conversation context
-    const conversationHistory = messageHistory.map((msg: Message) => 
-      `${msg.role === 'user' ? 'Candidate' : 'Interviewer'}: ${msg.content}`
-    ).join('\n\n');
+    const conversationHistory = messageHistory
+      .map(
+        (msg: Message) =>
+          `${msg.role === "user" ? "Candidate" : "Interviewer"}: ${msg.content}`,
+      )
+      .join("\n\n");
 
     const prompt = `
 You are continuing a ${session.difficulty}-level technical interview. The conversation so far:
@@ -135,7 +152,7 @@ As the interviewer, respond appropriately:
 5. Keep the conversation natural and engaging
 6. Focus on problem-solving approach, not just correctness
 
-Interview Focus: ${session.focus.join(', ')}
+Interview Focus: ${session.focus.join(", ")}
 
 Provide your next response as the interviewer:
 `;
@@ -145,22 +162,21 @@ Provide your next response as the interviewer:
     const interviewerResponse = response.text();
 
     // Determine response type based on content
-    let responseType: 'question' | 'follow-up' | 'evaluation' = 'follow-up';
-    if (interviewerResponse.includes('?')) {
-      responseType = 'question';
+    let responseType: "question" | "follow-up" | "evaluation" = "follow-up";
+    if (interviewerResponse.includes("?")) {
+      responseType = "question";
     }
 
     res.json({
       success: true,
       response: interviewerResponse,
-      type: responseType
+      type: responseType,
     });
-
   } catch (error) {
-    console.error('Technical interview message error:', error);
+    console.error("Technical interview message error:", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to process interview message'
+      error: "Failed to process interview message",
     });
   }
 };
@@ -168,42 +184,84 @@ Provide your next response as the interviewer:
 export const handleEndTechnicalInterview: RequestHandler = async (req, res) => {
   try {
     const { sessionId, messageHistory = [] } = req.body;
-    
+
     const session = activeSessions.get(sessionId);
     if (!session) {
       return res.status(404).json({
         success: false,
-        error: 'Interview session not found'
+        error: "Interview session not found",
       });
     }
 
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     // Generate evaluation
-    const conversationHistory = messageHistory.map((msg: Message) => 
-      `${msg.role === 'user' ? 'Candidate' : 'Interviewer'}: ${msg.content}`
-    ).join('\n\n');
+    const conversationHistory = messageHistory
+      .map(
+        (msg: Message) =>
+          `${msg.role === "user" ? "Candidate" : "Interviewer"}: ${msg.content}`,
+      )
+      .join("\n\n");
+
+    // Parse conversation to extract question-answer pairs
+    const qaPairs = [];
+    let currentQuestion = "";
+    let currentAnswer = "";
+
+    for (let i = 0; i < messageHistory.length; i++) {
+      const msg = messageHistory[i];
+      if (msg.role === "interviewer") {
+        // If we have a previous question-answer pair, save it
+        if (currentQuestion && currentAnswer) {
+          qaPairs.push({ question: currentQuestion, answer: currentAnswer });
+        }
+        currentQuestion = msg.content;
+        currentAnswer = "";
+      } else if (msg.role === "user") {
+        currentAnswer = msg.content;
+      }
+    }
+
+    // Add the last pair if exists
+    if (currentQuestion && currentAnswer) {
+      qaPairs.push({ question: currentQuestion, answer: currentAnswer });
+    }
 
     const evaluationPrompt = `
-Evaluate this ${session.difficulty}-level technical interview:
+Analyze this ${session.difficulty}-level technical interview and provide detailed feedback for each question-answer pair.
 
-${conversationHistory}
+Question-Answer pairs:
+${qaPairs
+  .map(
+    (qa, index) => `
+Q${index + 1}: ${qa.question}
+A${index + 1}: ${qa.answer}
+`,
+  )
+  .join("\n")}
 
 Provide a JSON response with this structure:
 {
-  "score": "Number from 0-100",
-  "feedback": "Detailed feedback covering: technical knowledge, problem-solving approach, communication skills, areas for improvement, and specific strengths. Be constructive and encouraging."
+  "questionFeedback": [
+    {
+      "question": "The exact question asked",
+      "answer": "The candidate's response",
+      "feedback": "Detailed analysis of the response covering technical accuracy, approach, and communication",
+      "strengths": ["specific strength 1", "specific strength 2"],
+      "improvements": ["specific area for improvement 1", "specific area for improvement 2"]
+    }
+  ],
+  "overallFeedback": "Brief summary of overall performance and key takeaways for improvement"
 }
 
-Evaluation criteria for ${session.difficulty} level:
-- Technical knowledge depth
-- Problem-solving approach
-- Code quality and structure
-- Communication and explanation skills
+For each question-answer pair, evaluate:
+- Technical accuracy and depth of knowledge
+- Problem-solving approach and methodology
+- Communication clarity and structure
+- Code quality (if applicable)
 - Handling of follow-up questions
-- Time management
 
-Be fair but honest in your assessment. Provide actionable feedback.
+Be constructive, specific, and actionable in your feedback.
 `;
 
     const result = await model.generateContent(evaluationPrompt);
@@ -212,65 +270,68 @@ Be fair but honest in your assessment. Provide actionable feedback.
 
     // Extract JSON from response
     const jsonMatch = evaluationText.match(/\{[\s\S]*\}/);
-    let score = 75;
-    let feedback = "Good technical interview performance with room for improvement.";
-    
+    let questionFeedback: QuestionFeedback[] = [];
+    let overallFeedback =
+      "Good technical interview performance with opportunities for improvement.";
+
     if (jsonMatch) {
       try {
         const evaluation = JSON.parse(jsonMatch[0]);
-        score = parseInt(evaluation.score) || 75;
-        feedback = evaluation.feedback || feedback;
+        questionFeedback = evaluation.questionFeedback || [];
+        overallFeedback = evaluation.overallFeedback || overallFeedback;
       } catch (e) {
-        console.warn('Failed to parse evaluation JSON:', e);
+        console.warn("Failed to parse evaluation JSON:", e);
       }
     }
 
     // Update session
-    session.status = 'completed';
+    session.status = "completed";
     session.endTime = new Date().toISOString();
-    session.score = score;
-    session.feedback = feedback;
+    session.questionFeedback = questionFeedback;
+    session.overallFeedback = overallFeedback;
 
     activeSessions.set(sessionId, session);
 
     res.json({
       success: true,
-      score,
-      feedback
+      questionFeedback,
+      overallFeedback,
     });
-
   } catch (error) {
-    console.error('End technical interview error:', error);
+    console.error("End technical interview error:", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to end interview'
+      error: "Failed to end interview",
     });
   }
 };
 
 // Behavioral Interview Handlers
-export const handleStartBehavioralInterview: RequestHandler = async (req, res) => {
+export const handleStartBehavioralInterview: RequestHandler = async (
+  req,
+  res,
+) => {
   try {
     const user = (req as any).user;
-    const { focus = ['critical-thinking', 'problem-solving'] } = req.body;
+    const { focus = ["critical-thinking", "problem-solving"] } = req.body;
 
     const sessionId = `behav_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `
-You are conducting a behavioral interview focused on critical thinking and aptitude assessment. 
+You are conducting a behavioral interview focused on critical thinking and aptitude assessment.
 
-Focus Areas: ${focus.join(', ')}
+Focus Areas: ${focus.join(", ")}
 
-Start with a professional greeting and your first behavioral question. Your questions should:
+Start with a casual "hey" greeting and your first behavioral question. Your questions should:
 1. Focus on critical thinking and problem-solving scenarios
 2. Include aptitude-based situational questions
 3. Test decision-making abilities
 4. Assess communication and reasoning skills
 5. Use the STAR method (Situation, Task, Action, Result) when appropriate
 
-Begin the interview with a greeting and first behavioral/aptitude question.
+Begin the interview with just "hey" as your greeting and first behavioral/aptitude question.
 `;
 
     const result = await model.generateContent(prompt);
@@ -278,22 +339,22 @@ Begin the interview with a greeting and first behavioral/aptitude question.
     const initialMessage = response.text();
 
     const initialBotMessage: Message = {
-      id: '1',
-      role: 'interviewer',
+      id: "1",
+      role: "interviewer",
       content: initialMessage,
       timestamp: new Date().toISOString(),
-      type: 'question'
+      type: "question",
     };
 
     const session: InterviewSession = {
       id: sessionId,
       userId: user.id,
-      type: 'behavioral',
-      difficulty: 'mid', // Behavioral interviews don't really have difficulty levels
+      type: "behavioral",
+      difficulty: "mid", // Behavioral interviews don't really have difficulty levels
       focus,
       startTime: new Date().toISOString(),
-      status: 'active',
-      messages: [initialBotMessage]
+      status: "active",
+      messages: [initialBotMessage],
     };
 
     activeSessions.set(sessionId, session);
@@ -306,36 +367,41 @@ Begin the interview with a greeting and first behavioral/aptitude question.
         focus: session.focus,
         startTime: session.startTime,
         status: session.status,
-        messages: session.messages
-      }
+        messages: session.messages,
+      },
     });
-
   } catch (error) {
-    console.error('Start behavioral interview error:', error);
+    console.error("Start behavioral interview error:", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to start behavioral interview'
+      error: "Failed to start behavioral interview",
     });
   }
 };
 
-export const handleBehavioralInterviewMessage: RequestHandler = async (req, res) => {
+export const handleBehavioralInterviewMessage: RequestHandler = async (
+  req,
+  res,
+) => {
   try {
     const { sessionId, message, messageHistory = [] } = req.body;
-    
+
     const session = activeSessions.get(sessionId);
     if (!session) {
       return res.status(404).json({
         success: false,
-        error: 'Interview session not found'
+        error: "Interview session not found",
       });
     }
 
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-    const conversationHistory = messageHistory.map((msg: Message) => 
-      `${msg.role === 'user' ? 'Candidate' : 'Interviewer'}: ${msg.content}`
-    ).join('\n\n');
+    const conversationHistory = messageHistory
+      .map(
+        (msg: Message) =>
+          `${msg.role === "user" ? "Candidate" : "Interviewer"}: ${msg.content}`,
+      )
+      .join("\n\n");
 
     const prompt = `
 You are continuing a behavioral interview focused on critical thinking and aptitude. The conversation so far:
@@ -352,7 +418,7 @@ As the interviewer, respond appropriately:
 5. Keep questions practical and scenario-based
 6. Test their ability to analyze situations and make decisions
 
-Focus Areas: ${session.focus.join(', ')}
+Focus Areas: ${session.focus.join(", ")}
 
 Provide your next response as the behavioral interviewer:
 `;
@@ -361,64 +427,109 @@ Provide your next response as the behavioral interviewer:
     const response = await result.response;
     const interviewerResponse = response.text();
 
-    let responseType: 'question' | 'follow-up' | 'evaluation' = 'follow-up';
-    if (interviewerResponse.includes('?')) {
-      responseType = 'question';
+    let responseType: "question" | "follow-up" | "evaluation" = "follow-up";
+    if (interviewerResponse.includes("?")) {
+      responseType = "question";
     }
 
     res.json({
       success: true,
       response: interviewerResponse,
-      type: responseType
+      type: responseType,
     });
-
   } catch (error) {
-    console.error('Behavioral interview message error:', error);
+    console.error("Behavioral interview message error:", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to process interview message'
+      error: "Failed to process interview message",
     });
   }
 };
 
-export const handleEndBehavioralInterview: RequestHandler = async (req, res) => {
+export const handleEndBehavioralInterview: RequestHandler = async (
+  req,
+  res,
+) => {
   try {
     const { sessionId, messageHistory = [] } = req.body;
-    
+
     const session = activeSessions.get(sessionId);
     if (!session) {
       return res.status(404).json({
         success: false,
-        error: 'Interview session not found'
+        error: "Interview session not found",
       });
     }
 
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-    const conversationHistory = messageHistory.map((msg: Message) => 
-      `${msg.role === 'user' ? 'Candidate' : 'Interviewer'}: ${msg.content}`
-    ).join('\n\n');
+    const conversationHistory = messageHistory
+      .map(
+        (msg: Message) =>
+          `${msg.role === "user" ? "Candidate" : "Interviewer"}: ${msg.content}`,
+      )
+      .join("\n\n");
+
+    // Parse conversation to extract question-answer pairs
+    const qaPairs = [];
+    let currentQuestion = "";
+    let currentAnswer = "";
+
+    for (let i = 0; i < messageHistory.length; i++) {
+      const msg = messageHistory[i];
+      if (msg.role === "interviewer") {
+        // If we have a previous question-answer pair, save it
+        if (currentQuestion && currentAnswer) {
+          qaPairs.push({ question: currentQuestion, answer: currentAnswer });
+        }
+        currentQuestion = msg.content;
+        currentAnswer = "";
+      } else if (msg.role === "user") {
+        currentAnswer = msg.content;
+      }
+    }
+
+    // Add the last pair if exists
+    if (currentQuestion && currentAnswer) {
+      qaPairs.push({ question: currentQuestion, answer: currentAnswer });
+    }
 
     const evaluationPrompt = `
-Evaluate this behavioral interview focused on critical thinking and aptitude:
+Analyze this behavioral interview focused on critical thinking and aptitude and provide detailed feedback for each question-answer pair.
 
-${conversationHistory}
+Question-Answer pairs:
+${qaPairs
+  .map(
+    (qa, index) => `
+Q${index + 1}: ${qa.question}
+A${index + 1}: ${qa.answer}
+`,
+  )
+  .join("\n")}
 
 Provide a JSON response with this structure:
 {
-  "score": "Number from 0-100",
-  "feedback": "Detailed feedback covering: critical thinking skills, problem-solving approach, communication clarity, decision-making process, situational awareness, and areas for improvement. Be constructive and specific."
+  "questionFeedback": [
+    {
+      "question": "The exact question asked",
+      "answer": "The candidate's response",
+      "feedback": "Detailed analysis of the response covering critical thinking, problem-solving approach, and communication",
+      "strengths": ["specific strength 1", "specific strength 2"],
+      "improvements": ["specific area for improvement 1", "specific area for improvement 2"]
+    }
+  ],
+  "overallFeedback": "Brief summary of overall performance and key takeaways for improvement"
 }
 
-Evaluation criteria:
+For each question-answer pair, evaluate:
 - Critical thinking and analytical skills
-- Problem-solving methodology
+- Problem-solving methodology and approach
 - Communication clarity and structure
 - Decision-making process and reasoning
-- Situational awareness and adaptability
 - Use of examples and concrete details (STAR method)
+- Situational awareness and adaptability
 
-Provide actionable feedback to help them improve.
+Be constructive, specific, and actionable in your feedback.
 `;
 
     const result = await model.generateContent(evaluationPrompt);
@@ -426,37 +537,37 @@ Provide actionable feedback to help them improve.
     const evaluationText = response.text();
 
     const jsonMatch = evaluationText.match(/\{[\s\S]*\}/);
-    let score = 75;
-    let feedback = "Good behavioral interview performance with solid critical thinking skills.";
-    
+    let questionFeedback: QuestionFeedback[] = [];
+    let overallFeedback =
+      "Good behavioral interview performance with solid critical thinking skills.";
+
     if (jsonMatch) {
       try {
         const evaluation = JSON.parse(jsonMatch[0]);
-        score = parseInt(evaluation.score) || 75;
-        feedback = evaluation.feedback || feedback;
+        questionFeedback = evaluation.questionFeedback || [];
+        overallFeedback = evaluation.overallFeedback || overallFeedback;
       } catch (e) {
-        console.warn('Failed to parse evaluation JSON:', e);
+        console.warn("Failed to parse evaluation JSON:", e);
       }
     }
 
-    session.status = 'completed';
+    session.status = "completed";
     session.endTime = new Date().toISOString();
-    session.score = score;
-    session.feedback = feedback;
+    session.questionFeedback = questionFeedback;
+    session.overallFeedback = overallFeedback;
 
     activeSessions.set(sessionId, session);
 
     res.json({
       success: true,
-      score,
-      feedback
+      questionFeedback,
+      overallFeedback,
     });
-
   } catch (error) {
-    console.error('End behavioral interview error:', error);
+    console.error("End behavioral interview error:", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to end interview'
+      error: "Failed to end interview",
     });
   }
 };
