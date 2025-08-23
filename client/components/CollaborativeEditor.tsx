@@ -313,7 +313,7 @@ console.log(\`Result: \${result}\`);
     if (!session || !participantId || permission === "read") return;
 
     try {
-      // Emit real-time update via socket
+      // Emit real-time update via socket (only in production)
       if (socketRef.current && connectionStatus === "connected") {
         socketRef.current.emit('code-change', {
           sessionId: session.id,
