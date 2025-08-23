@@ -39,8 +39,8 @@ export default function StudentLogin() {
   }, [user, isLoading, navigate]);
 
   const verifyProfessor = async () => {
-    if (!professorId.trim()) {
-      setError('Please enter a professor ID');
+    if (!professorEmail.trim()) {
+      setError('Please enter a professor email');
       return;
     }
 
@@ -48,7 +48,7 @@ export default function StudentLogin() {
     setError(null);
 
     try {
-      const response = await fetch(`/api/auth/professor/${professorId}`);
+      const response = await fetch(`/api/auth/professor/${encodeURIComponent(professorEmail)}`);
       const data = await response.json();
 
       if (data.success && data.professor) {
@@ -61,7 +61,7 @@ export default function StudentLogin() {
         setIsProfessorVerified(false);
       }
     } catch (error) {
-      setError('Failed to verify professor ID');
+      setError('Failed to verify professor email');
       setProfessorInfo(null);
       setIsProfessorVerified(false);
     } finally {
