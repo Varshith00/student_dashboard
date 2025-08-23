@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import StudentAnalyticsDashboard from "@/components/StudentAnalyticsDashboard";
 import {
   Code,
   Brain,
@@ -27,6 +28,7 @@ import {
   Users2,
   Monitor,
   Sparkles,
+  Award
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
