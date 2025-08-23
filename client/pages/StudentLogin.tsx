@@ -355,7 +355,7 @@ export default function StudentLogin() {
               <div className="mt-4 p-3 bg-muted/30 rounded-lg">
                 <h4 className="font-medium text-sm mb-2">Need Help?</h4>
                 <p className="text-xs text-muted-foreground">
-                  Ask your professor for their Professor ID. This ID is needed to join their class and access assignments.
+                  Ask your professor for their email address. This email is needed to join their class and access assignments.
                 </p>
               </div>
             )}
