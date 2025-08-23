@@ -220,6 +220,14 @@ export default function ProfessorDashboard() {
             Analytics
           </Button>
           <Button
+            variant={activeTab === 'assignments' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('assignments')}
+            className="whitespace-nowrap"
+          >
+            <Calendar className="w-4 h-4 mr-2" />
+            Assignments
+          </Button>
+          <Button
             variant={activeTab === 'problems' ? 'default' : 'outline'}
             onClick={() => setActiveTab('problems')}
             className="whitespace-nowrap"
