@@ -167,39 +167,86 @@ export default function VideoInterviewInterface({
 
   // Initialize speech recognition
   useEffect(() => {
-    if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
-      const SpeechRecognition =
-        window.SpeechRecognition || window.webkitSpeechRecognition;
-      recognitionRef.current = new SpeechRecognition();
+    const initializeSpeechRecognition = () => {
+      if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
+        try {
+          const SpeechRecognition =
+            window.SpeechRecognition || window.webkitSpeechRecognition;
+          recognitionRef.current = new SpeechRecognition();
 
-      recognitionRef.current.continuous = true;
-      recognitionRef.current.interimResults = true;
-      recognitionRef.current.lang = "en-US";
+          recognitionRef.current.continuous = true;
+          recognitionRef.current.interimResults = true;
+          recognitionRef.current.lang = "en-US";
+          recognitionRef.current.maxAlternatives = 1;
 
-      recognitionRef.current.onresult = (event) => {
-        let finalTranscript = "";
-        let interimTranscript = "";
+          recognitionRef.current.onresult = (event) => {
+            let finalTranscript = "";
+            let interimTranscript = "";
 
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          const transcript = event.results[i][0].transcript;
-          if (event.results[i].isFinal) {
-            finalTranscript += transcript;
-          } else {
-            interimTranscript += transcript;
-          }
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+              const transcript = event.results[i][0].transcript;
+              if (event.results[i].isFinal) {
+                finalTranscript += transcript;
+              } else {
+                interimTranscript += transcript;
+              }
+            }
+
+            if (finalTranscript) {
+              setTranscribedText((prev) => {
+                const newText = prev + finalTranscript + " ";
+                return newText;
+              });
+            }
+          };
+
+          recognitionRef.current.onerror = (event) => {
+            console.error("Speech recognition error:", event.error);
+
+            // Handle specific errors
+            switch (event.error) {
+              case 'not-allowed':
+                console.warn('Speech recognition permission denied');
+                break;
+              case 'no-speech':
+                console.warn('No speech detected');
+                break;
+              case 'audio-capture':
+                console.warn('Audio capture failed');
+                break;
+              case 'network':
+                console.warn('Network error for speech recognition');
+                break;
+              default:
+                console.warn('Speech recognition error:', event.error);
+            }
+          };
+
+          recognitionRef.current.onend = () => {
+            // Auto-restart if still recording and not paused
+            if (isRecording && !isPaused && recognitionRef.current) {
+              try {
+                recognitionRef.current.start();
+              } catch (error) {
+                console.warn('Failed to restart speech recognition:', error);
+              }
+            }
+          };
+
+          recognitionRef.current.onstart = () => {
+            console.log('Speech recognition started');
+          };
+
+        } catch (error) {
+          console.error('Failed to initialize speech recognition:', error);
         }
+      } else {
+        console.warn('Speech recognition not supported in this browser');
+      }
+    };
 
-        setTranscribedText((prev) => {
-          const newText = prev + finalTranscript;
-          return newText;
-        });
-      };
-
-      recognitionRef.current.onerror = (event) => {
-        console.error("Speech recognition error:", event.error);
-      };
-    }
-  }, []);
+    initializeSpeechRecognition();
+  }, [isRecording, isPaused]);
 
   // Recording timer
   useEffect(() => {
