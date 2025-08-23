@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { authFetch } from "@/contexts/AuthContext";
+import AssignProblemModal from "@/components/AssignProblemModal";
 import {
   Users,
   BarChart3,
@@ -19,7 +21,11 @@ import {
   Filter,
   Search,
   Eye,
-  Download
+  Download,
+  Plus,
+  Calendar,
+  Trash2,
+  Edit
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
