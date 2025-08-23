@@ -20,6 +20,7 @@ import Placeholder from "./pages/Placeholder";
 import NotFound from "./pages/NotFound";
 import CollaborationPage from "./pages/CollaborationPage";
 import WebEditorPage from "./pages/WebEditorPage";
+import ResizeObserverTest from "./pages/ResizeObserverTest";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +56,9 @@ const App = () => (
 
             {/* Enhanced Web Editor routes */}
             <Route path="/student/editor/:language" element={<WebEditorPage />} />
+
+            {/* ResizeObserver Test Route */}
+            <Route path="/test/resize-observer" element={<ResizeObserverTest />} />
 
             {/* Placeholder routes for future features */}
             <Route
