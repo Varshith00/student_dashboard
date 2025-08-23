@@ -11,8 +11,10 @@ import {
 } from "./routes/ai-questions";
 import {
   handleRegister,
+  handleStudentRegister,
   handleLogin,
   handleGetUser,
+  handleGetProfessor,
   authMiddleware,
 } from "./routes/auth";
 import {
