@@ -586,29 +586,24 @@ export default function BehavioralInterview() {
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <TrendingUp className="w-5 h-5 text-success" />
+                      <CheckCircle className="w-5 h-5 text-success" />
                       Interview Complete
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid md:grid-cols-2 gap-6">
+                    <div className="grid md:grid-cols-2 gap-6 mb-6">
                       <div>
-                        <h4 className="font-semibold mb-2">Your Performance</h4>
+                        <h4 className="font-semibold mb-2">Interview Summary</h4>
                         <div className="flex items-center gap-2 mb-2">
-                          <span className="text-2xl font-bold">
-                            {session.score}/100
-                          </span>
-                          <Badge
-                            variant={
-                              session.score && session.score >= 70
-                                ? "default"
-                                : "secondary"
-                            }
-                          >
-                            {session.score && session.score >= 70
-                              ? "Strong"
-                              : "Developing"}
+                          <Badge variant="default">
+                            Behavioral Interview
                           </Badge>
+                          <Badge variant="outline">
+                            {session.questionFeedback?.length || 0} Questions
+                          </Badge>
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          Focus: {session.focus.map(f => f.replace('-', ' ')).join(', ')}
                         </div>
                       </div>
                       <div>
@@ -624,16 +619,85 @@ export default function BehavioralInterview() {
                         </p>
                       </div>
                     </div>
-                    {session.feedback && (
-                      <div className="mt-4">
-                        <h4 className="font-semibold mb-2">
-                          Detailed Feedback
-                        </h4>
-                        <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                          {session.feedback}
-                        </p>
+
+                    {/* Question-by-Question Feedback */}
+                    {session.questionFeedback && session.questionFeedback.length > 0 && (
+                      <div className="space-y-4 mb-6">
+                        <h4 className="font-semibold">Question Feedback</h4>
+                        {session.questionFeedback.map((qa, index) => (
+                          <Card key={index} className="border-l-4 border-l-accent">
+                            <CardHeader className="pb-3">
+                              <CardTitle className="text-base">
+                                Question {index + 1}
+                              </CardTitle>
+                              <p className="text-sm text-muted-foreground">
+                                {qa.question}
+                              </p>
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                              <div>
+                                <h5 className="font-medium text-sm mb-1">Your Answer:</h5>
+                                <p className="text-sm text-muted-foreground bg-muted p-3 rounded">
+                                  {qa.answer}
+                                </p>
+                              </div>
+
+                              <div>
+                                <h5 className="font-medium text-sm mb-2">Feedback:</h5>
+                                <p className="text-sm">{qa.feedback}</p>
+                              </div>
+
+                              <div className="grid md:grid-cols-2 gap-4">
+                                {qa.strengths && qa.strengths.length > 0 && (
+                                  <div>
+                                    <h5 className="font-medium text-sm mb-2 text-success">
+                                      Strengths:
+                                    </h5>
+                                    <ul className="text-sm space-y-1">
+                                      {qa.strengths.map((strength, i) => (
+                                        <li key={i} className="flex items-start gap-2">
+                                          <CheckCircle className="w-3 h-3 text-success mt-0.5 flex-shrink-0" />
+                                          {strength}
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+
+                                {qa.improvements && qa.improvements.length > 0 && (
+                                  <div>
+                                    <h5 className="font-medium text-sm mb-2 text-warning">
+                                      Areas for Improvement:
+                                    </h5>
+                                    <ul className="text-sm space-y-1">
+                                      {qa.improvements.map((improvement, i) => (
+                                        <li key={i} className="flex items-start gap-2">
+                                          <AlertCircle className="w-3 h-3 text-warning mt-0.5 flex-shrink-0" />
+                                          {improvement}
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
                       </div>
                     )}
+
+                    {/* Overall Feedback */}
+                    {session.overallFeedback && (
+                      <div className="mb-6">
+                        <h4 className="font-semibold mb-2">Overall Assessment</h4>
+                        <Card className="bg-muted/50">
+                          <CardContent className="p-4">
+                            <p className="text-sm">{session.overallFeedback}</p>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    )}
+
                     <div className="flex gap-2 mt-4">
                       <Button onClick={() => navigate("/student/dashboard")}>
                         Back to Dashboard
