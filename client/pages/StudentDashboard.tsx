@@ -387,6 +387,40 @@ export default function StudentDashboard() {
                 </CardContent>
               </Card>
 
+              <Card className="hover:shadow-lg transition-shadow border-warning/50">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <FileText className="w-5 h-5 text-warning" />
+                    Assignments
+                    {assignmentSummary.pending + assignmentSummary.overdue > 0 && (
+                      <Badge className="ml-1" variant="destructive">
+                        {assignmentSummary.pending + assignmentSummary.overdue}
+                      </Badge>
+                    )}
+                  </CardTitle>
+                  <CardDescription>
+                    Problems assigned by professors
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <Button
+                      variant="outline"
+                      className="w-full border-warning text-warning hover:bg-warning hover:text-warning-foreground"
+                      onClick={() => setActiveTab("assignments")}
+                    >
+                      <FileText className="w-4 h-4 mr-2" />
+                      View Assignments ({assignmentSummary.total})
+                    </Button>
+                    {assignmentSummary.overdue > 0 && (
+                      <div className="text-xs text-destructive font-medium text-center">
+                        {assignmentSummary.overdue} overdue assignment{assignmentSummary.overdue !== 1 ? 's' : ''}
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
               <Card className="hover:shadow-lg transition-shadow border-accent/50">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-lg">
