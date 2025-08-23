@@ -237,3 +237,144 @@ export function createServer() {
 
   return { app, httpServer, io };
 }
+
+// Development-specific server that avoids body parsing conflicts with Vite
+export function createDevServer() {
+  const app = express();
+
+  // Middleware - but avoid express.json() which conflicts with Vite
+  app.use(cors());
+
+  // Custom body parser that works with Vite
+  app.use('/api', (req, res, next) => {
+    if (req.method === 'POST' || req.method === 'PUT' || req.method === 'PATCH') {
+      let body = '';
+      req.on('data', chunk => {
+        body += chunk.toString();
+      });
+      req.on('end', () => {
+        if (body) {
+          try {
+            req.body = JSON.parse(body);
+          } catch (e) {
+            req.body = {};
+          }
+        } else {
+          req.body = {};
+        }
+        next();
+      });
+    } else {
+      next();
+    }
+  });
+
+  // Routes
+  app.get("/api/ping", (_req, res) => {
+    const ping = process.env.PING_MESSAGE ?? "ping";
+    res.json({ message: ping });
+  });
+
+  app.get("/api/demo", handleDemo);
+
+  // Authentication routes
+  app.post("/api/auth/register", handleRegister);
+  app.post("/api/auth/student-register", handleStudentRegister);
+  app.post("/api/auth/login", handleLogin);
+  app.get("/api/auth/user", authMiddleware, handleGetUser);
+  app.get("/api/auth/professor/:professorEmail", handleGetProfessor);
+
+  // Protected routes (require authentication)
+  app.post("/api/execute-python", authMiddleware, handleExecutePython);
+  app.post("/api/execute-javascript", authMiddleware, handleExecuteJavaScript);
+  app.post("/api/ai/generate-question", authMiddleware, handleGenerateQuestion);
+  app.post("/api/ai/analyze-code", authMiddleware, handleAnalyzeCode);
+  app.post("/api/ai/get-hint", authMiddleware, handleGetHint);
+
+  // Interview routes
+  app.post(
+    "/api/interview/technical/start",
+    authMiddleware,
+    handleStartTechnicalInterview,
+  );
+  app.post(
+    "/api/interview/technical/message",
+    authMiddleware,
+    handleTechnicalInterviewMessage,
+  );
+  app.post(
+    "/api/interview/technical/end",
+    authMiddleware,
+    handleEndTechnicalInterview,
+  );
+  app.post(
+    "/api/interview/behavioral/start",
+    authMiddleware,
+    handleStartBehavioralInterview,
+  );
+  app.post(
+    "/api/interview/behavioral/message",
+    authMiddleware,
+    handleBehavioralInterviewMessage,
+  );
+  app.post(
+    "/api/interview/behavioral/end",
+    authMiddleware,
+    handleEndBehavioralInterview,
+  );
+
+  // Audio analysis routes
+  app.post("/api/audio/transcribe", authMiddleware, handleAudioTranscription);
+  app.post("/api/audio/analyze-answer", authMiddleware, handleAnswerAnalysis);
+  app.post(
+    "/api/audio/analyze-batch",
+    authMiddleware,
+    handleBatchAnswerAnalysis,
+  );
+
+  // Professor routes
+  app.get("/api/professor/students", authMiddleware, handleGetStudents);
+  app.post(
+    "/api/professor/assign-problem",
+    authMiddleware,
+    handleAssignProblem,
+  );
+  app.post(
+    "/api/professor/bulk-assign-problem",
+    authMiddleware,
+    handleBulkAssignProblem,
+  );
+  app.get("/api/professor/assignments", authMiddleware, handleGetAssignments);
+  app.get("/api/professor/analytics", authMiddleware, handleGetClassAnalytics);
+  app.get(
+    "/api/professor/students/:studentId",
+    authMiddleware,
+    handleGetStudentDetails,
+  );
+  app.put(
+    "/api/professor/assignments/:assignmentId/progress",
+    authMiddleware,
+    handleUpdateAssignmentProgress,
+  );
+  app.delete(
+    "/api/professor/assignments/:assignmentId",
+    authMiddleware,
+    handleDeleteAssignment,
+  );
+
+  // Student routes
+  app.get(
+    "/api/student/assignments",
+    authMiddleware,
+    handleGetStudentAssignments,
+  );
+
+  // Collaboration routes
+  app.post("/api/collaboration/create", authMiddleware, createSession);
+  app.post("/api/collaboration/join", authMiddleware, joinSession);
+  app.get("/api/collaboration/:sessionId", authMiddleware, getSession);
+  app.post("/api/collaboration/update", authMiddleware, updateCode);
+  app.post("/api/collaboration/leave", authMiddleware, leaveSession);
+
+  return { app };
+}
