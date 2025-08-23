@@ -21,7 +21,7 @@
     "password": "$2b$10$K8U9r0X9Y3nX9Y3nX9Y3n.G7eX9Y3nX9Y3nX9Y3nX9Y3nX9Y3nX9Y",
     "name": "Alex Rodriguez",
     "role": "student",
-    "professorId": "demo-professor-001",
+    "professorId": "professor@demo.com",
     "createdAt": "2025-01-02T10:00:00.000Z"
   },
   {
@@ -30,7 +30,7 @@
     "password": "$2b$10$K8U9r0X9Y3nX9Y3nX9Y3n.G7eX9Y3nX9Y3nX9Y3nX9Y3nX9Y3nX9Y",
     "name": "Emma Thompson",
     "role": "student",
-    "professorId": "demo-professor-001",
+    "professorId": "professor@demo.com",
     "createdAt": "2025-01-03T11:00:00.000Z"
   },
   {
@@ -39,7 +39,7 @@
     "password": "$2b$10$K8U9r0X9Y3nX9Y3nX9Y3n.G7eX9Y3nX9Y3nX9Y3nX9Y3nX9Y3nX9Y",
     "name": "David Kim",
     "role": "student",
-    "professorId": "demo-professor-001",
+    "professorId": "professor@demo.com",
     "createdAt": "2025-01-04T12:00:00.000Z"
   },
   {
