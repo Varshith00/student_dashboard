@@ -65,15 +65,12 @@ export default function AIQuestionGenerator() {
   const generateQuestion = async () => {
     setIsGenerating(true);
     setError(null);
-    
+
     try {
       const topicToUse = topic === 'custom' ? customTopic : topic;
-      
-      const response = await fetch('/api/ai/generate-question', {
+
+      const response = await authFetch('/api/ai/generate-question', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({
           difficulty,
           topic: topicToUse,
