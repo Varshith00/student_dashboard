@@ -41,12 +41,62 @@ export default function ProfessorDashboard() {
   const [analytics, setAnalytics] = useState<any>(null);
   const [isLoadingData, setIsLoadingData] = useState(false);
 
+  // Data fetching functions
+  const fetchStudents = async () => {
+    try {
+      const response = await authFetch('/api/professor/students');
+      const data = await response.json();
+      if (data.success) {
+        setStudents(data.students);
+      }
+    } catch (error) {
+      console.error('Failed to fetch students:', error);
+    }
+  };
+
+  const fetchAssignments = async () => {
+    try {
+      const response = await authFetch('/api/professor/assignments');
+      const data = await response.json();
+      if (data.success) {
+        setAssignments(data.assignments);
+      }
+    } catch (error) {
+      console.error('Failed to fetch assignments:', error);
+    }
+  };
+
+  const fetchAnalytics = async () => {
+    try {
+      const response = await authFetch('/api/professor/analytics');
+      const data = await response.json();
+      if (data.success) {
+        setAnalytics(data.analytics);
+      }
+    } catch (error) {
+      console.error('Failed to fetch analytics:', error);
+    }
+  };
+
+  const loadAllData = async () => {
+    setIsLoadingData(true);
+    await Promise.all([fetchStudents(), fetchAssignments(), fetchAnalytics()]);
+    setIsLoadingData(false);
+  };
+
   // Redirect if not logged in or not a professor
   useEffect(() => {
     if (!isLoading && (!user || user.role !== 'professor')) {
       navigate('/login');
     }
   }, [user, isLoading, navigate]);
+
+  // Load data when component mounts and user is authenticated
+  useEffect(() => {
+    if (user && user.role === 'professor') {
+      loadAllData();
+    }
+  }, [user]);
 
   const handleLogout = () => {
     logout();
