@@ -1,5 +1,11 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Code,
@@ -14,7 +20,7 @@ import {
   ArrowRight,
   Laptop,
   GraduationCap,
-  UserCheck
+  UserCheck,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -31,11 +37,11 @@ export default function Index() {
             <h1 className="text-2xl font-bold text-foreground">TechPrep</h1>
           </div>
           <div className="flex items-center gap-4">
-            <Link to="/login">
-              <Button variant="outline">Login</Button>
+            <Link to="/student/login">
+              <Button variant="outline">Student Login</Button>
             </Link>
-            <Link to="/login">
-              <Button>Get Started</Button>
+            <Link to="/professor/login">
+              <Button>Professor Login</Button>
             </Link>
           </div>
         </div>
@@ -52,17 +58,18 @@ export default function Index() {
             Launch Your Career
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
-            Build a complete learning platform for students that combines coding practice,
-            AI-powered mock interviews, progress tracking, and peer collaboration. Help universities
-            prepare students for tech careers with one unified system.
+            Build a complete learning platform for students that combines coding
+            practice, AI-powered mock interviews, progress tracking, and peer
+            collaboration. Help universities prepare students for tech careers
+            with one unified system.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/login">
+            <Link to="/student/login">
               <Button size="lg" className="text-lg px-8">
                 Start Learning <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </Link>
-            <Link to="/login">
+            <Link to="/professor/login">
               <Button variant="outline" size="lg" className="text-lg px-8">
                 I'm a Professor <UserCheck className="ml-2 w-5 h-5" />
               </Button>
@@ -169,7 +176,8 @@ export default function Index() {
                 <Laptop className="w-16 h-16 text-primary mx-auto mb-4" />
                 <CardTitle className="text-2xl mb-4">For Students</CardTitle>
                 <CardDescription className="text-base mb-6">
-                  Track your progress, solve coding challenges, and prepare for interviews
+                  Track your progress, solve coding challenges, and prepare for
+                  interviews
                 </CardDescription>
                 <div className="space-y-3 text-left mb-6">
                   <div className="flex items-center gap-3">
@@ -189,7 +197,7 @@ export default function Index() {
                     <span>Skill tracking & analytics</span>
                   </div>
                 </div>
-                <Link to="/login" className="w-full">
+                <Link to="/student/login" className="w-full">
                   <Button className="w-full">Student Login</Button>
                 </Link>
               </div>
@@ -200,7 +208,8 @@ export default function Index() {
                 <GraduationCap className="w-16 h-16 text-accent mx-auto mb-4" />
                 <CardTitle className="text-2xl mb-4">For Professors</CardTitle>
                 <CardDescription className="text-base mb-6">
-                  Monitor student progress and track class performance with detailed analytics
+                  Monitor student progress and track class performance with
+                  detailed analytics
                 </CardDescription>
                 <div className="space-y-3 text-left mb-6">
                   <div className="flex items-center gap-3">
@@ -220,8 +229,11 @@ export default function Index() {
                     <span>Progress visualizations</span>
                   </div>
                 </div>
-                <Link to="/login" className="w-full">
-                  <Button variant="outline" className="w-full border-accent text-accent hover:bg-accent hover:text-accent-foreground">
+                <Link to="/professor/login" className="w-full">
+                  <Button
+                    variant="outline"
+                    className="w-full border-accent text-accent hover:bg-accent hover:text-accent-foreground"
+                  >
                     Professor Login
                   </Button>
                 </Link>
@@ -258,7 +270,10 @@ export default function Index() {
       {/* Footer */}
       <footer className="border-t py-8 px-4">
         <div className="container mx-auto text-center text-muted-foreground">
-          <p>&copy; 2024 TechPrep. All rights reserved. Built for the future of tech education.</p>
+          <p>
+            &copy; 2024 TechPrep. All rights reserved. Built for the future of
+            tech education.
+          </p>
         </div>
       </footer>
     </div>

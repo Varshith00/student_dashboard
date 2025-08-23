@@ -10,6 +10,8 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { initializeResizeObserverErrorHandling } from "@/lib/resizeObserverErrorHandler";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
+import StudentLogin from "./pages/StudentLogin";
+import ProfessorLogin from "./pages/ProfessorLogin";
 import StudentDashboard from "./pages/StudentDashboard";
 import ProfessorDashboard from "./pages/ProfessorDashboard";
 import CodingProblem from "./pages/CodingProblem";
@@ -37,6 +39,8 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/student/login" element={<StudentLogin />} />
+            <Route path="/professor/login" element={<ProfessorLogin />} />
             <Route path="/student/dashboard" element={<StudentDashboard />} />
             <Route
               path="/professor/dashboard"

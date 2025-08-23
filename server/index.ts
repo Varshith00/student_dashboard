@@ -23,6 +23,21 @@ import {
   handleBehavioralInterviewMessage,
   handleEndBehavioralInterview,
 } from "./routes/interview";
+import {
+  handleAudioTranscription,
+  handleAnswerAnalysis,
+  handleBatchAnswerAnalysis,
+} from "./routes/audio-transcription";
+import {
+  handleGetStudents,
+  handleAssignProblem,
+  handleBulkAssignProblem,
+  handleGetAssignments,
+  handleGetClassAnalytics,
+  handleGetStudentDetails,
+  handleUpdateAssignmentProgress,
+  handleDeleteAssignment,
+} from "./routes/professor";
 
 export function createServer() {
   const app = express();
@@ -82,6 +97,45 @@ export function createServer() {
     "/api/interview/behavioral/end",
     authMiddleware,
     handleEndBehavioralInterview,
+  );
+
+  // Audio analysis routes
+  app.post("/api/audio/transcribe", authMiddleware, handleAudioTranscription);
+  app.post("/api/audio/analyze-answer", authMiddleware, handleAnswerAnalysis);
+  app.post(
+    "/api/audio/analyze-batch",
+    authMiddleware,
+    handleBatchAnswerAnalysis,
+  );
+
+  // Professor routes
+  app.get("/api/professor/students", authMiddleware, handleGetStudents);
+  app.post(
+    "/api/professor/assign-problem",
+    authMiddleware,
+    handleAssignProblem,
+  );
+  app.post(
+    "/api/professor/bulk-assign-problem",
+    authMiddleware,
+    handleBulkAssignProblem,
+  );
+  app.get("/api/professor/assignments", authMiddleware, handleGetAssignments);
+  app.get("/api/professor/analytics", authMiddleware, handleGetClassAnalytics);
+  app.get(
+    "/api/professor/students/:studentId",
+    authMiddleware,
+    handleGetStudentDetails,
+  );
+  app.put(
+    "/api/professor/assignments/:assignmentId/progress",
+    authMiddleware,
+    handleUpdateAssignmentProgress,
+  );
+  app.delete(
+    "/api/professor/assignments/:assignmentId",
+    authMiddleware,
+    handleDeleteAssignment,
   );
 
   return app;

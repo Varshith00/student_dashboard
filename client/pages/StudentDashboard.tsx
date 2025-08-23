@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import StudentAnalyticsDashboard from "@/components/StudentAnalyticsDashboard";
 import {
   Code,
   Brain,
@@ -27,6 +28,7 @@ import {
   Users2,
   Monitor,
   Sparkles,
+  Award,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -547,99 +549,7 @@ export default function StudentDashboard() {
           </div>
         )}
 
-        {activeTab === "progress" && (
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BarChart3 className="w-6 h-6 text-success" />
-                  Your Progress Analytics
-                </CardTitle>
-                <CardDescription>
-                  Detailed insights into your learning journey
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <h3 className="font-semibold mb-3">Skill Progress</h3>
-                    <div className="space-y-4">
-                      <div>
-                        <div className="flex justify-between mb-2">
-                          <span className="text-sm">Python Programming</span>
-                          <span className="text-sm text-muted-foreground">
-                            85%
-                          </span>
-                        </div>
-                        <Progress value={85} className="h-2" />
-                      </div>
-                      <div>
-                        <div className="flex justify-between mb-2">
-                          <span className="text-sm">Data Structures</span>
-                          <span className="text-sm text-muted-foreground">
-                            72%
-                          </span>
-                        </div>
-                        <Progress value={72} className="h-2" />
-                      </div>
-                      <div>
-                        <div className="flex justify-between mb-2">
-                          <span className="text-sm">Algorithms</span>
-                          <span className="text-sm text-muted-foreground">
-                            68%
-                          </span>
-                        </div>
-                        <Progress value={68} className="h-2" />
-                      </div>
-                      <div>
-                        <div className="flex justify-between mb-2">
-                          <span className="text-sm">Interview Skills</span>
-                          <span className="text-sm text-muted-foreground">
-                            78%
-                          </span>
-                        </div>
-                        <Progress value={78} className="h-2" />
-                      </div>
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold mb-3">Weekly Stats</h3>
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <Clock className="w-5 h-5 text-primary" />
-                          <span>Study Time</span>
-                        </div>
-                        <span className="font-semibold">12.5 hours</span>
-                      </div>
-                      <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <CheckCircle className="w-5 h-5 text-success" />
-                          <span>Problems Solved</span>
-                        </div>
-                        <span className="font-semibold">8</span>
-                      </div>
-                      <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <Brain className="w-5 h-5 text-accent" />
-                          <span>Interviews</span>
-                        </div>
-                        <span className="font-semibold">3</span>
-                      </div>
-                      <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <Trophy className="w-5 h-5 text-warning" />
-                          <span>Achievements</span>
-                        </div>
-                        <span className="font-semibold">2</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
+        {activeTab === "progress" && <StudentAnalyticsDashboard />}
 
         {activeTab === "pair-programming" && (
           <div className="space-y-6">
