@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { initializeResizeObserverErrorHandling } from "@/lib/resizeObserverErrorHandler";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import StudentDashboard from "./pages/StudentDashboard";
@@ -21,6 +22,9 @@ import CollaborationPage from "./pages/CollaborationPage";
 import WebEditorPage from "./pages/WebEditorPage";
 
 const queryClient = new QueryClient();
+
+// Initialize ResizeObserver error handling
+initializeResizeObserverErrorHandling();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
