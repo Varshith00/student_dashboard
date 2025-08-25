@@ -331,7 +331,10 @@ export default function VoiceChat({
         socket.emit("voice-answer", {
           sessionId,
           participantId: offerParticipantId,
-          answer: answer.toJSON(),
+          answer: {
+            type: answer.type,
+            sdp: answer.sdp,
+          },
         });
       } catch (err) {
         console.error("Error handling voice offer:", err);
