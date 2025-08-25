@@ -50,6 +50,7 @@ import {
   getSession,
   leaveSession,
   sendMessage,
+  validateSession,
 } from "./routes/collaboration";
 
 export function createServer() {
