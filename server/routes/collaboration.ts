@@ -111,6 +111,8 @@ export const createSession: RequestHandler = (req, res) => {
       language,
       code: initialCode || getDefaultCode(language),
       participants: [hostParticipant],
+      messages: [],
+      voiceStates: [],
       createdAt: now,
       lastActivity: now,
     };
