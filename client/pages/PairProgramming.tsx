@@ -329,10 +329,17 @@ export default function PairProgramming() {
                         ? "bg-success/10 border-success text-success-foreground"
                         : "bg-destructive/10 border-destructive text-destructive-foreground"
                     }`}>
-                      <p className="text-sm font-medium">
-                        {sessionValidation.valid ? "✓ Session Valid" : "✗ Session Invalid"}
-                      </p>
-                      <p className="text-sm">{sessionValidation.message}</p>
+                      <div className="flex items-center gap-2">
+                        {sessionValidation.valid ? (
+                          <CheckCircle className="w-4 h-4" />
+                        ) : (
+                          <XCircle className="w-4 h-4" />
+                        )}
+                        <p className="text-sm font-medium">
+                          {sessionValidation.valid ? "Session Valid" : "Session Invalid"}
+                        </p>
+                      </div>
+                      <p className="text-sm mt-1">{sessionValidation.message}</p>
                     </div>
                   )}
 
