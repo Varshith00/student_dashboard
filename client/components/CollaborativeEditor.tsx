@@ -506,70 +506,24 @@ console.log(\`Result: \${result}\`);
 
     const link = `${window.location.origin}/student/collaboration/${session.id}`;
 
-    try {
-      // Try modern clipboard API first
-      if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(link);
-        toast.success("Session link copied to clipboard!");
-      } else {
-        // Fallback for older browsers or non-secure contexts
-        const textArea = document.createElement("textarea");
-        textArea.value = link;
-        textArea.style.position = "fixed";
-        textArea.style.left = "-999999px";
-        textArea.style.top = "-999999px";
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-
-        const success = document.execCommand('copy');
-        document.body.removeChild(textArea);
-
-        if (success) {
-          toast.success("Session link copied to clipboard!");
-        } else {
-          throw new Error("Copy command failed");
-        }
-      }
-    } catch (error) {
-      console.error("Failed to copy to clipboard:", error);
-      // Show the link to the user if copying fails
-      prompt("Copy this session link:", link);
+    const success = await copyToClipboard(link);
+    if (success) {
+      toast.success("Session link copied to clipboard!");
+    } else {
+      showCopyPrompt(link, "Copy this session link");
+      toast.info("Session link displayed - please copy manually");
     }
   };
 
   const copySessionId = async () => {
     if (!session) return;
 
-    try {
-      // Try modern clipboard API first
-      if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(session.id);
-        toast.success("Session ID copied to clipboard!");
-      } else {
-        // Fallback for older browsers or non-secure contexts
-        const textArea = document.createElement("textarea");
-        textArea.value = session.id;
-        textArea.style.position = "fixed";
-        textArea.style.left = "-999999px";
-        textArea.style.top = "-999999px";
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-
-        const success = document.execCommand('copy');
-        document.body.removeChild(textArea);
-
-        if (success) {
-          toast.success("Session ID copied to clipboard!");
-        } else {
-          throw new Error("Copy command failed");
-        }
-      }
-    } catch (error) {
-      console.error("Failed to copy to clipboard:", error);
-      // Show the ID to the user if copying fails
-      prompt("Copy this session ID:", session.id);
+    const success = await copyToClipboard(session.id);
+    if (success) {
+      toast.success("Session ID copied to clipboard!");
+    } else {
+      showCopyPrompt(session.id, "Copy this session ID");
+      toast.info("Session ID displayed - please copy manually");
     }
   };
 
