@@ -122,6 +122,9 @@ export const createSession: RequestHandler = (req, res) => {
     activeSessions.set(sessionId, session);
     sessionEvents.set(sessionId, []);
 
+    console.log(`Session created - ID: ${sessionId}, Host: ${user.name}`);
+    console.log(`Total active sessions: ${activeSessions.size}`);
+
     const response: CreateSessionResponse = {
       success: true,
       sessionId: sessionId,
