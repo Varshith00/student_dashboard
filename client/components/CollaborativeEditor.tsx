@@ -292,6 +292,7 @@ console.log(\`Result: \${result}\`);
         setSession(data.session);
         setParticipantId(data.participantId);
         setCode(data.session.code);
+        setMessages(data.session.messages || []);
         setIsConnected(true);
 
         // Set permission based on participant data
