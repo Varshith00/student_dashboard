@@ -20,6 +20,8 @@ export interface CollaborationSession {
   language: "python" | "javascript";
   code: string;
   participants: Participant[];
+  messages: ChatMessage[];
+  voiceStates: VoiceState[];
   createdAt: string;
   lastActivity: string;
 }
