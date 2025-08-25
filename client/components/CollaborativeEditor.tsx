@@ -879,9 +879,17 @@ console.log(\`Result: \${result}\`);
         {/* Right Panel - Collaboration Tools */}
         <div className="w-80 border-l bg-muted/30">
           <Tabs defaultValue="participants" className="h-full">
-            <TabsList className="grid w-full grid-cols-3 m-4">
+            <TabsList className="grid w-full grid-cols-5 m-4 text-xs">
               <TabsTrigger value="participants">Team</TabsTrigger>
-              <TabsTrigger value="ai">AI Panel</TabsTrigger>
+              <TabsTrigger value="chat">
+                <MessageCircle className="w-3 h-3 mr-1" />
+                Chat
+              </TabsTrigger>
+              <TabsTrigger value="voice">
+                <Phone className="w-3 h-3 mr-1" />
+                Voice
+              </TabsTrigger>
+              <TabsTrigger value="ai">AI</TabsTrigger>
               <TabsTrigger value="settings">Settings</TabsTrigger>
             </TabsList>
 
