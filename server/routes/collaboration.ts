@@ -435,5 +435,82 @@ export const cleanupSessions = () => {
   }
 };
 
+export const sendMessage: RequestHandler = (req, res) => {
+  try {
+    const user = (req as any).user;
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+    }
+
+    const { sessionId, participantId, message }: SendMessageRequest = req.body;
+    const session = activeSessions.get(sessionId);
+
+    if (!session) {
+      return res.status(404).json({
+        success: false,
+        message: "Session not found",
+      });
+    }
+
+    // Find participant
+    const participant = session.participants.find(
+      (p) => p.id === participantId && p.userId === user.id,
+    );
+    if (!participant) {
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized to send messages in this session",
+      });
+    }
+
+    // Create chat message
+    const chatMessage: ChatMessage = {
+      id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+      content: message,
+      participantId,
+      participantName: participant.name,
+      timestamp: new Date().toISOString(),
+    };
+
+    // Add message to session
+    session.messages.push(chatMessage);
+    session.lastActivity = new Date().toISOString();
+    activeSessions.set(sessionId, session);
+
+    // Emit real-time message via socket.io (handled by socket, but we can also emit here as backup)
+    const io = (req as any).app?.get("io");
+    if (io) {
+      io.to(sessionId).emit("new-message", chatMessage);
+    }
+
+    // Add chat message event
+    const messageEvent: SessionEvent = {
+      type: "chat_message",
+      sessionId,
+      participantId,
+      data: { message: chatMessage },
+      timestamp: new Date().toISOString(),
+    };
+
+    const events = sessionEvents.get(sessionId) || [];
+    events.push(messageEvent);
+    sessionEvents.set(sessionId, events);
+
+    res.json({
+      success: true,
+      message: chatMessage,
+    });
+  } catch (error) {
+    console.error("Error sending message:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
 // Run cleanup every hour
 setInterval(cleanupSessions, 60 * 60 * 1000);
