@@ -1003,6 +1003,35 @@ console.log(\`Result: \${result}\`);
               </Card>
             </TabsContent>
 
+            <TabsContent value="chat" className="px-4 pb-4 h-full">
+              <div className="h-full">
+                <ChatInterface
+                  sessionId={session.id}
+                  participantId={participantId}
+                  participant={session.participants.find((p) => p.id === participantId)!}
+                  messages={messages}
+                  typingUsers={typingUsers}
+                  onSendMessage={handleSendMessage}
+                  onTypingStart={handleTypingStart}
+                  onTypingStop={handleTypingStop}
+                  disabled={permission === "read"}
+                />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="voice" className="px-4 pb-4 h-full">
+              <div className="h-full">
+                <VoiceChat
+                  sessionId={session.id}
+                  participantId={participantId}
+                  participant={session.participants.find((p) => p.id === participantId)!}
+                  participants={session.participants}
+                  socket={socketRef.current}
+                  disabled={permission === "read"}
+                />
+              </div>
+            </TabsContent>
+
             <TabsContent value="settings" className="px-4 pb-4 space-y-4">
               <Card>
                 <CardHeader>
