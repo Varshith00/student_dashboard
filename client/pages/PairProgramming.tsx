@@ -22,6 +22,8 @@ import {
   UserPlus,
   Laptop,
   Brain,
+  CheckCircle,
+  XCircle,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { authFetch } from "@/contexts/AuthContext";
@@ -35,6 +37,11 @@ export default function PairProgramming() {
   const [joinSessionId, setJoinSessionId] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
+  const [isValidating, setIsValidating] = useState(false);
+  const [sessionValidation, setSessionValidation] = useState<{
+    valid: boolean;
+    message: string;
+  } | null>(null);
 
   const createNewSession = async () => {
     setIsCreating(true);
@@ -61,6 +68,46 @@ export default function PairProgramming() {
     }
   };
 
+  const validateSession = async () => {
+    if (!joinSessionId.trim()) {
+      toast.error("Please enter a session ID");
+      return;
+    }
+
+    setIsValidating(true);
+    setSessionValidation(null);
+
+    try {
+      const response = await fetch(
+        `/api/collaboration/validate/${joinSessionId.trim()}`,
+      );
+      const data = await response.json();
+
+      if (data.success) {
+        setSessionValidation({
+          valid: true,
+          message: `Session found! ${data.activeParticipants} active participants in ${data.language} session.`,
+        });
+        toast.success("Session is valid and active!");
+      } else {
+        setSessionValidation({
+          valid: false,
+          message: data.message || "Session not found",
+        });
+        toast.error(data.message || "Session not found");
+      }
+    } catch (error) {
+      console.error("Error validating session:", error);
+      setSessionValidation({
+        valid: false,
+        message: "Failed to validate session - network error",
+      });
+      toast.error("Failed to validate session");
+    } finally {
+      setIsValidating(false);
+    }
+  };
+
   const joinExistingSession = async () => {
     if (!joinSessionId.trim()) {
       toast.error("Please enter a session ID");
@@ -68,22 +115,40 @@ export default function PairProgramming() {
     }
 
     setIsJoining(true);
+    console.log("Attempting to join session:", joinSessionId);
+
     try {
       const response = await authFetch("/api/collaboration/join", {
         method: "POST",
-        body: JSON.stringify({ sessionId: joinSessionId }),
+        body: JSON.stringify({ sessionId: joinSessionId.trim() }),
       });
 
+      console.log("Join session response status:", response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Join session HTTP error:", response.status, errorText);
+        toast.error(`Server error: ${response.status} - ${errorText}`);
+        return;
+      }
+
       const data = await response.json();
+      console.log("Join session response data:", data);
+
       if (data.success) {
         toast.success("Successfully joined session!");
-        navigate(`/student/collaboration/${joinSessionId}`);
+        navigate(`/student/collaboration/${joinSessionId.trim()}`);
       } else {
+        console.error("Join session failed:", data);
         toast.error(data.message || "Failed to join session");
       }
     } catch (error) {
-      toast.error("Failed to join session");
       console.error("Error joining session:", error);
+      if (error instanceof Error) {
+        toast.error(`Failed to join session: ${error.message}`);
+      } else {
+        toast.error("Failed to join session - network error");
+      }
     } finally {
       setIsJoining(false);
     }
@@ -228,61 +293,126 @@ export default function PairProgramming() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="space-y-3">
-                <Label htmlFor="session-id" className="text-base font-semibold">
-                  Session ID
-                </Label>
-                <Input
-                  id="session-id"
-                  placeholder="Enter session ID (e.g., collab_123_abc)"
-                  value={joinSessionId}
-                  onChange={(e) => setJoinSessionId(e.target.value)}
-                  onKeyPress={(e) => e.key === "Enter" && joinExistingSession()}
-                />
-                <p className="text-sm text-muted-foreground">
-                  Ask your teammate to share their session ID or link
-                </p>
-              </div>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  joinExistingSession();
+                }}
+                className="space-y-6"
+              >
+                <div className="space-y-3">
+                  <Label
+                    htmlFor="session-id"
+                    className="text-base font-semibold"
+                  >
+                    Session ID
+                  </Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="session-id"
+                      placeholder="Enter session ID (e.g., collab_123_abc)"
+                      value={joinSessionId}
+                      onChange={(e) => {
+                        setJoinSessionId(e.target.value);
+                        setSessionValidation(null); // Clear validation when input changes
+                      }}
+                      disabled={isJoining || isValidating}
+                      autoComplete="off"
+                      className="flex-1"
+                    />
+                    <Button
+                      type="button"
+                      onClick={validateSession}
+                      disabled={isValidating || !joinSessionId.trim()}
+                      variant="outline"
+                      size="default"
+                    >
+                      {isValidating ? "Checking..." : "Check"}
+                    </Button>
+                  </div>
 
-              <div className="space-y-3">
-                <Label className="text-base font-semibold">
-                  What You Can Do
-                </Label>
-                <div className="space-y-2 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-2">
-                    <Copy className="w-4 h-4 text-accent" />
-                    <span>View and edit code together</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4 text-accent" />
-                    <span>See real-time cursors and changes</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Brain className="w-4 h-4 text-accent" />
-                    <span>Get AI assistance and suggestions</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Laptop className="w-4 h-4 text-accent" />
-                    <span>Run code and see output together</span>
+                  {sessionValidation && (
+                    <div
+                      className={`p-3 rounded-lg border ${
+                        sessionValidation.valid
+                          ? "bg-success/10 border-success text-success-foreground"
+                          : "bg-destructive/10 border-destructive text-destructive-foreground"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        {sessionValidation.valid ? (
+                          <CheckCircle className="w-4 h-4" />
+                        ) : (
+                          <XCircle className="w-4 h-4" />
+                        )}
+                        <p className="text-sm font-medium">
+                          {sessionValidation.valid
+                            ? "Session Valid"
+                            : "Session Invalid"}
+                        </p>
+                      </div>
+                      <p className="text-sm mt-1">
+                        {sessionValidation.message}
+                      </p>
+                    </div>
+                  )}
+
+                  <p className="text-sm text-muted-foreground">
+                    Ask your teammate to share their session ID or link
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  <Label className="text-base font-semibold">
+                    What You Can Do
+                  </Label>
+                  <div className="space-y-2 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                      <Copy className="w-4 h-4 text-accent" />
+                      <span>View and edit code together</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Users className="w-4 h-4 text-accent" />
+                      <span>See real-time cursors and changes</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Brain className="w-4 h-4 text-accent" />
+                      <span>Get AI assistance and suggestions</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Laptop className="w-4 h-4 text-accent" />
+                      <span>Run code and see output together</span>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <Button
-                onClick={joinExistingSession}
-                disabled={isJoining || !joinSessionId.trim()}
-                variant="outline"
-                className="w-full border-accent text-accent hover:bg-accent hover:text-accent-foreground"
-                size="lg"
-              >
-                {isJoining ? (
-                  "Joining Session..."
-                ) : (
-                  <>
-                    Join Session <ArrowRight className="ml-2 w-5 h-5" />
-                  </>
-                )}
-              </Button>
+                <Button
+                  type="submit"
+                  disabled={
+                    isJoining ||
+                    !joinSessionId.trim() ||
+                    !sessionValidation?.valid
+                  }
+                  variant="outline"
+                  className="w-full border-accent text-accent hover:bg-accent hover:text-accent-foreground"
+                  size="lg"
+                >
+                  {isJoining ? (
+                    "Joining Session..."
+                  ) : sessionValidation?.valid ? (
+                    <>
+                      Join Session <ArrowRight className="ml-2 w-5 h-5" />
+                    </>
+                  ) : (
+                    <>
+                      {sessionValidation === null
+                        ? "Check Session First"
+                        : "Session Invalid"}{" "}
+                      <ArrowRight className="ml-2 w-5 h-5" />
+                    </>
+                  )}
+                </Button>
+              </form>
             </CardContent>
           </Card>
         </div>

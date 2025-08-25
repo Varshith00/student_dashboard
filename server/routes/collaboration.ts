@@ -8,6 +8,8 @@ import {
   JoinSessionResponse,
   UpdateCodeRequest,
   SessionEvent,
+  ChatMessage,
+  SendMessageRequest,
 } from "@shared/api";
 
 // In-memory storage for demo (in production, use a proper database)
@@ -111,12 +113,17 @@ export const createSession: RequestHandler = (req, res) => {
       language,
       code: initialCode || getDefaultCode(language),
       participants: [hostParticipant],
+      messages: [],
+      voiceStates: [],
       createdAt: now,
       lastActivity: now,
     };
 
     activeSessions.set(sessionId, session);
     sessionEvents.set(sessionId, []);
+
+    console.log(`Session created - ID: ${sessionId}, Host: ${user.name}`);
+    console.log(`Total active sessions: ${activeSessions.size}`);
 
     const response: CreateSessionResponse = {
       success: true,
@@ -137,6 +144,7 @@ export const joinSession: RequestHandler = (req, res) => {
   try {
     const user = (req as any).user;
     if (!user) {
+      console.log("Join session - No user in request");
       return res.status(401).json({
         success: false,
         message: "Authentication required",
@@ -144,12 +152,28 @@ export const joinSession: RequestHandler = (req, res) => {
     }
 
     const { sessionId }: JoinSessionRequest = req.body;
-    const session = activeSessions.get(sessionId);
+    console.log(
+      `Join session attempt - User: ${user.name}, Session ID: ${sessionId}`,
+    );
+    console.log(
+      `Active sessions: ${Array.from(activeSessions.keys()).join(", ")}`,
+    );
+
+    if (!sessionId || typeof sessionId !== "string" || !sessionId.trim()) {
+      console.log("Join session - Invalid session ID:", sessionId);
+      return res.status(400).json({
+        success: false,
+        message: "Invalid session ID provided",
+      });
+    }
+
+    const session = activeSessions.get(sessionId.trim());
 
     if (!session) {
+      console.log(`Join session - Session not found: ${sessionId}`);
       return res.status(404).json({
         success: false,
-        message: "Session not found",
+        message: "Session not found or has expired",
       });
     }
 
@@ -428,6 +452,120 @@ export const cleanupSessions = () => {
       sessionEvents.delete(sessionId);
       console.log(`Cleaned up inactive session: ${sessionId}`);
     }
+  }
+};
+
+export const sendMessage: RequestHandler = (req, res) => {
+  try {
+    const user = (req as any).user;
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+    }
+
+    const { sessionId, participantId, message }: SendMessageRequest = req.body;
+    const session = activeSessions.get(sessionId);
+
+    if (!session) {
+      return res.status(404).json({
+        success: false,
+        message: "Session not found",
+      });
+    }
+
+    // Find participant
+    const participant = session.participants.find(
+      (p) => p.id === participantId && p.userId === user.id,
+    );
+    if (!participant) {
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized to send messages in this session",
+      });
+    }
+
+    // Create chat message
+    const chatMessage: ChatMessage = {
+      id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+      content: message,
+      participantId,
+      participantName: participant.name,
+      timestamp: new Date().toISOString(),
+    };
+
+    // Add message to session
+    session.messages.push(chatMessage);
+    session.lastActivity = new Date().toISOString();
+    activeSessions.set(sessionId, session);
+
+    // Emit real-time message via socket.io (handled by socket, but we can also emit here as backup)
+    const io = (req as any).app?.get("io");
+    if (io) {
+      io.to(sessionId).emit("new-message", chatMessage);
+    }
+
+    // Add chat message event
+    const messageEvent: SessionEvent = {
+      type: "chat_message",
+      sessionId,
+      participantId,
+      data: { message: chatMessage },
+      timestamp: new Date().toISOString(),
+    };
+
+    const events = sessionEvents.get(sessionId) || [];
+    events.push(messageEvent);
+    sessionEvents.set(sessionId, events);
+
+    res.json({
+      success: true,
+      message: chatMessage,
+    });
+  } catch (error) {
+    console.error("Error sending message:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const validateSession: RequestHandler = (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    console.log(`Validating session: ${sessionId}`);
+    console.log(
+      `Active sessions: ${Array.from(activeSessions.keys()).join(", ")}`,
+    );
+
+    const session = activeSessions.get(sessionId);
+
+    if (!session) {
+      return res.status(404).json({
+        success: false,
+        message: "Session not found or has expired",
+        sessionId,
+        activeSessions: Array.from(activeSessions.keys()),
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Session exists",
+      sessionId,
+      participantCount: session.participants.length,
+      activeParticipants: session.participants.filter((p) => p.isActive).length,
+      language: session.language,
+      createdAt: session.createdAt,
+    });
+  } catch (error) {
+    console.error("Error validating session:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
   }
 };
 

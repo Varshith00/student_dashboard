@@ -36,8 +36,18 @@ import {
   LogOut,
   Brain,
   Lightbulb,
+  MessageCircle,
+  Phone,
 } from "lucide-react";
-import type { CollaborationSession, Participant } from "@shared/api";
+import type {
+  CollaborationSession,
+  Participant,
+  ChatMessage,
+  TypingIndicator,
+} from "@shared/api";
+import ChatInterface from "@/components/ChatInterface";
+import VoiceChat from "@/components/VoiceChat";
+import { copyToClipboard, showCopyPrompt } from "@/lib/clipboard";
 
 interface CollaborativeEditorProps {
   sessionId?: string;
@@ -72,6 +82,10 @@ export default function CollaborativeEditor({
   // AI features state
   const [aiSuggestion, setAiSuggestion] = useState<string>("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  // Chat state
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [typingUsers, setTypingUsers] = useState<TypingIndicator[]>([]);
 
   // Socket connection
   const socketRef = useRef<Socket | null>(null);
@@ -202,6 +216,24 @@ console.log(\`Result: \${result}\`);
         // Could be used to show cursors in the editor
       });
 
+      // Handle chat messages
+      socket.on("new-message", (messageData: ChatMessage) => {
+        setMessages((prev) => [...prev, messageData]);
+      });
+
+      // Handle typing indicators
+      socket.on("user-typing", (data: TypingIndicator) => {
+        setTypingUsers((prev) => {
+          const filtered = prev.filter(
+            (user) => user.participantId !== data.participantId,
+          );
+          if (data.isTyping) {
+            return [...filtered, data];
+          }
+          return filtered;
+        });
+      });
+
       return () => {
         if (socket) {
           socket.emit("leave-session", session.id);
@@ -268,6 +300,7 @@ console.log(\`Result: \${result}\`);
         setSession(data.session);
         setParticipantId(data.participantId);
         setCode(data.session.code);
+        setMessages(data.session.messages || []);
         setIsConnected(true);
 
         // Set permission based on participant data
@@ -299,21 +332,40 @@ console.log(\`Result: \${result}\`);
     }
 
     setIsJoining(true);
+    console.log("Attempting to join session:", joinSessionId);
+
     try {
       const response = await authFetch("/api/collaboration/join", {
         method: "POST",
-        body: JSON.stringify({ sessionId: joinSessionId }),
+        body: JSON.stringify({ sessionId: joinSessionId.trim() }),
       });
 
+      console.log("Join session response status:", response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Join session HTTP error:", response.status, errorText);
+        toast.error(`Server error: ${response.status} - ${errorText}`);
+        return;
+      }
+
       const data = await response.json();
+      console.log("Join session response data:", data);
+
       if (data.success) {
-        navigate(`/student/collaboration/${joinSessionId}`);
+        toast.success("Successfully joined session!");
+        navigate(`/student/collaboration/${joinSessionId.trim()}`);
       } else {
+        console.error("Join session failed:", data);
         toast.error(data.message || "Failed to join session");
       }
     } catch (error) {
-      toast.error("Failed to join session");
       console.error("Error joining session:", error);
+      if (error instanceof Error) {
+        toast.error(`Failed to join session: ${error.message}`);
+      } else {
+        toast.error("Failed to join session - network error");
+      }
     } finally {
       setIsJoining(false);
     }
@@ -456,19 +508,30 @@ console.log(\`Result: \${result}\`);
     }
   };
 
-  const copySessionLink = () => {
+  const copySessionLink = async () => {
     if (!session) return;
 
     const link = `${window.location.origin}/student/collaboration/${session.id}`;
-    navigator.clipboard.writeText(link);
-    toast.success("Session link copied to clipboard!");
+
+    const success = await copyToClipboard(link);
+    if (success) {
+      toast.success("Session link copied to clipboard!");
+    } else {
+      showCopyPrompt(link, "Copy this session link");
+      toast.info("Session link displayed - please copy manually");
+    }
   };
 
-  const copySessionId = () => {
+  const copySessionId = async () => {
     if (!session) return;
 
-    navigator.clipboard.writeText(session.id);
-    toast.success("Session ID copied to clipboard!");
+    const success = await copyToClipboard(session.id);
+    if (success) {
+      toast.success("Session ID copied to clipboard!");
+    } else {
+      showCopyPrompt(session.id, "Copy this session ID");
+      toast.info("Session ID displayed - please copy manually");
+    }
   };
 
   const handleBack = () => {
@@ -493,6 +556,53 @@ console.log(\`Result: \${result}\`);
       console.error("Error leaving session:", error);
       navigate("/student/dashboard");
     }
+  };
+
+  // Chat functions
+  const handleSendMessage = (message: string) => {
+    if (!socketRef.current || !session || !participantId) return;
+
+    const participant = session.participants.find(
+      (p) => p.id === participantId,
+    );
+    if (!participant) return;
+
+    socketRef.current.emit("send-message", {
+      sessionId: session.id,
+      message,
+      participantId,
+      participantName: participant.name,
+    });
+  };
+
+  const handleTypingStart = () => {
+    if (!socketRef.current || !session || !participantId) return;
+
+    const participant = session.participants.find(
+      (p) => p.id === participantId,
+    );
+    if (!participant) return;
+
+    socketRef.current.emit("typing-start", {
+      sessionId: session.id,
+      participantId,
+      participantName: participant.name,
+    });
+  };
+
+  const handleTypingStop = () => {
+    if (!socketRef.current || !session || !participantId) return;
+
+    const participant = session.participants.find(
+      (p) => p.id === participantId,
+    );
+    if (!participant) return;
+
+    socketRef.current.emit("typing-stop", {
+      sessionId: session.id,
+      participantId,
+      participantName: participant.name,
+    });
   };
 
   const handleEditorDidMount = (editor: any) => {
@@ -538,28 +648,37 @@ console.log(\`Result: \${result}\`);
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Session ID</label>
-              <Input
-                placeholder="Enter session ID (e.g., collab_123_abc)"
-                value={joinSessionId}
-                onChange={(e) => setJoinSessionId(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && handleJoinSession()}
-              />
-            </div>
-            <div className="flex gap-2">
-              <Button
-                onClick={handleJoinSession}
-                disabled={isJoining || !joinSessionId.trim()}
-                className="flex-1"
-              >
-                {isJoining ? "Joining..." : "Join Session"}
-              </Button>
-              <Button variant="outline" onClick={handleBack}>
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back
-              </Button>
-            </div>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleJoinSession();
+              }}
+              className="space-y-4"
+            >
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Session ID</label>
+                <Input
+                  placeholder="Enter session ID (e.g., collab_123_abc)"
+                  value={joinSessionId}
+                  onChange={(e) => setJoinSessionId(e.target.value)}
+                  disabled={isJoining}
+                  autoComplete="off"
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  type="submit"
+                  disabled={isJoining || !joinSessionId.trim()}
+                  className="flex-1"
+                >
+                  {isJoining ? "Joining..." : "Join Session"}
+                </Button>
+                <Button type="button" variant="outline" onClick={handleBack}>
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back
+                </Button>
+              </div>
+            </form>
             <div className="text-center">
               <p className="text-sm text-muted-foreground mb-2">Or</p>
               <Button
@@ -813,9 +932,17 @@ console.log(\`Result: \${result}\`);
         {/* Right Panel - Collaboration Tools */}
         <div className="w-80 border-l bg-muted/30">
           <Tabs defaultValue="participants" className="h-full">
-            <TabsList className="grid w-full grid-cols-3 m-4">
+            <TabsList className="grid w-full grid-cols-5 m-4 text-xs">
               <TabsTrigger value="participants">Team</TabsTrigger>
-              <TabsTrigger value="ai">AI Panel</TabsTrigger>
+              <TabsTrigger value="chat">
+                <MessageCircle className="w-3 h-3 mr-1" />
+                Chat
+              </TabsTrigger>
+              <TabsTrigger value="voice">
+                <Phone className="w-3 h-3 mr-1" />
+                Voice
+              </TabsTrigger>
+              <TabsTrigger value="ai">AI</TabsTrigger>
               <TabsTrigger value="settings">Settings</TabsTrigger>
             </TabsList>
 
@@ -927,6 +1054,39 @@ console.log(\`Result: \${result}\`);
                   )}
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            <TabsContent value="chat" className="px-4 pb-4 h-full">
+              <div className="h-full">
+                <ChatInterface
+                  sessionId={session.id}
+                  participantId={participantId}
+                  participant={
+                    session.participants.find((p) => p.id === participantId)!
+                  }
+                  messages={messages}
+                  typingUsers={typingUsers}
+                  onSendMessage={handleSendMessage}
+                  onTypingStart={handleTypingStart}
+                  onTypingStop={handleTypingStop}
+                  disabled={permission === "read"}
+                />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="voice" className="px-4 pb-4 h-full">
+              <div className="h-full">
+                <VoiceChat
+                  sessionId={session.id}
+                  participantId={participantId}
+                  participant={
+                    session.participants.find((p) => p.id === participantId)!
+                  }
+                  participants={session.participants}
+                  socket={socketRef.current}
+                  disabled={permission === "read"}
+                />
+              </div>
             </TabsContent>
 
             <TabsContent value="settings" className="px-4 pb-4 space-y-4">

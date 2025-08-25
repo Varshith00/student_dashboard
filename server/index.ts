@@ -49,6 +49,8 @@ import {
   updateCode,
   getSession,
   leaveSession,
+  sendMessage,
+  validateSession,
 } from "./routes/collaboration";
 
 export function createServer() {
@@ -109,6 +111,74 @@ export function createServer() {
         socket.to(sessionId).emit("participant-update", {
           participantId,
           status,
+        });
+      });
+
+      // Handle chat messages
+      socket.on("send-message", (data) => {
+        const { sessionId, message, participantId, participantName } = data;
+        const messageData = {
+          id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+          content: message,
+          participantId,
+          participantName,
+          timestamp: new Date().toISOString(),
+        };
+
+        // Broadcast to all participants in the session including sender
+        io.to(sessionId).emit("new-message", messageData);
+        console.log(`Message sent in session ${sessionId}: ${message}`);
+      });
+
+      // Handle typing indicators
+      socket.on("typing-start", (data) => {
+        const { sessionId, participantId, participantName } = data;
+        socket.to(sessionId).emit("user-typing", {
+          participantId,
+          participantName,
+          isTyping: true,
+        });
+      });
+
+      socket.on("typing-stop", (data) => {
+        const { sessionId, participantId, participantName } = data;
+        socket.to(sessionId).emit("user-typing", {
+          participantId,
+          participantName,
+          isTyping: false,
+        });
+      });
+
+      // Handle WebRTC voice signaling
+      socket.on("voice-offer", (data) => {
+        const { sessionId, offer, participantId } = data;
+        socket.to(sessionId).emit("voice-offer", {
+          offer,
+          participantId,
+        });
+      });
+
+      socket.on("voice-answer", (data) => {
+        const { sessionId, answer, participantId } = data;
+        socket.to(sessionId).emit("voice-answer", {
+          answer,
+          participantId,
+        });
+      });
+
+      socket.on("voice-ice-candidate", (data) => {
+        const { sessionId, candidate, participantId } = data;
+        socket.to(sessionId).emit("voice-ice-candidate", {
+          candidate,
+          participantId,
+        });
+      });
+
+      socket.on("voice-state-change", (data) => {
+        const { sessionId, participantId, state } = data;
+        socket.to(sessionId).emit("voice-state-change", {
+          participantId,
+          state, // 'connected', 'disconnected', 'muted', 'unmuted'
         });
       });
 
@@ -232,7 +302,9 @@ export function createServer() {
   app.post("/api/collaboration/create", authMiddleware, createSession);
   app.post("/api/collaboration/join", authMiddleware, joinSession);
   app.get("/api/collaboration/:sessionId", authMiddleware, getSession);
+  app.get("/api/collaboration/validate/:sessionId", validateSession);
   app.post("/api/collaboration/update", authMiddleware, updateCode);
+  app.post("/api/collaboration/message", authMiddleware, sendMessage);
   app.post("/api/collaboration/leave", authMiddleware, leaveSession);
 
   return { app, httpServer, io };
@@ -442,7 +514,9 @@ export function createDevServer() {
   app.post("/api/collaboration/create", authMiddleware, createSession);
   app.post("/api/collaboration/join", authMiddleware, joinSession);
   app.get("/api/collaboration/:sessionId", authMiddleware, getSession);
+  app.get("/api/collaboration/validate/:sessionId", validateSession);
   app.post("/api/collaboration/update", authMiddleware, updateCode);
+  app.post("/api/collaboration/message", authMiddleware, sendMessage);
   app.post("/api/collaboration/leave", authMiddleware, leaveSession);
 
   return { app };
