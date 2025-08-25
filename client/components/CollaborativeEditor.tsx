@@ -36,8 +36,12 @@ import {
   LogOut,
   Brain,
   Lightbulb,
+  MessageCircle,
+  Phone,
 } from "lucide-react";
-import type { CollaborationSession, Participant } from "@shared/api";
+import type { CollaborationSession, Participant, ChatMessage, TypingIndicator } from "@shared/api";
+import ChatInterface from "@/components/ChatInterface";
+import VoiceChat from "@/components/VoiceChat";
 
 interface CollaborativeEditorProps {
   sessionId?: string;
