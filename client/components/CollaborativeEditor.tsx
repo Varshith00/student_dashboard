@@ -210,6 +210,22 @@ console.log(\`Result: \${result}\`);
         // Could be used to show cursors in the editor
       });
 
+      // Handle chat messages
+      socket.on("new-message", (messageData: ChatMessage) => {
+        setMessages((prev) => [...prev, messageData]);
+      });
+
+      // Handle typing indicators
+      socket.on("user-typing", (data: TypingIndicator) => {
+        setTypingUsers((prev) => {
+          const filtered = prev.filter((user) => user.participantId !== data.participantId);
+          if (data.isTyping) {
+            return [...filtered, data];
+          }
+          return filtered;
+        });
+      });
+
       return () => {
         if (socket) {
           socket.emit("leave-session", session.id);
