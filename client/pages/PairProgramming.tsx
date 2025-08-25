@@ -365,16 +365,20 @@ export default function PairProgramming() {
 
                 <Button
                   type="submit"
-                  disabled={isJoining || !joinSessionId.trim()}
+                  disabled={isJoining || !joinSessionId.trim() || !sessionValidation?.valid}
                   variant="outline"
                   className="w-full border-accent text-accent hover:bg-accent hover:text-accent-foreground"
                   size="lg"
                 >
                   {isJoining ? (
                     "Joining Session..."
-                  ) : (
+                  ) : sessionValidation?.valid ? (
                     <>
                       Join Session <ArrowRight className="ml-2 w-5 h-5" />
+                    </>
+                  ) : (
+                    <>
+                      {sessionValidation === null ? "Check Session First" : "Session Invalid"} <ArrowRight className="ml-2 w-5 h-5" />
                     </>
                   )}
                 </Button>
