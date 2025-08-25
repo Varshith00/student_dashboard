@@ -520,6 +520,47 @@ console.log(\`Result: \${result}\`);
     }
   };
 
+  // Chat functions
+  const handleSendMessage = (message: string) => {
+    if (!socketRef.current || !session || !participantId) return;
+
+    const participant = session.participants.find((p) => p.id === participantId);
+    if (!participant) return;
+
+    socketRef.current.emit("send-message", {
+      sessionId: session.id,
+      message,
+      participantId,
+      participantName: participant.name,
+    });
+  };
+
+  const handleTypingStart = () => {
+    if (!socketRef.current || !session || !participantId) return;
+
+    const participant = session.participants.find((p) => p.id === participantId);
+    if (!participant) return;
+
+    socketRef.current.emit("typing-start", {
+      sessionId: session.id,
+      participantId,
+      participantName: participant.name,
+    });
+  };
+
+  const handleTypingStop = () => {
+    if (!socketRef.current || !session || !participantId) return;
+
+    const participant = session.participants.find((p) => p.id === participantId);
+    if (!participant) return;
+
+    socketRef.current.emit("typing-stop", {
+      sessionId: session.id,
+      participantId,
+      participantName: participant.name,
+    });
+  };
+
   const handleEditorDidMount = (editor: any) => {
     editorRef.current = editor;
   };
