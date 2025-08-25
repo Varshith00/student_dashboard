@@ -246,21 +246,29 @@ export default function PairProgramming() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="space-y-3">
-                <Label htmlFor="session-id" className="text-base font-semibold">
-                  Session ID
-                </Label>
-                <Input
-                  id="session-id"
-                  placeholder="Enter session ID (e.g., collab_123_abc)"
-                  value={joinSessionId}
-                  onChange={(e) => setJoinSessionId(e.target.value)}
-                  onKeyPress={(e) => e.key === "Enter" && joinExistingSession()}
-                />
-                <p className="text-sm text-muted-foreground">
-                  Ask your teammate to share their session ID or link
-                </p>
-              </div>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  joinExistingSession();
+                }}
+                className="space-y-6"
+              >
+                <div className="space-y-3">
+                  <Label htmlFor="session-id" className="text-base font-semibold">
+                    Session ID
+                  </Label>
+                  <Input
+                    id="session-id"
+                    placeholder="Enter session ID (e.g., collab_123_abc)"
+                    value={joinSessionId}
+                    onChange={(e) => setJoinSessionId(e.target.value)}
+                    disabled={isJoining}
+                    autoComplete="off"
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Ask your teammate to share their session ID or link
+                  </p>
+                </div>
 
               <div className="space-y-3">
                 <Label className="text-base font-semibold">
@@ -286,21 +294,22 @@ export default function PairProgramming() {
                 </div>
               </div>
 
-              <Button
-                onClick={joinExistingSession}
-                disabled={isJoining || !joinSessionId.trim()}
-                variant="outline"
-                className="w-full border-accent text-accent hover:bg-accent hover:text-accent-foreground"
-                size="lg"
-              >
-                {isJoining ? (
-                  "Joining Session..."
-                ) : (
-                  <>
-                    Join Session <ArrowRight className="ml-2 w-5 h-5" />
-                  </>
-                )}
-              </Button>
+                <Button
+                  type="submit"
+                  disabled={isJoining || !joinSessionId.trim()}
+                  variant="outline"
+                  className="w-full border-accent text-accent hover:bg-accent hover:text-accent-foreground"
+                  size="lg"
+                >
+                  {isJoining ? (
+                    "Joining Session..."
+                  ) : (
+                    <>
+                      Join Session <ArrowRight className="ml-2 w-5 h-5" />
+                    </>
+                  )}
+                </Button>
+              </form>
             </CardContent>
           </Card>
         </div>
