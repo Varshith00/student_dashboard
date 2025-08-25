@@ -194,7 +194,10 @@ export default function VoiceChat({
         socket.emit("voice-offer", {
           sessionId,
           participantId: targetParticipant.id,
-          offer: offer.toJSON(),
+          offer: {
+            type: offer.type,
+            sdp: offer.sdp,
+          },
         });
       }
 
