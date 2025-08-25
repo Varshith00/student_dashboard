@@ -297,14 +297,43 @@ export default function PairProgramming() {
                   <Label htmlFor="session-id" className="text-base font-semibold">
                     Session ID
                   </Label>
-                  <Input
-                    id="session-id"
-                    placeholder="Enter session ID (e.g., collab_123_abc)"
-                    value={joinSessionId}
-                    onChange={(e) => setJoinSessionId(e.target.value)}
-                    disabled={isJoining}
-                    autoComplete="off"
-                  />
+                  <div className="flex gap-2">
+                    <Input
+                      id="session-id"
+                      placeholder="Enter session ID (e.g., collab_123_abc)"
+                      value={joinSessionId}
+                      onChange={(e) => {
+                        setJoinSessionId(e.target.value);
+                        setSessionValidation(null); // Clear validation when input changes
+                      }}
+                      disabled={isJoining || isValidating}
+                      autoComplete="off"
+                      className="flex-1"
+                    />
+                    <Button
+                      type="button"
+                      onClick={validateSession}
+                      disabled={isValidating || !joinSessionId.trim()}
+                      variant="outline"
+                      size="default"
+                    >
+                      {isValidating ? "Checking..." : "Check"}
+                    </Button>
+                  </div>
+
+                  {sessionValidation && (
+                    <div className={`p-3 rounded-lg border ${
+                      sessionValidation.valid
+                        ? "bg-success/10 border-success text-success-foreground"
+                        : "bg-destructive/10 border-destructive text-destructive-foreground"
+                    }`}>
+                      <p className="text-sm font-medium">
+                        {sessionValidation.valid ? "✓ Session Valid" : "✗ Session Invalid"}
+                      </p>
+                      <p className="text-sm">{sessionValidation.message}</p>
+                    </div>
+                  )}
+
                   <p className="text-sm text-muted-foreground">
                     Ask your teammate to share their session ID or link
                   </p>
