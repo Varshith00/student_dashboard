@@ -302,6 +302,7 @@ export function createServer() {
   app.post("/api/collaboration/join", authMiddleware, joinSession);
   app.get("/api/collaboration/:sessionId", authMiddleware, getSession);
   app.post("/api/collaboration/update", authMiddleware, updateCode);
+  app.post("/api/collaboration/message", authMiddleware, sendMessage);
   app.post("/api/collaboration/leave", authMiddleware, leaveSession);
 
   return { app, httpServer, io };
@@ -512,6 +513,7 @@ export function createDevServer() {
   app.post("/api/collaboration/join", authMiddleware, joinSession);
   app.get("/api/collaboration/:sessionId", authMiddleware, getSession);
   app.post("/api/collaboration/update", authMiddleware, updateCode);
+  app.post("/api/collaboration/message", authMiddleware, sendMessage);
   app.post("/api/collaboration/leave", authMiddleware, leaveSession);
 
   return { app };
