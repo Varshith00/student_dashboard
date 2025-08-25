@@ -42,6 +42,7 @@ import {
 import type { CollaborationSession, Participant, ChatMessage, TypingIndicator } from "@shared/api";
 import ChatInterface from "@/components/ChatInterface";
 import VoiceChat from "@/components/VoiceChat";
+import { copyToClipboard, showCopyPrompt } from "@/lib/clipboard";
 
 interface CollaborativeEditorProps {
   sessionId?: string;
