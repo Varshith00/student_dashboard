@@ -49,6 +49,7 @@ import {
   updateCode,
   getSession,
   leaveSession,
+  sendMessage,
 } from "./routes/collaboration";
 
 export function createServer() {
