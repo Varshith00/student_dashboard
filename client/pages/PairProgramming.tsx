@@ -35,6 +35,8 @@ export default function PairProgramming() {
   const [joinSessionId, setJoinSessionId] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
+  const [isValidating, setIsValidating] = useState(false);
+  const [sessionValidation, setSessionValidation] = useState<{ valid: boolean; message: string } | null>(null);
 
   const createNewSession = async () => {
     setIsCreating(true);
