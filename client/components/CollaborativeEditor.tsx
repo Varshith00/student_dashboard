@@ -680,28 +680,37 @@ console.log(\`Result: \${result}\`);
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Session ID</label>
-              <Input
-                placeholder="Enter session ID (e.g., collab_123_abc)"
-                value={joinSessionId}
-                onChange={(e) => setJoinSessionId(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && handleJoinSession()}
-              />
-            </div>
-            <div className="flex gap-2">
-              <Button
-                onClick={handleJoinSession}
-                disabled={isJoining || !joinSessionId.trim()}
-                className="flex-1"
-              >
-                {isJoining ? "Joining..." : "Join Session"}
-              </Button>
-              <Button variant="outline" onClick={handleBack}>
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back
-              </Button>
-            </div>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleJoinSession();
+              }}
+              className="space-y-4"
+            >
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Session ID</label>
+                <Input
+                  placeholder="Enter session ID (e.g., collab_123_abc)"
+                  value={joinSessionId}
+                  onChange={(e) => setJoinSessionId(e.target.value)}
+                  disabled={isJoining}
+                  autoComplete="off"
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  type="submit"
+                  disabled={isJoining || !joinSessionId.trim()}
+                  className="flex-1"
+                >
+                  {isJoining ? "Joining..." : "Join Session"}
+                </Button>
+                <Button type="button" variant="outline" onClick={handleBack}>
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back
+                </Button>
+              </div>
+            </form>
             <div className="text-center">
               <p className="text-sm text-muted-foreground mb-2">Or</p>
               <Button
