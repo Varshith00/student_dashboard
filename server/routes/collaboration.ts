@@ -141,6 +141,7 @@ export const joinSession: RequestHandler = (req, res) => {
   try {
     const user = (req as any).user;
     if (!user) {
+      console.log("Join session - No user in request");
       return res.status(401).json({
         success: false,
         message: "Authentication required",
@@ -148,12 +149,24 @@ export const joinSession: RequestHandler = (req, res) => {
     }
 
     const { sessionId }: JoinSessionRequest = req.body;
-    const session = activeSessions.get(sessionId);
+    console.log(`Join session attempt - User: ${user.name}, Session ID: ${sessionId}`);
+    console.log(`Active sessions: ${Array.from(activeSessions.keys()).join(', ')}`);
+
+    if (!sessionId || typeof sessionId !== 'string' || !sessionId.trim()) {
+      console.log("Join session - Invalid session ID:", sessionId);
+      return res.status(400).json({
+        success: false,
+        message: "Invalid session ID provided",
+      });
+    }
+
+    const session = activeSessions.get(sessionId.trim());
 
     if (!session) {
+      console.log(`Join session - Session not found: ${sessionId}`);
       return res.status(404).json({
         success: false,
-        message: "Session not found",
+        message: "Session not found or has expired",
       });
     }
 
