@@ -34,6 +34,7 @@ export interface Participant {
   isActive: boolean;
   permission: "read" | "write";
   cursor?: { line: number; column: number };
+  voiceState?: VoiceState;
   joinedAt: string;
 }
 
