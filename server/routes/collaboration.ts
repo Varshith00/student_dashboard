@@ -528,5 +528,40 @@ export const sendMessage: RequestHandler = (req, res) => {
   }
 };
 
+export const validateSession: RequestHandler = (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    console.log(`Validating session: ${sessionId}`);
+    console.log(`Active sessions: ${Array.from(activeSessions.keys()).join(', ')}`);
+
+    const session = activeSessions.get(sessionId);
+
+    if (!session) {
+      return res.status(404).json({
+        success: false,
+        message: "Session not found or has expired",
+        sessionId,
+        activeSessions: Array.from(activeSessions.keys()),
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Session exists",
+      sessionId,
+      participantCount: session.participants.length,
+      activeParticipants: session.participants.filter(p => p.isActive).length,
+      language: session.language,
+      createdAt: session.createdAt,
+    });
+  } catch (error) {
+    console.error("Error validating session:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
 // Run cleanup every hour
 setInterval(cleanupSessions, 60 * 60 * 1000);
