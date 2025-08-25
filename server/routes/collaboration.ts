@@ -8,6 +8,8 @@ import {
   JoinSessionResponse,
   UpdateCodeRequest,
   SessionEvent,
+  ChatMessage,
+  SendMessageRequest,
 } from "@shared/api";
 
 // In-memory storage for demo (in production, use a proper database)
