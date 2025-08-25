@@ -38,7 +38,10 @@ export default function PairProgramming() {
   const [isCreating, setIsCreating] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
-  const [sessionValidation, setSessionValidation] = useState<{ valid: boolean; message: string } | null>(null);
+  const [sessionValidation, setSessionValidation] = useState<{
+    valid: boolean;
+    message: string;
+  } | null>(null);
 
   const createNewSession = async () => {
     setIsCreating(true);
@@ -75,19 +78,21 @@ export default function PairProgramming() {
     setSessionValidation(null);
 
     try {
-      const response = await fetch(`/api/collaboration/validate/${joinSessionId.trim()}`);
+      const response = await fetch(
+        `/api/collaboration/validate/${joinSessionId.trim()}`,
+      );
       const data = await response.json();
 
       if (data.success) {
         setSessionValidation({
           valid: true,
-          message: `Session found! ${data.activeParticipants} active participants in ${data.language} session.`
+          message: `Session found! ${data.activeParticipants} active participants in ${data.language} session.`,
         });
         toast.success("Session is valid and active!");
       } else {
         setSessionValidation({
           valid: false,
-          message: data.message || "Session not found"
+          message: data.message || "Session not found",
         });
         toast.error(data.message || "Session not found");
       }
@@ -95,7 +100,7 @@ export default function PairProgramming() {
       console.error("Error validating session:", error);
       setSessionValidation({
         valid: false,
-        message: "Failed to validate session - network error"
+        message: "Failed to validate session - network error",
       });
       toast.error("Failed to validate session");
     } finally {
@@ -296,7 +301,10 @@ export default function PairProgramming() {
                 className="space-y-6"
               >
                 <div className="space-y-3">
-                  <Label htmlFor="session-id" className="text-base font-semibold">
+                  <Label
+                    htmlFor="session-id"
+                    className="text-base font-semibold"
+                  >
                     Session ID
                   </Label>
                   <div className="flex gap-2">
@@ -324,11 +332,13 @@ export default function PairProgramming() {
                   </div>
 
                   {sessionValidation && (
-                    <div className={`p-3 rounded-lg border ${
-                      sessionValidation.valid
-                        ? "bg-success/10 border-success text-success-foreground"
-                        : "bg-destructive/10 border-destructive text-destructive-foreground"
-                    }`}>
+                    <div
+                      className={`p-3 rounded-lg border ${
+                        sessionValidation.valid
+                          ? "bg-success/10 border-success text-success-foreground"
+                          : "bg-destructive/10 border-destructive text-destructive-foreground"
+                      }`}
+                    >
                       <div className="flex items-center gap-2">
                         {sessionValidation.valid ? (
                           <CheckCircle className="w-4 h-4" />
@@ -336,10 +346,14 @@ export default function PairProgramming() {
                           <XCircle className="w-4 h-4" />
                         )}
                         <p className="text-sm font-medium">
-                          {sessionValidation.valid ? "Session Valid" : "Session Invalid"}
+                          {sessionValidation.valid
+                            ? "Session Valid"
+                            : "Session Invalid"}
                         </p>
                       </div>
-                      <p className="text-sm mt-1">{sessionValidation.message}</p>
+                      <p className="text-sm mt-1">
+                        {sessionValidation.message}
+                      </p>
                     </div>
                   )}
 
@@ -348,33 +362,37 @@ export default function PairProgramming() {
                   </p>
                 </div>
 
-              <div className="space-y-3">
-                <Label className="text-base font-semibold">
-                  What You Can Do
-                </Label>
-                <div className="space-y-2 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-2">
-                    <Copy className="w-4 h-4 text-accent" />
-                    <span>View and edit code together</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4 text-accent" />
-                    <span>See real-time cursors and changes</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Brain className="w-4 h-4 text-accent" />
-                    <span>Get AI assistance and suggestions</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Laptop className="w-4 h-4 text-accent" />
-                    <span>Run code and see output together</span>
+                <div className="space-y-3">
+                  <Label className="text-base font-semibold">
+                    What You Can Do
+                  </Label>
+                  <div className="space-y-2 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                      <Copy className="w-4 h-4 text-accent" />
+                      <span>View and edit code together</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Users className="w-4 h-4 text-accent" />
+                      <span>See real-time cursors and changes</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Brain className="w-4 h-4 text-accent" />
+                      <span>Get AI assistance and suggestions</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Laptop className="w-4 h-4 text-accent" />
+                      <span>Run code and see output together</span>
+                    </div>
                   </div>
                 </div>
-              </div>
 
                 <Button
                   type="submit"
-                  disabled={isJoining || !joinSessionId.trim() || !sessionValidation?.valid}
+                  disabled={
+                    isJoining ||
+                    !joinSessionId.trim() ||
+                    !sessionValidation?.valid
+                  }
                   variant="outline"
                   className="w-full border-accent text-accent hover:bg-accent hover:text-accent-foreground"
                   size="lg"
@@ -387,7 +405,10 @@ export default function PairProgramming() {
                     </>
                   ) : (
                     <>
-                      {sessionValidation === null ? "Check Session First" : "Session Invalid"} <ArrowRight className="ml-2 w-5 h-5" />
+                      {sessionValidation === null
+                        ? "Check Session First"
+                        : "Session Invalid"}{" "}
+                      <ArrowRight className="ml-2 w-5 h-5" />
                     </>
                   )}
                 </Button>

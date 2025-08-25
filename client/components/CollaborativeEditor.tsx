@@ -39,7 +39,12 @@ import {
   MessageCircle,
   Phone,
 } from "lucide-react";
-import type { CollaborationSession, Participant, ChatMessage, TypingIndicator } from "@shared/api";
+import type {
+  CollaborationSession,
+  Participant,
+  ChatMessage,
+  TypingIndicator,
+} from "@shared/api";
 import ChatInterface from "@/components/ChatInterface";
 import VoiceChat from "@/components/VoiceChat";
 import { copyToClipboard, showCopyPrompt } from "@/lib/clipboard";
@@ -219,7 +224,9 @@ console.log(\`Result: \${result}\`);
       // Handle typing indicators
       socket.on("user-typing", (data: TypingIndicator) => {
         setTypingUsers((prev) => {
-          const filtered = prev.filter((user) => user.participantId !== data.participantId);
+          const filtered = prev.filter(
+            (user) => user.participantId !== data.participantId,
+          );
           if (data.isTyping) {
             return [...filtered, data];
           }
@@ -555,7 +562,9 @@ console.log(\`Result: \${result}\`);
   const handleSendMessage = (message: string) => {
     if (!socketRef.current || !session || !participantId) return;
 
-    const participant = session.participants.find((p) => p.id === participantId);
+    const participant = session.participants.find(
+      (p) => p.id === participantId,
+    );
     if (!participant) return;
 
     socketRef.current.emit("send-message", {
@@ -569,7 +578,9 @@ console.log(\`Result: \${result}\`);
   const handleTypingStart = () => {
     if (!socketRef.current || !session || !participantId) return;
 
-    const participant = session.participants.find((p) => p.id === participantId);
+    const participant = session.participants.find(
+      (p) => p.id === participantId,
+    );
     if (!participant) return;
 
     socketRef.current.emit("typing-start", {
@@ -582,7 +593,9 @@ console.log(\`Result: \${result}\`);
   const handleTypingStop = () => {
     if (!socketRef.current || !session || !participantId) return;
 
-    const participant = session.participants.find((p) => p.id === participantId);
+    const participant = session.participants.find(
+      (p) => p.id === participantId,
+    );
     if (!participant) return;
 
     socketRef.current.emit("typing-stop", {
@@ -1048,7 +1061,9 @@ console.log(\`Result: \${result}\`);
                 <ChatInterface
                   sessionId={session.id}
                   participantId={participantId}
-                  participant={session.participants.find((p) => p.id === participantId)!}
+                  participant={
+                    session.participants.find((p) => p.id === participantId)!
+                  }
                   messages={messages}
                   typingUsers={typingUsers}
                   onSendMessage={handleSendMessage}
@@ -1064,7 +1079,9 @@ console.log(\`Result: \${result}\`);
                 <VoiceChat
                   sessionId={session.id}
                   participantId={participantId}
-                  participant={session.participants.find((p) => p.id === participantId)!}
+                  participant={
+                    session.participants.find((p) => p.id === participantId)!
+                  }
                   participants={session.participants}
                   socket={socketRef.current}
                   disabled={permission === "read"}

@@ -196,9 +196,7 @@ export default function ChatInterface({
                   >
                     <div
                       className={`max-w-[80%] ${
-                        isMe
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted"
+                        isMe ? "bg-primary text-primary-foreground" : "bg-muted"
                       } rounded-lg px-3 py-2`}
                     >
                       {showName && !isMe && (
@@ -237,9 +235,7 @@ export default function ChatInterface({
               onChange={handleInputChange}
               onKeyPress={handleKeyPress}
               placeholder={
-                disabled
-                  ? "You can only view messages"
-                  : "Type a message..."
+                disabled ? "You can only view messages" : "Type a message..."
               }
               disabled={disabled || isSending}
               className="flex-1"
@@ -257,7 +253,7 @@ export default function ChatInterface({
               )}
             </Button>
           </div>
-          
+
           {disabled && (
             <p className="text-xs text-muted-foreground mt-2 text-center">
               You have read-only access to this session

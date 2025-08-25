@@ -124,7 +124,13 @@ export interface VoiceSignalData {
 
 export interface VoiceStateChange {
   participantId: string;
-  state: 'connected' | 'disconnected' | 'muted' | 'unmuted' | 'deafened' | 'undeafened';
+  state:
+    | "connected"
+    | "disconnected"
+    | "muted"
+    | "unmuted"
+    | "deafened"
+    | "undeafened";
 }
 
 /**

@@ -152,10 +152,14 @@ export const joinSession: RequestHandler = (req, res) => {
     }
 
     const { sessionId }: JoinSessionRequest = req.body;
-    console.log(`Join session attempt - User: ${user.name}, Session ID: ${sessionId}`);
-    console.log(`Active sessions: ${Array.from(activeSessions.keys()).join(', ')}`);
+    console.log(
+      `Join session attempt - User: ${user.name}, Session ID: ${sessionId}`,
+    );
+    console.log(
+      `Active sessions: ${Array.from(activeSessions.keys()).join(", ")}`,
+    );
 
-    if (!sessionId || typeof sessionId !== 'string' || !sessionId.trim()) {
+    if (!sessionId || typeof sessionId !== "string" || !sessionId.trim()) {
       console.log("Join session - Invalid session ID:", sessionId);
       return res.status(400).json({
         success: false,
@@ -532,7 +536,9 @@ export const validateSession: RequestHandler = (req, res) => {
   try {
     const { sessionId } = req.params;
     console.log(`Validating session: ${sessionId}`);
-    console.log(`Active sessions: ${Array.from(activeSessions.keys()).join(', ')}`);
+    console.log(
+      `Active sessions: ${Array.from(activeSessions.keys()).join(", ")}`,
+    );
 
     const session = activeSessions.get(sessionId);
 
@@ -550,7 +556,7 @@ export const validateSession: RequestHandler = (req, res) => {
       message: "Session exists",
       sessionId,
       participantCount: session.participants.length,
-      activeParticipants: session.participants.filter(p => p.isActive).length,
+      activeParticipants: session.participants.filter((p) => p.isActive).length,
       language: session.language,
       createdAt: session.createdAt,
     });

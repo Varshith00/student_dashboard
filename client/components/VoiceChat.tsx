@@ -50,7 +50,9 @@ export default function VoiceChat({
   const [isConnecting, setIsConnecting] = useState(false);
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [connectionQuality, setConnectionQuality] = useState<"good" | "poor" | "disconnected">("disconnected");
+  const [connectionQuality, setConnectionQuality] = useState<
+    "good" | "poor" | "disconnected"
+  >("disconnected");
 
   const localStreamRef = useRef<MediaStream | null>(null);
   const peerConnectionsRef = useRef<Map<string, PeerConnection>>(new Map());
@@ -75,90 +77,106 @@ export default function VoiceChat({
         },
         video: false,
       });
-      
+
       setHasPermission(true);
       setError(null);
       return stream;
     } catch (err: any) {
       console.error("Error getting user media:", err);
       setHasPermission(false);
-      
+
       if (err.name === "NotAllowedError") {
-        setError("Microphone permission denied. Please allow microphone access and try again.");
+        setError(
+          "Microphone permission denied. Please allow microphone access and try again.",
+        );
       } else if (err.name === "NotFoundError") {
-        setError("No microphone found. Please connect a microphone and try again.");
+        setError(
+          "No microphone found. Please connect a microphone and try again.",
+        );
       } else {
         setError(`Microphone error: ${err.message}`);
       }
-      
+
       return null;
     }
   }, []);
 
   // Create peer connection for a participant
-  const createPeerConnection = useCallback((targetParticipantId: string, targetParticipantName: string): RTCPeerConnection => {
-    const pc = new RTCPeerConnection(rtcConfig);
-    
-    // Add local stream tracks
-    if (localStreamRef.current) {
-      localStreamRef.current.getTracks().forEach((track) => {
-        pc.addTrack(track, localStreamRef.current!);
-      });
-    }
+  const createPeerConnection = useCallback(
+    (
+      targetParticipantId: string,
+      targetParticipantName: string,
+    ): RTCPeerConnection => {
+      const pc = new RTCPeerConnection(rtcConfig);
 
-    // Handle incoming remote stream
-    pc.ontrack = (event) => {
-      console.log(`Received remote track from ${targetParticipantName}`);
-      const [remoteStream] = event.streams;
-      
-      // Create audio element for remote stream
-      const audioElement = document.createElement("audio");
-      audioElement.srcObject = remoteStream;
-      audioElement.autoplay = true;
-      audioElement.muted = isDeafened;
-      audioElement.volume = isDeafened ? 0 : 1;
-      
-      // Add to container
-      if (audioContainerRef.current) {
-        audioContainerRef.current.appendChild(audioElement);
-      }
-      
-      // Update peer connection reference
-      const peerConn = peerConnectionsRef.current.get(targetParticipantId);
-      if (peerConn) {
-        peerConn.audioElement = audioElement;
-        peerConnectionsRef.current.set(targetParticipantId, peerConn);
-      }
-    };
-
-    // Handle ICE candidates
-    pc.onicecandidate = (event) => {
-      if (event.candidate && socket) {
-        socket.emit("voice-ice-candidate", {
-          sessionId,
-          participantId: targetParticipantId,
-          candidate: {
-            candidate: event.candidate.candidate,
-            sdpMLineIndex: event.candidate.sdpMLineIndex,
-            sdpMid: event.candidate.sdpMid,
-          },
+      // Add local stream tracks
+      if (localStreamRef.current) {
+        localStreamRef.current.getTracks().forEach((track) => {
+          pc.addTrack(track, localStreamRef.current!);
         });
       }
-    };
 
-    // Handle connection state changes
-    pc.onconnectionstatechange = () => {
-      console.log(`Connection state with ${targetParticipantName}:`, pc.connectionState);
-      
-      if (pc.connectionState === "connected") {
-        setConnectionQuality("good");
-      } else if (pc.connectionState === "disconnected" || pc.connectionState === "failed") {
-        setConnectionQuality("poor");
-      }
-    };
+      // Handle incoming remote stream
+      pc.ontrack = (event) => {
+        console.log(`Received remote track from ${targetParticipantName}`);
+        const [remoteStream] = event.streams;
 
-    return pc;
-  }, [sessionId, socket, isDeafened]);
+        // Create audio element for remote stream
+        const audioElement = document.createElement("audio");
+        audioElement.srcObject = remoteStream;
+        audioElement.autoplay = true;
+        audioElement.muted = isDeafened;
+        audioElement.volume = isDeafened ? 0 : 1;
+
+        // Add to container
+        if (audioContainerRef.current) {
+          audioContainerRef.current.appendChild(audioElement);
+        }
+
+        // Update peer connection reference
+        const peerConn = peerConnectionsRef.current.get(targetParticipantId);
+        if (peerConn) {
+          peerConn.audioElement = audioElement;
+          peerConnectionsRef.current.set(targetParticipantId, peerConn);
+        }
+      };
+
+      // Handle ICE candidates
+      pc.onicecandidate = (event) => {
+        if (event.candidate && socket) {
+          socket.emit("voice-ice-candidate", {
+            sessionId,
+            participantId: targetParticipantId,
+            candidate: {
+              candidate: event.candidate.candidate,
+              sdpMLineIndex: event.candidate.sdpMLineIndex,
+              sdpMid: event.candidate.sdpMid,
+            },
+          });
+        }
+      };
+
+      // Handle connection state changes
+      pc.onconnectionstatechange = () => {
+        console.log(
+          `Connection state with ${targetParticipantName}:`,
+          pc.connectionState,
+        );
+
+        if (pc.connectionState === "connected") {
+          setConnectionQuality("good");
+        } else if (
+          pc.connectionState === "disconnected" ||
+          pc.connectionState === "failed"
+        ) {
+          setConnectionQuality("poor");
+        }
+      };
+
+      return pc;
+    },
+    [sessionId, socket, isDeafened],
+  );
 
   // Start voice call
   const startVoiceCall = useCallback(async () => {
@@ -179,12 +197,15 @@ export default function VoiceChat({
 
       // Create peer connections for each active participant (except self)
       const activeParticipants = participants.filter(
-        (p) => p.isActive && p.id !== participantId
+        (p) => p.isActive && p.id !== participantId,
       );
 
       for (const targetParticipant of activeParticipants) {
-        const pc = createPeerConnection(targetParticipant.id, targetParticipant.name);
-        
+        const pc = createPeerConnection(
+          targetParticipant.id,
+          targetParticipant.name,
+        );
+
         peerConnectionsRef.current.set(targetParticipant.id, {
           participantId: targetParticipant.id,
           participantName: targetParticipant.name,
@@ -207,7 +228,7 @@ export default function VoiceChat({
 
       setIsConnected(true);
       setConnectionQuality("good");
-      
+
       // Emit voice state change
       socket.emit("voice-state-change", {
         sessionId,
@@ -223,7 +244,16 @@ export default function VoiceChat({
     } finally {
       setIsConnecting(false);
     }
-  }, [socket, isConnecting, isConnected, getLocalStream, participants, participantId, sessionId, createPeerConnection]);
+  }, [
+    socket,
+    isConnecting,
+    isConnected,
+    getLocalStream,
+    participants,
+    participantId,
+    sessionId,
+    createPeerConnection,
+  ]);
 
   // Stop voice call
   const stopVoiceCall = useCallback(() => {
@@ -307,16 +337,21 @@ export default function VoiceChat({
 
     const handleVoiceOffer = async (data: any) => {
       const { offer, participantId: offerParticipantId } = data;
-      
+
       // Find participant
-      const targetParticipant = participants.find((p) => p.id === offerParticipantId);
+      const targetParticipant = participants.find(
+        (p) => p.id === offerParticipantId,
+      );
       if (!targetParticipant) return;
 
       try {
         // Create peer connection if not exists
         let peerConn = peerConnectionsRef.current.get(offerParticipantId);
         if (!peerConn) {
-          const pc = createPeerConnection(offerParticipantId, targetParticipant.name);
+          const pc = createPeerConnection(
+            offerParticipantId,
+            targetParticipant.name,
+          );
           peerConn = {
             participantId: offerParticipantId,
             participantName: targetParticipant.name,
@@ -326,7 +361,9 @@ export default function VoiceChat({
         }
 
         // Set remote description
-        await peerConn.connection.setRemoteDescription(new RTCSessionDescription(offer));
+        await peerConn.connection.setRemoteDescription(
+          new RTCSessionDescription(offer),
+        );
 
         // Create and send answer
         const answer = await peerConn.connection.createAnswer();
@@ -347,12 +384,14 @@ export default function VoiceChat({
 
     const handleVoiceAnswer = async (data: any) => {
       const { answer, participantId: answerParticipantId } = data;
-      
+
       const peerConn = peerConnectionsRef.current.get(answerParticipantId);
       if (!peerConn) return;
 
       try {
-        await peerConn.connection.setRemoteDescription(new RTCSessionDescription(answer));
+        await peerConn.connection.setRemoteDescription(
+          new RTCSessionDescription(answer),
+        );
       } catch (err) {
         console.error("Error handling voice answer:", err);
       }
@@ -360,12 +399,14 @@ export default function VoiceChat({
 
     const handleVoiceIceCandidate = async (data: any) => {
       const { candidate, participantId: candidateParticipantId } = data;
-      
+
       const peerConn = peerConnectionsRef.current.get(candidateParticipantId);
       if (!peerConn) return;
 
       try {
-        await peerConn.connection.addIceCandidate(new RTCIceCandidate(candidate));
+        await peerConn.connection.addIceCandidate(
+          new RTCIceCandidate(candidate),
+        );
       } catch (err) {
         console.error("Error handling ICE candidate:", err);
       }
@@ -403,7 +444,9 @@ export default function VoiceChat({
       try {
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
           // Check if already have permission
-          const permissions = await navigator.permissions.query({ name: "microphone" as PermissionName });
+          const permissions = await navigator.permissions.query({
+            name: "microphone" as PermissionName,
+          });
           setHasPermission(permissions.state === "granted");
         } else {
           setHasPermission(false);
@@ -420,9 +463,12 @@ export default function VoiceChat({
 
   const getConnectionIcon = () => {
     switch (connectionQuality) {
-      case "good": return <Wifi className="w-4 h-4 text-success" />;
-      case "poor": return <WifiOff className="w-4 h-4 text-warning" />;
-      default: return <WifiOff className="w-4 h-4 text-muted-foreground" />;
+      case "good":
+        return <Wifi className="w-4 h-4 text-success" />;
+      case "poor":
+        return <WifiOff className="w-4 h-4 text-warning" />;
+      default:
+        return <WifiOff className="w-4 h-4 text-muted-foreground" />;
     }
   };
 
@@ -433,7 +479,7 @@ export default function VoiceChat({
   };
 
   const activeVoiceParticipants = participants.filter(
-    (p) => p.isActive && p.id !== participantId && p.voiceState?.isConnected
+    (p) => p.isActive && p.id !== participantId && p.voiceState?.isConnected,
   );
 
   if (disabled) {
@@ -443,7 +489,9 @@ export default function VoiceChat({
           <CardTitle className="flex items-center gap-2 text-lg">
             <Phone className="w-5 h-5" />
             Voice Chat
-            <Badge variant="secondary" className="ml-auto">Disabled</Badge>
+            <Badge variant="secondary" className="ml-auto">
+              Disabled
+            </Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -483,7 +531,8 @@ export default function VoiceChat({
           <Alert>
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
-              Microphone permission is required for voice chat. Please enable microphone access in your browser settings.
+              Microphone permission is required for voice chat. Please enable
+              microphone access in your browser settings.
             </AlertDescription>
           </Alert>
         )}
@@ -521,7 +570,11 @@ export default function VoiceChat({
                 size="sm"
                 className="flex-1"
               >
-                {isMuted ? <MicOff className="w-4 h-4 mr-2" /> : <Mic className="w-4 h-4 mr-2" />}
+                {isMuted ? (
+                  <MicOff className="w-4 h-4 mr-2" />
+                ) : (
+                  <Mic className="w-4 h-4 mr-2" />
+                )}
                 {isMuted ? "Unmute" : "Mute"}
               </Button>
               <Button
@@ -530,7 +583,11 @@ export default function VoiceChat({
                 size="sm"
                 className="flex-1"
               >
-                {isDeafened ? <VolumeX className="w-4 h-4 mr-2" /> : <Volume2 className="w-4 h-4 mr-2" />}
+                {isDeafened ? (
+                  <VolumeX className="w-4 h-4 mr-2" />
+                ) : (
+                  <Volume2 className="w-4 h-4 mr-2" />
+                )}
                 {isDeafened ? "Undeafen" : "Deafen"}
               </Button>
             </div>
@@ -543,9 +600,10 @@ export default function VoiceChat({
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-sm font-semibold">
             <Users className="w-4 h-4" />
-            Voice Participants ({activeVoiceParticipants.length + (isConnected ? 1 : 0)})
+            Voice Participants (
+            {activeVoiceParticipants.length + (isConnected ? 1 : 0)})
           </div>
-          
+
           <div className="space-y-2">
             {/* Current user */}
             {isConnected && (
@@ -558,15 +616,24 @@ export default function VoiceChat({
                 </div>
                 <span className="text-sm flex-1">{participant.name} (You)</span>
                 <div className="flex items-center gap-1">
-                  {isMuted ? <MicOff className="w-3 h-3 text-destructive" /> : <Mic className="w-3 h-3 text-success" />}
-                  {isDeafened && <VolumeX className="w-3 h-3 text-destructive" />}
+                  {isMuted ? (
+                    <MicOff className="w-3 h-3 text-destructive" />
+                  ) : (
+                    <Mic className="w-3 h-3 text-success" />
+                  )}
+                  {isDeafened && (
+                    <VolumeX className="w-3 h-3 text-destructive" />
+                  )}
                 </div>
               </div>
             )}
 
             {/* Other participants */}
             {activeVoiceParticipants.map((p) => (
-              <div key={p.id} className="flex items-center gap-2 p-2 rounded-lg bg-muted/30">
+              <div
+                key={p.id}
+                className="flex items-center gap-2 p-2 rounded-lg bg-muted/30"
+              >
                 <div
                   className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold text-white"
                   style={{ backgroundColor: p.color }}

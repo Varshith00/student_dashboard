@@ -9,7 +9,7 @@ export async function copyToClipboard(text: string): Promise<boolean> {
       await navigator.clipboard.writeText(text);
       return true;
     }
-    
+
     // Fallback for older browsers or non-secure contexts
     return fallbackCopyToClipboard(text);
   } catch (error) {
@@ -23,7 +23,7 @@ function fallbackCopyToClipboard(text: string): boolean {
     // Create a temporary textarea element
     const textArea = document.createElement("textarea");
     textArea.value = text;
-    
+
     // Make it invisible but functional
     textArea.style.position = "fixed";
     textArea.style.left = "-999999px";
@@ -31,18 +31,18 @@ function fallbackCopyToClipboard(text: string): boolean {
     textArea.style.opacity = "0";
     textArea.style.pointerEvents = "none";
     textArea.style.zIndex = "-1";
-    
+
     // Add to DOM, select, and copy
     document.body.appendChild(textArea);
     textArea.focus();
     textArea.select();
     textArea.setSelectionRange(0, text.length);
-    
-    const success = document.execCommand('copy');
-    
+
+    const success = document.execCommand("copy");
+
     // Clean up
     document.body.removeChild(textArea);
-    
+
     return success;
   } catch (error) {
     console.error("Fallback copy failed:", error);
@@ -50,7 +50,10 @@ function fallbackCopyToClipboard(text: string): boolean {
   }
 }
 
-export function showCopyPrompt(text: string, description: string = "Copy this text"): void {
+export function showCopyPrompt(
+  text: string,
+  description: string = "Copy this text",
+): void {
   // As a last resort, show a prompt dialog
   prompt(`${description}:`, text);
 }
