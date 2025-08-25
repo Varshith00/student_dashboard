@@ -69,11 +69,59 @@ export interface SessionEvent {
     | "code_update"
     | "participant_join"
     | "participant_leave"
-    | "cursor_update";
+    | "cursor_update"
+    | "chat_message"
+    | "voice_state_change";
   sessionId: string;
   participantId: string;
   data: any;
   timestamp: string;
+}
+
+/**
+ * Chat types
+ */
+export interface ChatMessage {
+  id: string;
+  content: string;
+  participantId: string;
+  participantName: string;
+  timestamp: string;
+}
+
+export interface SendMessageRequest {
+  sessionId: string;
+  participantId: string;
+  message: string;
+}
+
+export interface TypingIndicator {
+  participantId: string;
+  participantName: string;
+  isTyping: boolean;
+}
+
+/**
+ * Voice chat types
+ */
+export interface VoiceState {
+  participantId: string;
+  isConnected: boolean;
+  isMuted: boolean;
+  isDeafened?: boolean;
+}
+
+export interface VoiceSignalData {
+  sessionId: string;
+  participantId: string;
+  offer?: RTCSessionDescriptionInit;
+  answer?: RTCSessionDescriptionInit;
+  candidate?: RTCIceCandidateInit;
+}
+
+export interface VoiceStateChange {
+  participantId: string;
+  state: 'connected' | 'disconnected' | 'muted' | 'unmuted' | 'deafened' | 'undeafened';
 }
 
 /**
