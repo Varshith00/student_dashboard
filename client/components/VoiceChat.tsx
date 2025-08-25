@@ -137,7 +137,11 @@ export default function VoiceChat({
         socket.emit("voice-ice-candidate", {
           sessionId,
           participantId: targetParticipantId,
-          candidate: event.candidate.toJSON(),
+          candidate: {
+            candidate: event.candidate.candidate,
+            sdpMLineIndex: event.candidate.sdpMLineIndex,
+            sdpMid: event.candidate.sdpMid,
+          },
         });
       }
     };
