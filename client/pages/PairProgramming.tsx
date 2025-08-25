@@ -68,22 +68,40 @@ export default function PairProgramming() {
     }
 
     setIsJoining(true);
+    console.log("Attempting to join session:", joinSessionId);
+
     try {
       const response = await authFetch("/api/collaboration/join", {
         method: "POST",
-        body: JSON.stringify({ sessionId: joinSessionId }),
+        body: JSON.stringify({ sessionId: joinSessionId.trim() }),
       });
 
+      console.log("Join session response status:", response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Join session HTTP error:", response.status, errorText);
+        toast.error(`Server error: ${response.status} - ${errorText}`);
+        return;
+      }
+
       const data = await response.json();
+      console.log("Join session response data:", data);
+
       if (data.success) {
         toast.success("Successfully joined session!");
-        navigate(`/student/collaboration/${joinSessionId}`);
+        navigate(`/student/collaboration/${joinSessionId.trim()}`);
       } else {
+        console.error("Join session failed:", data);
         toast.error(data.message || "Failed to join session");
       }
     } catch (error) {
-      toast.error("Failed to join session");
       console.error("Error joining session:", error);
+      if (error instanceof Error) {
+        toast.error(`Failed to join session: ${error.message}`);
+      } else {
+        toast.error("Failed to join session - network error");
+      }
     } finally {
       setIsJoining(false);
     }
