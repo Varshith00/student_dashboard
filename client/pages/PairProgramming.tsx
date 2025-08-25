@@ -63,6 +63,44 @@ export default function PairProgramming() {
     }
   };
 
+  const validateSession = async () => {
+    if (!joinSessionId.trim()) {
+      toast.error("Please enter a session ID");
+      return;
+    }
+
+    setIsValidating(true);
+    setSessionValidation(null);
+
+    try {
+      const response = await fetch(`/api/collaboration/validate/${joinSessionId.trim()}`);
+      const data = await response.json();
+
+      if (data.success) {
+        setSessionValidation({
+          valid: true,
+          message: `Session found! ${data.activeParticipants} active participants in ${data.language} session.`
+        });
+        toast.success("Session is valid and active!");
+      } else {
+        setSessionValidation({
+          valid: false,
+          message: data.message || "Session not found"
+        });
+        toast.error(data.message || "Session not found");
+      }
+    } catch (error) {
+      console.error("Error validating session:", error);
+      setSessionValidation({
+        valid: false,
+        message: "Failed to validate session - network error"
+      });
+      toast.error("Failed to validate session");
+    } finally {
+      setIsValidating(false);
+    }
+  };
+
   const joinExistingSession = async () => {
     if (!joinSessionId.trim()) {
       toast.error("Please enter a session ID");
