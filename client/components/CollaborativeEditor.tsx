@@ -77,6 +77,10 @@ export default function CollaborativeEditor({
   const [aiSuggestion, setAiSuggestion] = useState<string>("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
+  // Chat state
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [typingUsers, setTypingUsers] = useState<TypingIndicator[]>([]);
+
   // Socket connection
   const socketRef = useRef<Socket | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<
