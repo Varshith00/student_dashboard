@@ -103,5 +103,23 @@
     "role": "student",
     "professorId": "prof1@gmail.com",
     "createdAt": "2025-08-23T16:51:13.273Z"
+  },
+  {
+    "id": "1756131306447l6q7d2biz",
+    "email": "abhi@456",
+    "password": "$2b$10$SdwQSYWndfnxwq21KvIvCu8woP.ao81587av8w3QYOh3o8DCj7XFm",
+    "name": "vishnu",
+    "role": "student",
+    "professorId": "prof1@gmail.com",
+    "createdAt": "2025-08-25T14:15:06.447Z"
+  },
+  {
+    "id": "1756131339830xsxa4ecym",
+    "email": "abhi@000",
+    "password": "$2b$10$aLdS6UMePawLh8BUJOzyW./F8aEFLaJBMRdYxh2IT9fcyE.R5ldLu",
+    "name": "vishnu",
+    "role": "student",
+    "professorId": "prof1@gmail.com",
+    "createdAt": "2025-08-25T14:15:39.830Z"
   }
 ]
