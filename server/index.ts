@@ -125,6 +125,8 @@ export function createServer() {
       // Handle chat messages
       socket.on("send-message", (data) => {
         const { sessionId, message, participantId, participantName } = data;
+        console.log(`🔥 Received message from ${participantName} in session ${sessionId}: ${message}`);
+
         const messageData = {
           id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
           content: message,
@@ -134,8 +136,9 @@ export function createServer() {
         };
 
         // Broadcast to all participants in the session including sender
+        console.log(`🔥 Broadcasting message to session room ${sessionId}`);
         io.to(sessionId).emit("new-message", messageData);
-        console.log(`Message sent in session ${sessionId}: ${message}`);
+        console.log(`🔥 Message broadcasted successfully`);
       });
 
       // Handle typing indicators
