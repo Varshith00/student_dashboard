@@ -837,7 +837,7 @@ export default function StudentDashboard() {
                           value={joinSessionId}
                           onChange={(e) => setJoinSessionId(e.target.value)}
                           onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
+                            if (e.key === "Enter") {
                               handleJoinSession();
                             }
                           }}

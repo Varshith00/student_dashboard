@@ -62,141 +62,143 @@ export function createServer() {
 
   // Enable Socket.io in both development and production
   io = new Server(httpServer, {
-      cors: {
-        origin: "*",
-        methods: ["GET", "POST"],
-      },
-    });
+    cors: {
+      origin: "*",
+      methods: ["GET", "POST"],
+    },
+  });
 
-    // Socket.io connection handling
-    io.on("connection", (socket) => {
-      console.log("User connected:", socket.id);
+  // Socket.io connection handling
+  io.on("connection", (socket) => {
+    console.log("User connected:", socket.id);
 
-      // Join collaboration session
-      socket.on("join-session", (sessionId) => {
-        socket.join(sessionId);
-        console.log(`🔥 Socket ${socket.id} joined session room ${sessionId}`);
+    // Join collaboration session
+    socket.on("join-session", (sessionId) => {
+      socket.join(sessionId);
+      console.log(`🔥 Socket ${socket.id} joined session room ${sessionId}`);
 
-        // Emit to the user that they've joined the room
-        socket.emit("room-joined", { sessionId });
+      // Emit to the user that they've joined the room
+      socket.emit("room-joined", { sessionId });
 
-        // Notify others in the room that someone joined the socket room
-        socket.to(sessionId).emit("socket-user-joined", {
-          socketId: socket.id,
-          sessionId
-        });
-      });
-
-      // Leave collaboration session
-      socket.on("leave-session", (sessionId) => {
-        socket.leave(sessionId);
-        console.log(`Socket ${socket.id} left session ${sessionId}`);
-      });
-
-      // Handle code changes
-      socket.on("code-change", (data) => {
-        const { sessionId, code, cursor, participantId } = data;
-        // Broadcast to all other participants in the session
-        socket.to(sessionId).emit("code-update", {
-          code,
-          cursor,
-          participantId,
-        });
-      });
-
-      // Handle cursor position updates
-      socket.on("cursor-update", (data) => {
-        const { sessionId, cursor, participantId } = data;
-        socket.to(sessionId).emit("cursor-update", {
-          cursor,
-          participantId,
-        });
-      });
-
-      // Handle participant status updates
-      socket.on("participant-update", (data) => {
-        const { sessionId, participantId, status } = data;
-        socket.to(sessionId).emit("participant-update", {
-          participantId,
-          status,
-        });
-      });
-
-      // Handle chat messages
-      socket.on("send-message", (data) => {
-        const { sessionId, message, participantId, participantName } = data;
-        console.log(`🔥 Received message from ${participantName} in session ${sessionId}: ${message}`);
-
-        const messageData = {
-          id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
-          content: message,
-          participantId,
-          participantName,
-          timestamp: new Date().toISOString(),
-        };
-
-        // Broadcast to all participants in the session including sender
-        console.log(`🔥 Broadcasting message to session room ${sessionId}`);
-        io.to(sessionId).emit("new-message", messageData);
-        console.log(`🔥 Message broadcasted successfully`);
-      });
-
-      // Handle typing indicators
-      socket.on("typing-start", (data) => {
-        const { sessionId, participantId, participantName } = data;
-        socket.to(sessionId).emit("user-typing", {
-          participantId,
-          participantName,
-          isTyping: true,
-        });
-      });
-
-      socket.on("typing-stop", (data) => {
-        const { sessionId, participantId, participantName } = data;
-        socket.to(sessionId).emit("user-typing", {
-          participantId,
-          participantName,
-          isTyping: false,
-        });
-      });
-
-      // Handle WebRTC voice signaling
-      socket.on("voice-offer", (data) => {
-        const { sessionId, offer, participantId } = data;
-        socket.to(sessionId).emit("voice-offer", {
-          offer,
-          participantId,
-        });
-      });
-
-      socket.on("voice-answer", (data) => {
-        const { sessionId, answer, participantId } = data;
-        socket.to(sessionId).emit("voice-answer", {
-          answer,
-          participantId,
-        });
-      });
-
-      socket.on("voice-ice-candidate", (data) => {
-        const { sessionId, candidate, participantId } = data;
-        socket.to(sessionId).emit("voice-ice-candidate", {
-          candidate,
-          participantId,
-        });
-      });
-
-      socket.on("voice-state-change", (data) => {
-        const { sessionId, participantId, state } = data;
-        socket.to(sessionId).emit("voice-state-change", {
-          participantId,
-          state, // 'connected', 'disconnected', 'muted', 'unmuted'
-        });
-      });
-
-      socket.on("disconnect", () => {
-        console.log("User disconnected:", socket.id);
+      // Notify others in the room that someone joined the socket room
+      socket.to(sessionId).emit("socket-user-joined", {
+        socketId: socket.id,
+        sessionId,
       });
     });
+
+    // Leave collaboration session
+    socket.on("leave-session", (sessionId) => {
+      socket.leave(sessionId);
+      console.log(`Socket ${socket.id} left session ${sessionId}`);
+    });
+
+    // Handle code changes
+    socket.on("code-change", (data) => {
+      const { sessionId, code, cursor, participantId } = data;
+      // Broadcast to all other participants in the session
+      socket.to(sessionId).emit("code-update", {
+        code,
+        cursor,
+        participantId,
+      });
+    });
+
+    // Handle cursor position updates
+    socket.on("cursor-update", (data) => {
+      const { sessionId, cursor, participantId } = data;
+      socket.to(sessionId).emit("cursor-update", {
+        cursor,
+        participantId,
+      });
+    });
+
+    // Handle participant status updates
+    socket.on("participant-update", (data) => {
+      const { sessionId, participantId, status } = data;
+      socket.to(sessionId).emit("participant-update", {
+        participantId,
+        status,
+      });
+    });
+
+    // Handle chat messages
+    socket.on("send-message", (data) => {
+      const { sessionId, message, participantId, participantName } = data;
+      console.log(
+        `🔥 Received message from ${participantName} in session ${sessionId}: ${message}`,
+      );
+
+      const messageData = {
+        id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+        content: message,
+        participantId,
+        participantName,
+        timestamp: new Date().toISOString(),
+      };
+
+      // Broadcast to all participants in the session including sender
+      console.log(`🔥 Broadcasting message to session room ${sessionId}`);
+      io.to(sessionId).emit("new-message", messageData);
+      console.log(`🔥 Message broadcasted successfully`);
+    });
+
+    // Handle typing indicators
+    socket.on("typing-start", (data) => {
+      const { sessionId, participantId, participantName } = data;
+      socket.to(sessionId).emit("user-typing", {
+        participantId,
+        participantName,
+        isTyping: true,
+      });
+    });
+
+    socket.on("typing-stop", (data) => {
+      const { sessionId, participantId, participantName } = data;
+      socket.to(sessionId).emit("user-typing", {
+        participantId,
+        participantName,
+        isTyping: false,
+      });
+    });
+
+    // Handle WebRTC voice signaling
+    socket.on("voice-offer", (data) => {
+      const { sessionId, offer, participantId } = data;
+      socket.to(sessionId).emit("voice-offer", {
+        offer,
+        participantId,
+      });
+    });
+
+    socket.on("voice-answer", (data) => {
+      const { sessionId, answer, participantId } = data;
+      socket.to(sessionId).emit("voice-answer", {
+        answer,
+        participantId,
+      });
+    });
+
+    socket.on("voice-ice-candidate", (data) => {
+      const { sessionId, candidate, participantId } = data;
+      socket.to(sessionId).emit("voice-ice-candidate", {
+        candidate,
+        participantId,
+      });
+    });
+
+    socket.on("voice-state-change", (data) => {
+      const { sessionId, participantId, state } = data;
+      socket.to(sessionId).emit("voice-state-change", {
+        participantId,
+        state, // 'connected', 'disconnected', 'muted', 'unmuted'
+      });
+    });
+
+    socket.on("disconnect", () => {
+      console.log("User disconnected:", socket.id);
+    });
+  });
   // Make io instance available to routes
   app.set("io", io);
 

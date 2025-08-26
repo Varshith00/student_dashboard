@@ -236,7 +236,10 @@ console.log(\`Result: \${result}\`);
 
       return () => {
         if (socket) {
-          console.log("🔥 Cleaning up socket connection for session:", session.id);
+          console.log(
+            "🔥 Cleaning up socket connection for session:",
+            session.id,
+          );
           socket.emit("leave-session", session.id);
           socket.off("room-joined");
           socket.off("participant-joined");
