@@ -159,6 +159,10 @@ console.log(\`Result: \${result}\`);
         socket.emit("join-session", session.id);
       });
 
+      socket.on("room-joined", (data) => {
+        console.log("🔥 Successfully joined socket room:", data);
+      });
+
       socket.on("disconnect", () => {
         console.log("Disconnected from socket server");
         setConnectionStatus("disconnected");
