@@ -70,6 +70,7 @@ export default function StudentDashboard() {
     { total: 0, pending: 0, inProgress: 0, completed: 0, overdue: 0 },
   );
   const [assignmentsLoading, setAssignmentsLoading] = useState(false);
+  const [joinSessionId, setJoinSessionId] = useState("");
 
   // Redirect if not logged in or not a student
   useEffect(() => {
