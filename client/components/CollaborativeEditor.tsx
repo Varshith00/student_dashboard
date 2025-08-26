@@ -139,19 +139,9 @@ console.log(\`Result: \${result}\`);
     }
   }
 
-  // Initialize socket connection (only in production)
+  // Initialize socket connection
   useEffect(() => {
     if (!session?.id) return;
-
-    // Check if we're in production environment
-    const isProduction = process.env.NODE_ENV === "production";
-
-    if (!isProduction) {
-      // In development, skip socket connection to avoid conflicts
-      setConnectionStatus("disconnected");
-      console.log("🔧 Development mode: Real-time collaboration disabled");
-      return;
-    }
 
     setConnectionStatus("connecting");
 
