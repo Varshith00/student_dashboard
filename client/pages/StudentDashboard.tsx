@@ -178,6 +178,15 @@ export default function StudentDashboard() {
     }
   };
 
+  const handleJoinSession = () => {
+    if (!joinSessionId.trim()) {
+      // Could use toast here if available
+      alert("Please enter a session ID");
+      return;
+    }
+    navigate(`/student/collaboration/${joinSessionId.trim()}`);
+  };
+
   const handleLogout = () => {
     logout();
     navigate("/");
