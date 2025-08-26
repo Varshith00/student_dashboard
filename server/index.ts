@@ -57,11 +57,10 @@ export function createServer() {
   const app = express();
   const httpServer = createHttpServer(app);
 
-  // Only create socket.io in production to avoid development conflicts
+  // Create socket.io for real-time collaboration
   let io = null;
-  const isProduction = process.env.NODE_ENV === "production";
 
-  if (isProduction) {
+  // Enable Socket.io in both development and production
     io = new Server(httpServer, {
       cors: {
         origin: "*",
@@ -186,11 +185,7 @@ export function createServer() {
         console.log("User disconnected:", socket.id);
       });
     });
-  } else {
-    console.log("🔧 Development mode: Socket.io disabled");
-  }
-
-  // Make io instance available to routes (will be null in development)
+  // Make io instance available to routes
   app.set("io", io);
 
   // Middleware
