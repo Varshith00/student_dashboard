@@ -833,6 +833,13 @@ export default function StudentDashboard() {
                           type="text"
                           placeholder="Enter session ID..."
                           className="w-full px-3 py-2 border rounded-md"
+                          value={joinSessionId}
+                          onChange={(e) => setJoinSessionId(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              handleJoinSession();
+                            }
+                          }}
                         />
                         <div className="text-sm text-muted-foreground">
                           <p>• Get the session ID from your collaborator</p>
@@ -843,6 +850,8 @@ export default function StudentDashboard() {
                       <Button
                         variant="outline"
                         className="w-full border-accent text-accent hover:bg-accent hover:text-accent-foreground"
+                        onClick={handleJoinSession}
+                        disabled={!joinSessionId.trim()}
                       >
                         <Play className="w-4 h-4 mr-2" />
                         Join Session
