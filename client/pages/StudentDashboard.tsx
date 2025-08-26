@@ -181,10 +181,10 @@ export default function StudentDashboard() {
 
   const handleJoinSession = () => {
     if (!joinSessionId.trim()) {
-      // Could use toast here if available
-      alert("Please enter a session ID");
+      toast.error("Please enter a session ID");
       return;
     }
+    toast.success("Joining session...");
     navigate(`/student/collaboration/${joinSessionId.trim()}`);
   };
 
