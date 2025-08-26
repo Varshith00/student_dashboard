@@ -61,7 +61,7 @@ export function createServer() {
   let io = null;
 
   // Enable Socket.io in both development and production
-    io = new Server(httpServer, {
+  io = new Server(httpServer, {
       cors: {
         origin: "*",
         methods: ["GET", "POST"],
