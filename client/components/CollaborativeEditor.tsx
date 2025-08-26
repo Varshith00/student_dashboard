@@ -212,6 +212,7 @@ console.log(\`Result: \${result}\`);
 
       // Handle chat messages
       socket.on("new-message", (messageData: ChatMessage) => {
+        console.log("🔥 New message received:", messageData);
         setMessages((prev) => [...prev, messageData]);
       });
 
