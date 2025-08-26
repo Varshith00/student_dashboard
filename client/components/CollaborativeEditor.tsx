@@ -153,8 +153,9 @@ console.log(\`Result: \${result}\`);
       const socket = socketRef.current;
 
       socket.on("connect", () => {
-        console.log("Connected to socket server");
+        console.log("🔥 Connected to socket server, socket ID:", socket.id);
         setConnectionStatus("connected");
+        console.log("🔥 Joining session room:", session.id);
         socket.emit("join-session", session.id);
       });
 
