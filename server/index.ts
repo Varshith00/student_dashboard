@@ -75,7 +75,16 @@ export function createServer() {
       // Join collaboration session
       socket.on("join-session", (sessionId) => {
         socket.join(sessionId);
-        console.log(`Socket ${socket.id} joined session ${sessionId}`);
+        console.log(`🔥 Socket ${socket.id} joined session room ${sessionId}`);
+
+        // Emit to the user that they've joined the room
+        socket.emit("room-joined", { sessionId });
+
+        // Notify others in the room that someone joined the socket room
+        socket.to(sessionId).emit("socket-user-joined", {
+          socketId: socket.id,
+          sessionId
+        });
       });
 
       // Leave collaboration session
