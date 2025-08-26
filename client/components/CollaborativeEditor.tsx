@@ -187,17 +187,21 @@ console.log(\`Result: \${result}\`);
 
       // Handle participant updates
       socket.on("participant-joined", (data) => {
+        console.log("🔥 Participant joined:", data);
         const { participant, session: updatedSession } = data;
         setSession(updatedSession);
+        toast.success(`${participant.name} joined the session`);
       });
 
       socket.on("participant-left", (data) => {
+        console.log("🔥 Participant left:", data);
         const {
           participantId: leftParticipantId,
           participantName,
           session: updatedSession,
         } = data;
         setSession(updatedSession);
+        toast.info(`${participantName} left the session`);
       });
 
       socket.on("cursor-update", (data) => {
