@@ -139,19 +139,9 @@ console.log(\`Result: \${result}\`);
     }
   }
 
-  // Initialize socket connection (only in production)
+  // Initialize socket connection
   useEffect(() => {
     if (!session?.id) return;
-
-    // Check if we're in production environment
-    const isProduction = process.env.NODE_ENV === "production";
-
-    if (!isProduction) {
-      // In development, skip socket connection to avoid conflicts
-      setConnectionStatus("disconnected");
-      console.log("🔧 Development mode: Real-time collaboration disabled");
-      return;
-    }
 
     setConnectionStatus("connecting");
 
@@ -163,9 +153,14 @@ console.log(\`Result: \${result}\`);
       const socket = socketRef.current;
 
       socket.on("connect", () => {
-        console.log("Connected to socket server");
+        console.log("🔥 Connected to socket server, socket ID:", socket.id);
         setConnectionStatus("connected");
+        console.log("🔥 Joining session room:", session.id);
         socket.emit("join-session", session.id);
+      });
+
+      socket.on("room-joined", (data) => {
+        console.log("🔥 Successfully joined socket room:", data);
       });
 
       socket.on("disconnect", () => {
@@ -197,17 +192,21 @@ console.log(\`Result: \${result}\`);
 
       // Handle participant updates
       socket.on("participant-joined", (data) => {
+        console.log("🔥 Participant joined:", data);
         const { participant, session: updatedSession } = data;
         setSession(updatedSession);
+        toast.success(`${participant.name} joined the session`);
       });
 
       socket.on("participant-left", (data) => {
+        console.log("🔥 Participant left:", data);
         const {
           participantId: leftParticipantId,
           participantName,
           session: updatedSession,
         } = data;
         setSession(updatedSession);
+        toast.info(`${participantName} left the session`);
       });
 
       socket.on("cursor-update", (data) => {
@@ -218,6 +217,7 @@ console.log(\`Result: \${result}\`);
 
       // Handle chat messages
       socket.on("new-message", (messageData: ChatMessage) => {
+        console.log("🔥 New message received:", messageData);
         setMessages((prev) => [...prev, messageData]);
       });
 
@@ -236,7 +236,18 @@ console.log(\`Result: \${result}\`);
 
       return () => {
         if (socket) {
+          console.log(
+            "🔥 Cleaning up socket connection for session:",
+            session.id,
+          );
           socket.emit("leave-session", session.id);
+          socket.off("room-joined");
+          socket.off("participant-joined");
+          socket.off("participant-left");
+          socket.off("code-update");
+          socket.off("cursor-update");
+          socket.off("new-message");
+          socket.off("user-typing");
           socket.disconnect();
         }
       };

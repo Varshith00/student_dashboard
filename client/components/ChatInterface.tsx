@@ -56,6 +56,7 @@ export default function ChatInterface({
     if (!newMessage.trim() || isSending || disabled) return;
 
     const messageContent = newMessage.trim();
+    console.log("🔥 Sending message:", messageContent);
     setNewMessage("");
     setIsSending(true);
 
@@ -66,7 +67,12 @@ export default function ChatInterface({
         onTypingStop();
       }
 
-      // Send via API as backup (Socket.io handles real-time)
+      // Send via socket for real-time delivery
+      console.log("🔥 Sending via socket...");
+      onSendMessage(messageContent);
+
+      // Also send via API as backup
+      console.log("🔥 Sending via API...");
       const response = await authFetch("/api/collaboration/message", {
         method: "POST",
         body: JSON.stringify({
@@ -80,10 +86,9 @@ export default function ChatInterface({
         throw new Error("Failed to send message");
       }
 
-      // Also send via socket for immediate feedback
-      onSendMessage(messageContent);
+      console.log("🔥 Message sent successfully!");
     } catch (error) {
-      console.error("Error sending message:", error);
+      console.error("🔥 Error sending message:", error);
       toast.error("Failed to send message");
       // Restore message on error
       setNewMessage(messageContent);

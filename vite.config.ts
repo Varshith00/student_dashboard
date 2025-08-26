@@ -31,14 +31,20 @@ function expressPlugin(): Plugin {
     apply: "serve", // Only apply during development (serve mode)
     configureServer(server) {
       console.log(
-        "🔧 Development mode: Using development server configuration",
+        "🔧 Development mode: Using full server configuration with Socket.io",
       );
 
-      // Use a development-specific server configuration that avoids body parsing conflicts
-      const { app } = createDevServer();
+      // Use the full server configuration that includes Socket.io
+      const { app, httpServer, io } = createServer();
 
       // Add Express app as middleware to Vite dev server
       server.middlewares.use(app);
+
+      // Note: Socket.io will run on the HTTP server created above
+      // The client should connect to the same port (8080)
+      if (io) {
+        console.log("✅ Socket.io enabled in development mode");
+      }
     },
   };
 }

@@ -36,6 +36,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth, authFetch } from "@/contexts/AuthContext";
 import { problems } from "@/data/problems";
+import { toast } from "sonner";
 
 interface Assignment {
   id: string;
@@ -70,6 +71,7 @@ export default function StudentDashboard() {
     { total: 0, pending: 0, inProgress: 0, completed: 0, overdue: 0 },
   );
   const [assignmentsLoading, setAssignmentsLoading] = useState(false);
+  const [joinSessionId, setJoinSessionId] = useState("");
 
   // Redirect if not logged in or not a student
   useEffect(() => {
@@ -175,6 +177,15 @@ export default function StudentDashboard() {
       default:
         return status;
     }
+  };
+
+  const handleJoinSession = () => {
+    if (!joinSessionId.trim()) {
+      toast.error("Please enter a session ID");
+      return;
+    }
+    toast.success("Joining session...");
+    navigate(`/student/collaboration/${joinSessionId.trim()}`);
   };
 
   const handleLogout = () => {
@@ -823,6 +834,13 @@ export default function StudentDashboard() {
                           type="text"
                           placeholder="Enter session ID..."
                           className="w-full px-3 py-2 border rounded-md"
+                          value={joinSessionId}
+                          onChange={(e) => setJoinSessionId(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              handleJoinSession();
+                            }
+                          }}
                         />
                         <div className="text-sm text-muted-foreground">
                           <p>• Get the session ID from your collaborator</p>
@@ -833,6 +851,8 @@ export default function StudentDashboard() {
                       <Button
                         variant="outline"
                         className="w-full border-accent text-accent hover:bg-accent hover:text-accent-foreground"
+                        onClick={handleJoinSession}
+                        disabled={!joinSessionId.trim()}
                       >
                         <Play className="w-4 h-4 mr-2" />
                         Join Session
