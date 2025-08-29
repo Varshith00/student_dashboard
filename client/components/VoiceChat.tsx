@@ -338,20 +338,16 @@ export default function VoiceChat({
     const handleVoiceOffer = async (data: any) => {
       const { offer, participantId: offerParticipantId } = data;
 
-      // Find participant
-      const targetParticipant = participants.find(
-        (p) => p.id === offerParticipantId,
-      );
+      // Only handle if this offer is intended for me
+      if (offerParticipantId !== participantId) return;
+
+      const targetParticipant = participants.find((p) => p.id === offerParticipantId);
       if (!targetParticipant) return;
 
       try {
-        // Create peer connection if not exists
         let peerConn = peerConnectionsRef.current.get(offerParticipantId);
         if (!peerConn) {
-          const pc = createPeerConnection(
-            offerParticipantId,
-            targetParticipant.name,
-          );
+          const pc = createPeerConnection(offerParticipantId, targetParticipant.name);
           peerConn = {
             participantId: offerParticipantId,
             participantName: targetParticipant.name,
@@ -360,12 +356,8 @@ export default function VoiceChat({
           peerConnectionsRef.current.set(offerParticipantId, peerConn);
         }
 
-        // Set remote description
-        await peerConn.connection.setRemoteDescription(
-          new RTCSessionDescription(offer),
-        );
+        await peerConn.connection.setRemoteDescription(new RTCSessionDescription(offer));
 
-        // Create and send answer
         const answer = await peerConn.connection.createAnswer();
         await peerConn.connection.setLocalDescription(answer);
 
