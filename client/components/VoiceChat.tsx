@@ -393,13 +393,14 @@ export default function VoiceChat({
     const handleVoiceIceCandidate = async (data: any) => {
       const { candidate, participantId: candidateParticipantId } = data;
 
+      // Only handle if intended for me
+      if (candidateParticipantId !== participantId) return;
+
       const peerConn = peerConnectionsRef.current.get(candidateParticipantId);
       if (!peerConn) return;
 
       try {
-        await peerConn.connection.addIceCandidate(
-          new RTCIceCandidate(candidate),
-        );
+        await peerConn.connection.addIceCandidate(new RTCIceCandidate(candidate));
       } catch (err) {
         console.error("Error handling ICE candidate:", err);
       }
