@@ -389,7 +389,9 @@ console.log(\`Result: \${result}\`);
       // Emit real-time update via socket (only in production)
       if (socketRef.current && connectionStatus === "connected") {
         const pos = editorRef.current?.getPosition();
-        const cursor = pos ? { line: pos.lineNumber, column: pos.column } : undefined;
+        const cursor = pos
+          ? { line: pos.lineNumber, column: pos.column }
+          : undefined;
         socketRef.current.emit("code-change", {
           sessionId: session.id,
           participantId,
@@ -399,7 +401,9 @@ console.log(\`Result: \${result}\`);
       }
 
       const pos = editorRef.current?.getPosition();
-      const cursor = pos ? { line: pos.lineNumber, column: pos.column } : undefined;
+      const cursor = pos
+        ? { line: pos.lineNumber, column: pos.column }
+        : undefined;
       const response = await authFetch("/api/collaboration/update", {
         method: "POST",
         body: JSON.stringify({

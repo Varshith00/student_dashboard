@@ -341,13 +341,18 @@ export default function VoiceChat({
       // Only handle if this offer is intended for me
       if (offerParticipantId !== participantId) return;
 
-      const targetParticipant = participants.find((p) => p.id === offerParticipantId);
+      const targetParticipant = participants.find(
+        (p) => p.id === offerParticipantId,
+      );
       if (!targetParticipant) return;
 
       try {
         let peerConn = peerConnectionsRef.current.get(offerParticipantId);
         if (!peerConn) {
-          const pc = createPeerConnection(offerParticipantId, targetParticipant.name);
+          const pc = createPeerConnection(
+            offerParticipantId,
+            targetParticipant.name,
+          );
           peerConn = {
             participantId: offerParticipantId,
             participantName: targetParticipant.name,
@@ -356,7 +361,9 @@ export default function VoiceChat({
           peerConnectionsRef.current.set(offerParticipantId, peerConn);
         }
 
-        await peerConn.connection.setRemoteDescription(new RTCSessionDescription(offer));
+        await peerConn.connection.setRemoteDescription(
+          new RTCSessionDescription(offer),
+        );
 
         const answer = await peerConn.connection.createAnswer();
         await peerConn.connection.setLocalDescription(answer);
@@ -384,7 +391,9 @@ export default function VoiceChat({
       if (!peerConn) return;
 
       try {
-        await peerConn.connection.setRemoteDescription(new RTCSessionDescription(answer));
+        await peerConn.connection.setRemoteDescription(
+          new RTCSessionDescription(answer),
+        );
       } catch (err) {
         console.error("Error handling voice answer:", err);
       }
@@ -400,7 +409,9 @@ export default function VoiceChat({
       if (!peerConn) return;
 
       try {
-        await peerConn.connection.addIceCandidate(new RTCIceCandidate(candidate));
+        await peerConn.connection.addIceCandidate(
+          new RTCIceCandidate(candidate),
+        );
       } catch (err) {
         console.error("Error handling ICE candidate:", err);
       }

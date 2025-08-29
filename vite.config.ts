@@ -31,7 +31,9 @@ function expressPlugin(): Plugin {
     name: "express-plugin",
     apply: "serve",
     configureServer(server) {
-      console.log("🔧 Development mode: Attaching API and Socket.io to Vite server");
+      console.log(
+        "🔧 Development mode: Attaching API and Socket.io to Vite server",
+      );
 
       // Create the Express app with routes suitable for Vite dev
       const { app } = createDevServer();
@@ -48,7 +50,9 @@ function expressPlugin(): Plugin {
       // Mount Express app into Vite dev server
       server.middlewares.use(app);
 
-      console.log("✅ Socket.io enabled in development mode on Vite httpServer");
+      console.log(
+        "✅ Socket.io enabled in development mode on Vite httpServer",
+      );
     },
   };
 }
