@@ -28,23 +28,28 @@ export default defineConfig(({ mode }) => ({
 function expressPlugin(): Plugin {
   return {
     name: "express-plugin",
-    apply: "serve", // Only apply during development (serve mode)
+    apply: "serve",
     configureServer(server) {
-      console.log(
-        "🔧 Development mode: Using full server configuration with Socket.io",
-      );
+      console.log("🔧 Development mode: Attaching API and Socket.io to Vite server");
 
-      // Use the full server configuration that includes Socket.io
-      const { app, httpServer, io } = createServer();
+      // Create the Express app with routes suitable for Vite dev
+      const { app } = createDevServer();
 
-      // Add Express app as middleware to Vite dev server
+      // Attach Socket.io to Vite's own http server so it actually listens
+      const { Server } = require("socket.io");
+      const { attachSocketHandlers } = require("./server");
+      const io = new Server(server.httpServer, {
+        cors: { origin: "*", methods: ["GET", "POST"] },
+      });
+      attachSocketHandlers(io);
+
+      // Make io available to API routes
+      app.set("io", io);
+
+      // Mount Express app into Vite dev server
       server.middlewares.use(app);
 
-      // Note: Socket.io will run on the HTTP server created above
-      // The client should connect to the same port (8080)
-      if (io) {
-        console.log("✅ Socket.io enabled in development mode");
-      }
+      console.log("✅ Socket.io enabled in development mode on Vite httpServer");
     },
   };
 }
