@@ -377,13 +377,14 @@ export default function VoiceChat({
     const handleVoiceAnswer = async (data: any) => {
       const { answer, participantId: answerParticipantId } = data;
 
+      // Only handle if the answer is intended for me
+      if (answerParticipantId !== participantId) return;
+
       const peerConn = peerConnectionsRef.current.get(answerParticipantId);
       if (!peerConn) return;
 
       try {
-        await peerConn.connection.setRemoteDescription(
-          new RTCSessionDescription(answer),
-        );
+        await peerConn.connection.setRemoteDescription(new RTCSessionDescription(answer));
       } catch (err) {
         console.error("Error handling voice answer:", err);
       }
