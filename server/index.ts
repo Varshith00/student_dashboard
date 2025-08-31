@@ -314,7 +314,7 @@ export function createServer() {
   app.post("/api/collaboration/create", authMiddleware, createSession);
   app.post("/api/collaboration/join", authMiddleware, joinSession);
   app.get("/api/collaboration/:sessionId", authMiddleware, getSession);
-  app.get("/api/collaboration/validate/:sessionId", validateSession);
+  app.get("/api/collaboration/validate/:sessionId", authMiddleware, validateSession);
   app.post("/api/collaboration/update", authMiddleware, updateCode);
   app.post("/api/collaboration/message", authMiddleware, sendMessage);
   app.post("/api/collaboration/leave", authMiddleware, leaveSession);
@@ -509,7 +509,7 @@ export function createDevServer() {
   app.post("/api/collaboration/create", authMiddleware, createSession);
   app.post("/api/collaboration/join", authMiddleware, joinSession);
   app.get("/api/collaboration/:sessionId", authMiddleware, getSession);
-  app.get("/api/collaboration/validate/:sessionId", validateSession);
+  app.get("/api/collaboration/validate/:sessionId", authMiddleware, validateSession);
   app.post("/api/collaboration/update", authMiddleware, updateCode);
   app.post("/api/collaboration/message", authMiddleware, sendMessage);
   app.post("/api/collaboration/leave", authMiddleware, leaveSession);
