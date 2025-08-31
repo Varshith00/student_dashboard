@@ -17,7 +17,8 @@ interface ExecuteJavaScriptResponse {
 
 const jsRateWindowMs = 60_000;
 const jsMaxPerWindow = 5;
-const jsRateMap: Map<string, { count: number; windowStart: number }> = new Map();
+const jsRateMap: Map<string, { count: number; windowStart: number }> =
+  new Map();
 
 export const handleExecuteJavaScript: RequestHandler = async (req, res) => {
   try {
@@ -39,7 +40,9 @@ export const handleExecuteJavaScript: RequestHandler = async (req, res) => {
     entry.count += 1;
     jsRateMap.set(userKey, entry);
     if (entry.count > jsMaxPerWindow) {
-      return res.status(429).json({ success: false, error: "Rate limit exceeded" });
+      return res
+        .status(429)
+        .json({ success: false, error: "Rate limit exceeded" });
     }
 
     const { code } = req.body as ExecuteJavaScriptRequest;
