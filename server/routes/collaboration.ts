@@ -13,7 +13,7 @@ import {
 } from "@shared/api";
 
 // In-memory storage for demo (in production, use a proper database)
-const activeSessions: Map<string, CollaborationSession> = new Map();
+export const activeSessions: Map<string, CollaborationSession> = new Map();
 const sessionEvents: Map<string, SessionEvent[]> = new Map();
 
 // Colors for participants
