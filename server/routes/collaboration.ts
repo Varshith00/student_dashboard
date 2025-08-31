@@ -484,7 +484,7 @@ export const sendMessage: RequestHandler = (req, res) => {
 
     // Create chat message
     const chatMessage: ChatMessage = {
-      id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+      id: `msg_${randomUUID()}`,
       content: message,
       participantId,
       participantName: participant.name,
