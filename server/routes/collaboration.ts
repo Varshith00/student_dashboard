@@ -552,5 +552,11 @@ export const validateSession: RequestHandler = (req, res) => {
   }
 };
 
+export function isUserParticipant(sessionId: string, userId: string): boolean {
+  const session = activeSessions.get(sessionId);
+  if (!session) return false;
+  return session.participants.some((p) => p.userId === userId && p.isActive);
+}
+
 // Run cleanup every hour
 setInterval(cleanupSessions, 60 * 60 * 1000);
