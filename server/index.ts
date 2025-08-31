@@ -3,6 +3,8 @@ import express from "express";
 import cors from "cors";
 import { createServer as createHttpServer } from "http";
 import { Server } from "socket.io";
+import jwt from "jsonwebtoken";
+import { randomUUID } from "crypto";
 import { handleDemo } from "./routes/demo";
 import { handleExecutePython } from "./routes/execute-python";
 import { handleExecuteJavaScript } from "./routes/execute-javascript";
@@ -59,7 +61,7 @@ export function attachSocketHandlers(io: Server) {
 
     socket.on("join-session", (sessionId) => {
       socket.join(sessionId);
-      console.log(`🔥 Socket ${socket.id} joined session room ${sessionId}`);
+      console.log(`�� Socket ${socket.id} joined session room ${sessionId}`);
       socket.emit("room-joined", { sessionId });
       socket.to(sessionId).emit("socket-user-joined", {
         socketId: socket.id,
