@@ -15,8 +15,33 @@ interface ExecuteJavaScriptResponse {
   execution_time?: number;
 }
 
+const jsRateWindowMs = 60_000;
+const jsMaxPerWindow = 5;
+const jsRateMap: Map<string, { count: number; windowStart: number }> = new Map();
+
 export const handleExecuteJavaScript: RequestHandler = async (req, res) => {
   try {
+    if (process.env.ALLOW_CODE_EXECUTION !== "true") {
+      return res.status(503).json({
+        success: false,
+        error: "Code execution is temporarily disabled",
+      } as ExecuteJavaScriptResponse);
+    }
+
+    const user = (req as any).user;
+    const userKey = user?.id || req.ip;
+    const now = Date.now();
+    const entry = jsRateMap.get(userKey) || { count: 0, windowStart: now };
+    if (now - entry.windowStart > jsRateWindowMs) {
+      entry.count = 0;
+      entry.windowStart = now;
+    }
+    entry.count += 1;
+    jsRateMap.set(userKey, entry);
+    if (entry.count > jsMaxPerWindow) {
+      return res.status(429).json({ success: false, error: "Rate limit exceeded" });
+    }
+
     const { code } = req.body as ExecuteJavaScriptRequest;
 
     if (!code || typeof code !== "string") {
