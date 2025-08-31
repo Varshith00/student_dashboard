@@ -58,12 +58,30 @@ import {
 } from "./routes/collaboration";
 
 export function attachSocketHandlers(io: Server) {
+  io.use((socket, next) => {
+    try {
+      const auth: any = socket.handshake.auth || {};
+      const query: any = socket.handshake.query || {};
+      const token = auth.token || query.token;
+      if (!token) return next(new Error("Unauthorized"));
+      const JWT_SECRET = process.env.JWT_SECRET as string;
+      const decoded = jwt.verify(token as string, JWT_SECRET) as any;
+      (socket.data as any).user = {
+        id: decoded.id,
+        email: decoded.email,
+        role: decoded.role,
+      };
+      next();
+    } catch {
+      next(new Error("Unauthorized"));
+    }
+  });
   io.on("connection", (socket) => {
     console.log("User connected:", socket.id);
 
     socket.on("join-session", (sessionId) => {
       socket.join(sessionId);
-      console.log(`�� Socket ${socket.id} joined session room ${sessionId}`);
+      console.log(`🔥 Socket ${socket.id} joined session room ${sessionId}`);
       socket.emit("room-joined", { sessionId });
       socket.to(sessionId).emit("socket-user-joined", {
         socketId: socket.id,
