@@ -325,7 +325,7 @@ export function createServer() {
 export function createDevServer() {
   const app = express();
 
-  app.use(cors());
+  app.use(cors({ origin: false }));
 
   app.use("/api", (req, res, next) => {
     if (
