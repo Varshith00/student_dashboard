@@ -131,7 +131,7 @@ export function attachSocketHandlers(io: Server) {
       );
 
       const messageData = {
-        id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+        id: `msg_${randomUUID()}`,
         content: message,
         participantId,
         participantName,
