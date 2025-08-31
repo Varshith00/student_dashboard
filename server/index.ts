@@ -80,6 +80,11 @@ export function attachSocketHandlers(io: Server) {
     console.log("User connected:", socket.id);
 
     socket.on("join-session", (sessionId) => {
+      const user = (socket.data as any).user;
+      if (!user || !isUserParticipant(sessionId, user.id)) {
+        socket.emit("error", { message: "Not authorized for this session" });
+        return;
+      }
       socket.join(sessionId);
       console.log(`🔥 Socket ${socket.id} joined session room ${sessionId}`);
       socket.emit("room-joined", { sessionId });
