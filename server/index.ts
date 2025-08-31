@@ -53,6 +53,8 @@ import {
   leaveSession,
   sendMessage,
   validateSession,
+  validateSession,
+  isUserParticipant,
 } from "./routes/collaboration";
 
 export function attachSocketHandlers(io: Server) {
