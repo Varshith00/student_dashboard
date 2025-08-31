@@ -154,12 +154,6 @@ export const joinSession: RequestHandler = (req, res) => {
     }
 
     const { sessionId }: JoinSessionRequest = req.body;
-    console.log(
-      `Join session attempt - User: ${user.name}, Session ID: ${sessionId}`,
-    );
-    console.log(
-      `Active sessions: ${Array.from(activeSessions.keys()).join(", ")}`,
-    );
 
     if (!sessionId || typeof sessionId !== "string" || !sessionId.trim()) {
       console.log("Join session - Invalid session ID:", sessionId);
