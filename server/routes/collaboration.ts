@@ -184,7 +184,7 @@ export const joinSession: RequestHandler = (req, res) => {
       // Add new participant
       const colorIndex = session.participants.length % participantColors.length;
       const newParticipant: Participant = {
-        id: `participant_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+        id: `participant_${randomUUID()}`,
         userId: user.id,
         name: user.name,
         color: participantColors[colorIndex],
