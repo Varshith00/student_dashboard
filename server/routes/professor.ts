@@ -238,6 +238,9 @@ export const handleGetStudents: RequestHandler = async (req, res) => {
 export const handleAssignProblem: RequestHandler = async (req, res) => {
   try {
     const professor = (req as any).user;
+    if (professor.role !== "professor") {
+      return res.status(403).json({ success: false, error: "Only professors can assign problems" });
+    }
     const { studentId, problemId, dueDate } = req.body;
 
     if (!studentId || !problemId) {
