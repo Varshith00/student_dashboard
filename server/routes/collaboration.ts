@@ -28,6 +28,8 @@ const participantColors = [
   "#ec4899", // pink
 ];
 
+import { randomUUID } from "crypto";
+
 function getDefaultCode(language: "python" | "javascript"): string {
   if (language === "python") {
     return `# Collaborative Python Session
