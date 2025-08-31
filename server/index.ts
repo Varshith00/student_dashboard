@@ -214,7 +214,7 @@ export function createServer() {
 
   app.set("io", io);
 
-  app.use(cors());
+  app.use(cors({ origin: false }));
   app.use(express.json({ limit: "10mb" }));
   app.use(express.urlencoded({ extended: true }));
 
