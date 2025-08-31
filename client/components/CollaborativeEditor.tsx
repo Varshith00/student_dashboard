@@ -146,8 +146,10 @@ console.log(\`Result: \${result}\`);
     setConnectionStatus("connecting");
 
     try {
+      const token = localStorage.getItem("authToken");
       socketRef.current = io(window.location.origin, {
         transports: ["websocket", "polling"],
+        auth: token ? { token } : {},
       });
 
       const socket = socketRef.current;
