@@ -95,12 +95,12 @@ export const createSession: RequestHandler = (req, res) => {
       });
     }
 
-    const sessionId = `collab_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const sessionId = `collab_${randomUUID()}`;
     const now = new Date().toISOString();
 
     // Create host participant
     const hostParticipant: Participant = {
-      id: `participant_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+      id: `participant_${randomUUID()}`,
       userId: user.id,
       name: user.name,
       color: participantColors[0],
