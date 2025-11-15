@@ -15,8 +15,36 @@ interface ExecutePythonResponse {
   execution_time?: number;
 }
 
+const pyRateWindowMs = 60_000;
+const pyMaxPerWindow = 5;
+const pyRateMap: Map<string, { count: number; windowStart: number }> =
+  new Map();
+
 export const handleExecutePython: RequestHandler = async (req, res) => {
   try {
+    if (process.env.ALLOW_CODE_EXECUTION !== "true") {
+      return res.status(503).json({
+        success: false,
+        error: "Code execution is temporarily disabled",
+      } as ExecutePythonResponse);
+    }
+
+    const user = (req as any).user;
+    const userKey = user?.id || req.ip;
+    const now = Date.now();
+    const entry = pyRateMap.get(userKey) || { count: 0, windowStart: now };
+    if (now - entry.windowStart > pyRateWindowMs) {
+      entry.count = 0;
+      entry.windowStart = now;
+    }
+    entry.count += 1;
+    pyRateMap.set(userKey, entry);
+    if (entry.count > pyMaxPerWindow) {
+      return res
+        .status(429)
+        .json({ success: false, error: "Rate limit exceeded" });
+    }
+
     const { code } = req.body as ExecutePythonRequest;
 
     if (!code || typeof code !== "string") {

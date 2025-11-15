@@ -139,33 +139,30 @@ console.log(\`Result: \${result}\`);
     }
   }
 
-  // Initialize socket connection (only in production)
+  // Initialize socket connection
   useEffect(() => {
     if (!session?.id) return;
-
-    // Check if we're in production environment
-    const isProduction = process.env.NODE_ENV === "production";
-
-    if (!isProduction) {
-      // In development, skip socket connection to avoid conflicts
-      setConnectionStatus("disconnected");
-      console.log("🔧 Development mode: Real-time collaboration disabled");
-      return;
-    }
 
     setConnectionStatus("connecting");
 
     try {
+      const token = localStorage.getItem("authToken");
       socketRef.current = io(window.location.origin, {
         transports: ["websocket", "polling"],
+        auth: token ? { token } : {},
       });
 
       const socket = socketRef.current;
 
       socket.on("connect", () => {
-        console.log("Connected to socket server");
+        console.log("🔥 Connected to socket server, socket ID:", socket.id);
         setConnectionStatus("connected");
+        console.log("🔥 Joining session room:", session.id);
         socket.emit("join-session", session.id);
+      });
+
+      socket.on("room-joined", (data) => {
+        console.log("🔥 Successfully joined socket room:", data);
       });
 
       socket.on("disconnect", () => {
@@ -197,17 +194,21 @@ console.log(\`Result: \${result}\`);
 
       // Handle participant updates
       socket.on("participant-joined", (data) => {
+        console.log("🔥 Participant joined:", data);
         const { participant, session: updatedSession } = data;
         setSession(updatedSession);
+        toast.success(`${participant.name} joined the session`);
       });
 
       socket.on("participant-left", (data) => {
+        console.log("🔥 Participant left:", data);
         const {
           participantId: leftParticipantId,
           participantName,
           session: updatedSession,
         } = data;
         setSession(updatedSession);
+        toast.info(`${participantName} left the session`);
       });
 
       socket.on("cursor-update", (data) => {
@@ -218,6 +219,7 @@ console.log(\`Result: \${result}\`);
 
       // Handle chat messages
       socket.on("new-message", (messageData: ChatMessage) => {
+        console.log("🔥 New message received:", messageData);
         setMessages((prev) => [...prev, messageData]);
       });
 
@@ -236,7 +238,18 @@ console.log(\`Result: \${result}\`);
 
       return () => {
         if (socket) {
+          console.log(
+            "🔥 Cleaning up socket connection for session:",
+            session.id,
+          );
           socket.emit("leave-session", session.id);
+          socket.off("room-joined");
+          socket.off("participant-joined");
+          socket.off("participant-left");
+          socket.off("code-update");
+          socket.off("cursor-update");
+          socket.off("new-message");
+          socket.off("user-typing");
           socket.disconnect();
         }
       };
@@ -377,21 +390,29 @@ console.log(\`Result: \${result}\`);
     try {
       // Emit real-time update via socket (only in production)
       if (socketRef.current && connectionStatus === "connected") {
+        const pos = editorRef.current?.getPosition();
+        const cursor = pos
+          ? { line: pos.lineNumber, column: pos.column }
+          : undefined;
         socketRef.current.emit("code-change", {
           sessionId: session.id,
           participantId,
           code: newCode,
-          cursor: editorRef.current?.getPosition(),
+          cursor,
         });
       }
 
+      const pos = editorRef.current?.getPosition();
+      const cursor = pos
+        ? { line: pos.lineNumber, column: pos.column }
+        : undefined;
       const response = await authFetch("/api/collaboration/update", {
         method: "POST",
         body: JSON.stringify({
           sessionId: session.id,
           participantId,
           code: newCode,
-          cursor: editorRef.current?.getPosition(),
+          cursor,
         }),
       });
 

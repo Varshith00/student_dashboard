@@ -238,6 +238,11 @@ export const handleGetStudents: RequestHandler = async (req, res) => {
 export const handleAssignProblem: RequestHandler = async (req, res) => {
   try {
     const professor = (req as any).user;
+    if (professor.role !== "professor") {
+      return res
+        .status(403)
+        .json({ success: false, error: "Only professors can assign problems" });
+    }
     const { studentId, problemId, dueDate } = req.body;
 
     if (!studentId || !problemId) {
@@ -281,6 +286,11 @@ export const handleAssignProblem: RequestHandler = async (req, res) => {
 export const handleBulkAssignProblem: RequestHandler = async (req, res) => {
   try {
     const professor = (req as any).user;
+    if (professor.role !== "professor") {
+      return res
+        .status(403)
+        .json({ success: false, error: "Only professors can assign problems" });
+    }
     const { studentIds, problemId, dueDate } = req.body;
 
     if (
@@ -564,10 +574,23 @@ export const handleUpdateAssignmentProgress: RequestHandler = async (
   res,
 ) => {
   try {
+    const professor = (req as any).user;
+    if (professor.role !== "professor") {
+      return res
+        .status(403)
+        .json({
+          success: false,
+          error: "Only professors can update assignments",
+        });
+    }
     const { assignmentId } = req.params;
     const { status, score, timeSpent } = req.body;
 
-    const assignmentIndex = assignments.findIndex((a) => a.id === assignmentId);
+    const assignmentIndex = assignments.findIndex(
+      (a) =>
+        a.id === assignmentId &&
+        (a.professorId === professor.id || a.professorId === professor.email),
+    );
     if (assignmentIndex === -1) {
       return res.status(404).json({
         success: false,

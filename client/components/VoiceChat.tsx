@@ -338,14 +338,15 @@ export default function VoiceChat({
     const handleVoiceOffer = async (data: any) => {
       const { offer, participantId: offerParticipantId } = data;
 
-      // Find participant
+      // Only handle if this offer is intended for me
+      if (offerParticipantId !== participantId) return;
+
       const targetParticipant = participants.find(
         (p) => p.id === offerParticipantId,
       );
       if (!targetParticipant) return;
 
       try {
-        // Create peer connection if not exists
         let peerConn = peerConnectionsRef.current.get(offerParticipantId);
         if (!peerConn) {
           const pc = createPeerConnection(
@@ -360,12 +361,10 @@ export default function VoiceChat({
           peerConnectionsRef.current.set(offerParticipantId, peerConn);
         }
 
-        // Set remote description
         await peerConn.connection.setRemoteDescription(
           new RTCSessionDescription(offer),
         );
 
-        // Create and send answer
         const answer = await peerConn.connection.createAnswer();
         await peerConn.connection.setLocalDescription(answer);
 
@@ -385,6 +384,9 @@ export default function VoiceChat({
     const handleVoiceAnswer = async (data: any) => {
       const { answer, participantId: answerParticipantId } = data;
 
+      // Only handle if the answer is intended for me
+      if (answerParticipantId !== participantId) return;
+
       const peerConn = peerConnectionsRef.current.get(answerParticipantId);
       if (!peerConn) return;
 
@@ -399,6 +401,9 @@ export default function VoiceChat({
 
     const handleVoiceIceCandidate = async (data: any) => {
       const { candidate, participantId: candidateParticipantId } = data;
+
+      // Only handle if intended for me
+      if (candidateParticipantId !== participantId) return;
 
       const peerConn = peerConnectionsRef.current.get(candidateParticipantId);
       if (!peerConn) return;

@@ -13,7 +13,7 @@ import {
 } from "@shared/api";
 
 // In-memory storage for demo (in production, use a proper database)
-const activeSessions: Map<string, CollaborationSession> = new Map();
+export const activeSessions: Map<string, CollaborationSession> = new Map();
 const sessionEvents: Map<string, SessionEvent[]> = new Map();
 
 // Colors for participants
@@ -27,6 +27,8 @@ const participantColors = [
   "#f97316", // orange
   "#ec4899", // pink
 ];
+
+import { randomUUID } from "crypto";
 
 function getDefaultCode(language: "python" | "javascript"): string {
   if (language === "python") {
@@ -93,12 +95,12 @@ export const createSession: RequestHandler = (req, res) => {
       });
     }
 
-    const sessionId = `collab_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const sessionId = `collab_${randomUUID()}`;
     const now = new Date().toISOString();
 
     // Create host participant
     const hostParticipant: Participant = {
-      id: `participant_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+      id: `participant_${randomUUID()}`,
       userId: user.id,
       name: user.name,
       color: participantColors[0],
@@ -152,12 +154,6 @@ export const joinSession: RequestHandler = (req, res) => {
     }
 
     const { sessionId }: JoinSessionRequest = req.body;
-    console.log(
-      `Join session attempt - User: ${user.name}, Session ID: ${sessionId}`,
-    );
-    console.log(
-      `Active sessions: ${Array.from(activeSessions.keys()).join(", ")}`,
-    );
 
     if (!sessionId || typeof sessionId !== "string" || !sessionId.trim()) {
       console.log("Join session - Invalid session ID:", sessionId);
@@ -188,7 +184,7 @@ export const joinSession: RequestHandler = (req, res) => {
       // Add new participant
       const colorIndex = session.participants.length % participantColors.length;
       const newParticipant: Participant = {
-        id: `participant_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+        id: `participant_${randomUUID()}`,
         userId: user.id,
         name: user.name,
         color: participantColors[colorIndex],
@@ -488,7 +484,7 @@ export const sendMessage: RequestHandler = (req, res) => {
 
     // Create chat message
     const chatMessage: ChatMessage = {
-      id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+      id: `msg_${randomUUID()}`,
       content: message,
       participantId,
       participantName: participant.name,
@@ -535,39 +531,32 @@ export const sendMessage: RequestHandler = (req, res) => {
 export const validateSession: RequestHandler = (req, res) => {
   try {
     const { sessionId } = req.params;
-    console.log(`Validating session: ${sessionId}`);
-    console.log(
-      `Active sessions: ${Array.from(activeSessions.keys()).join(", ")}`,
-    );
-
     const session = activeSessions.get(sessionId);
 
     if (!session) {
       return res.status(404).json({
         success: false,
         message: "Session not found or has expired",
-        sessionId,
-        activeSessions: Array.from(activeSessions.keys()),
       });
     }
 
     res.json({
       success: true,
       message: "Session exists",
-      sessionId,
-      participantCount: session.participants.length,
-      activeParticipants: session.participants.filter((p) => p.isActive).length,
-      language: session.language,
-      createdAt: session.createdAt,
     });
   } catch (error) {
-    console.error("Error validating session:", error);
     res.status(500).json({
       success: false,
       message: "Internal server error",
     });
   }
 };
+
+export function isUserParticipant(sessionId: string, userId: string): boolean {
+  const session = activeSessions.get(sessionId);
+  if (!session) return false;
+  return session.participants.some((p) => p.userId === userId && p.isActive);
+}
 
 // Run cleanup every hour
 setInterval(cleanupSessions, 60 * 60 * 1000);

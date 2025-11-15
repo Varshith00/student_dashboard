@@ -1,7 +1,8 @@
 import { defineConfig, Plugin } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
-import { createServer, createDevServer } from "./server";
+import { Server as IOServer } from "socket.io";
+import { attachSocketHandlers, createDevServer } from "./server";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -28,17 +29,30 @@ export default defineConfig(({ mode }) => ({
 function expressPlugin(): Plugin {
   return {
     name: "express-plugin",
-    apply: "serve", // Only apply during development (serve mode)
+    apply: "serve",
     configureServer(server) {
       console.log(
-        "🔧 Development mode: Using development server configuration",
+        "🔧 Development mode: Attaching API and Socket.io to Vite server",
       );
 
-      // Use a development-specific server configuration that avoids body parsing conflicts
+      // Create the Express app with routes suitable for Vite dev
       const { app } = createDevServer();
 
-      // Add Express app as middleware to Vite dev server
+      // Attach Socket.io to Vite's own http server so it actually listens
+      const io = new IOServer(server.httpServer, {
+        cors: { origin: "*", methods: ["GET", "POST"] },
+      });
+      attachSocketHandlers(io);
+
+      // Make io available to API routes
+      app.set("io", io);
+
+      // Mount Express app into Vite dev server
       server.middlewares.use(app);
+
+      console.log(
+        "✅ Socket.io enabled in development mode on Vite httpServer",
+      );
     },
   };
 }

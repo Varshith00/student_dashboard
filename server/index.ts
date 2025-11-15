@@ -3,6 +3,8 @@ import express from "express";
 import cors from "cors";
 import { createServer as createHttpServer } from "http";
 import { Server } from "socket.io";
+import jwt from "jsonwebtoken";
+import { randomUUID } from "crypto";
 import { handleDemo } from "./routes/demo";
 import { handleExecutePython } from "./routes/execute-python";
 import { handleExecuteJavaScript } from "./routes/execute-javascript";
@@ -51,154 +53,171 @@ import {
   leaveSession,
   sendMessage,
   validateSession,
+  validateSession,
+  isUserParticipant,
 } from "./routes/collaboration";
+
+export function attachSocketHandlers(io: Server) {
+  io.use((socket, next) => {
+    try {
+      const auth: any = socket.handshake.auth || {};
+      const query: any = socket.handshake.query || {};
+      const token = auth.token || query.token;
+      if (!token) return next(new Error("Unauthorized"));
+      const JWT_SECRET = process.env.JWT_SECRET as string;
+      const decoded = jwt.verify(token as string, JWT_SECRET) as any;
+      (socket.data as any).user = {
+        id: decoded.id,
+        email: decoded.email,
+        role: decoded.role,
+      };
+      next();
+    } catch {
+      next(new Error("Unauthorized"));
+    }
+  });
+  io.on("connection", (socket) => {
+    console.log("User connected:", socket.id);
+
+    socket.on("join-session", (sessionId) => {
+      const user = (socket.data as any).user;
+      if (!user || !isUserParticipant(sessionId, user.id)) {
+        socket.emit("error", { message: "Not authorized for this session" });
+        return;
+      }
+      socket.join(sessionId);
+      console.log(`🔥 Socket ${socket.id} joined session room ${sessionId}`);
+      socket.emit("room-joined", { sessionId });
+      socket.to(sessionId).emit("socket-user-joined", {
+        socketId: socket.id,
+        sessionId,
+      });
+    });
+
+    socket.on("leave-session", (sessionId) => {
+      socket.leave(sessionId);
+      console.log(`Socket ${socket.id} left session ${sessionId}`);
+    });
+
+    socket.on("code-change", (data) => {
+      const { sessionId, code, cursor, participantId } = data;
+      socket.to(sessionId).emit("code-update", {
+        code,
+        cursor,
+        participantId,
+      });
+    });
+
+    socket.on("cursor-update", (data) => {
+      const { sessionId, cursor, participantId } = data;
+      socket.to(sessionId).emit("cursor-update", {
+        cursor,
+        participantId,
+      });
+    });
+
+    socket.on("participant-update", (data) => {
+      const { sessionId, participantId, status } = data;
+      socket.to(sessionId).emit("participant-update", {
+        participantId,
+        status,
+      });
+    });
+
+    socket.on("send-message", (data) => {
+      const { sessionId, message, participantId, participantName } = data;
+      console.log(
+        `🔥 Received message from ${participantName} in session ${sessionId}: ${message}`,
+      );
+
+      const messageData = {
+        id: `msg_${randomUUID()}`,
+        content: message,
+        participantId,
+        participantName,
+        timestamp: new Date().toISOString(),
+      };
+
+      console.log(`🔥 Broadcasting message to session room ${sessionId}`);
+      io.to(sessionId).emit("new-message", messageData);
+      console.log(`🔥 Message broadcasted successfully`);
+    });
+
+    socket.on("typing-start", (data) => {
+      const { sessionId, participantId, participantName } = data;
+      socket.to(sessionId).emit("user-typing", {
+        participantId,
+        participantName,
+        isTyping: true,
+      });
+    });
+
+    socket.on("typing-stop", (data) => {
+      const { sessionId, participantId, participantName } = data;
+      socket.to(sessionId).emit("user-typing", {
+        participantId,
+        participantName,
+        isTyping: false,
+      });
+    });
+
+    socket.on("voice-offer", (data) => {
+      const { sessionId, offer, participantId } = data;
+      socket.to(sessionId).emit("voice-offer", {
+        offer,
+        participantId,
+      });
+    });
+
+    socket.on("voice-answer", (data) => {
+      const { sessionId, answer, participantId } = data;
+      socket.to(sessionId).emit("voice-answer", {
+        answer,
+        participantId,
+      });
+    });
+
+    socket.on("voice-ice-candidate", (data) => {
+      const { sessionId, candidate, participantId } = data;
+      socket.to(sessionId).emit("voice-ice-candidate", {
+        candidate,
+        participantId,
+      });
+    });
+
+    socket.on("voice-state-change", (data) => {
+      const { sessionId, participantId, state } = data;
+      socket.to(sessionId).emit("voice-state-change", {
+        participantId,
+        state,
+      });
+    });
+
+    socket.on("disconnect", () => {
+      console.log("User disconnected:", socket.id);
+    });
+  });
+}
 
 export function createServer() {
   const app = express();
   const httpServer = createHttpServer(app);
 
-  // Only create socket.io in production to avoid development conflicts
-  let io = null;
-  const isProduction = process.env.NODE_ENV === "production";
+  const io = new Server(httpServer, {
+    cors: {
+      origin: "*",
+      methods: ["GET", "POST"],
+    },
+  });
 
-  if (isProduction) {
-    io = new Server(httpServer, {
-      cors: {
-        origin: "*",
-        methods: ["GET", "POST"],
-      },
-    });
+  attachSocketHandlers(io);
 
-    // Socket.io connection handling
-    io.on("connection", (socket) => {
-      console.log("User connected:", socket.id);
-
-      // Join collaboration session
-      socket.on("join-session", (sessionId) => {
-        socket.join(sessionId);
-        console.log(`Socket ${socket.id} joined session ${sessionId}`);
-      });
-
-      // Leave collaboration session
-      socket.on("leave-session", (sessionId) => {
-        socket.leave(sessionId);
-        console.log(`Socket ${socket.id} left session ${sessionId}`);
-      });
-
-      // Handle code changes
-      socket.on("code-change", (data) => {
-        const { sessionId, code, cursor, participantId } = data;
-        // Broadcast to all other participants in the session
-        socket.to(sessionId).emit("code-update", {
-          code,
-          cursor,
-          participantId,
-        });
-      });
-
-      // Handle cursor position updates
-      socket.on("cursor-update", (data) => {
-        const { sessionId, cursor, participantId } = data;
-        socket.to(sessionId).emit("cursor-update", {
-          cursor,
-          participantId,
-        });
-      });
-
-      // Handle participant status updates
-      socket.on("participant-update", (data) => {
-        const { sessionId, participantId, status } = data;
-        socket.to(sessionId).emit("participant-update", {
-          participantId,
-          status,
-        });
-      });
-
-      // Handle chat messages
-      socket.on("send-message", (data) => {
-        const { sessionId, message, participantId, participantName } = data;
-        const messageData = {
-          id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
-          content: message,
-          participantId,
-          participantName,
-          timestamp: new Date().toISOString(),
-        };
-
-        // Broadcast to all participants in the session including sender
-        io.to(sessionId).emit("new-message", messageData);
-        console.log(`Message sent in session ${sessionId}: ${message}`);
-      });
-
-      // Handle typing indicators
-      socket.on("typing-start", (data) => {
-        const { sessionId, participantId, participantName } = data;
-        socket.to(sessionId).emit("user-typing", {
-          participantId,
-          participantName,
-          isTyping: true,
-        });
-      });
-
-      socket.on("typing-stop", (data) => {
-        const { sessionId, participantId, participantName } = data;
-        socket.to(sessionId).emit("user-typing", {
-          participantId,
-          participantName,
-          isTyping: false,
-        });
-      });
-
-      // Handle WebRTC voice signaling
-      socket.on("voice-offer", (data) => {
-        const { sessionId, offer, participantId } = data;
-        socket.to(sessionId).emit("voice-offer", {
-          offer,
-          participantId,
-        });
-      });
-
-      socket.on("voice-answer", (data) => {
-        const { sessionId, answer, participantId } = data;
-        socket.to(sessionId).emit("voice-answer", {
-          answer,
-          participantId,
-        });
-      });
-
-      socket.on("voice-ice-candidate", (data) => {
-        const { sessionId, candidate, participantId } = data;
-        socket.to(sessionId).emit("voice-ice-candidate", {
-          candidate,
-          participantId,
-        });
-      });
-
-      socket.on("voice-state-change", (data) => {
-        const { sessionId, participantId, state } = data;
-        socket.to(sessionId).emit("voice-state-change", {
-          participantId,
-          state, // 'connected', 'disconnected', 'muted', 'unmuted'
-        });
-      });
-
-      socket.on("disconnect", () => {
-        console.log("User disconnected:", socket.id);
-      });
-    });
-  } else {
-    console.log("🔧 Development mode: Socket.io disabled");
-  }
-
-  // Make io instance available to routes (will be null in development)
   app.set("io", io);
 
-  // Middleware
-  app.use(cors());
-  app.use(express.json({ limit: "10mb" })); // Increase limit for code submissions
+  app.use(cors({ origin: false }));
+  app.use(express.json({ limit: "10mb" }));
   app.use(express.urlencoded({ extended: true }));
 
-  // Example API routes
   app.get("/api/ping", (_req, res) => {
     const ping = process.env.PING_MESSAGE ?? "ping";
     res.json({ message: ping });
@@ -206,21 +225,18 @@ export function createServer() {
 
   app.get("/api/demo", handleDemo);
 
-  // Authentication routes
   app.post("/api/auth/register", handleRegister);
   app.post("/api/auth/student-register", handleStudentRegister);
   app.post("/api/auth/login", handleLogin);
   app.get("/api/auth/user", authMiddleware, handleGetUser);
   app.get("/api/auth/professor/:professorEmail", handleGetProfessor);
 
-  // Protected routes (require authentication)
   app.post("/api/execute-python", authMiddleware, handleExecutePython);
   app.post("/api/execute-javascript", authMiddleware, handleExecuteJavaScript);
   app.post("/api/ai/generate-question", authMiddleware, handleGenerateQuestion);
   app.post("/api/ai/analyze-code", authMiddleware, handleAnalyzeCode);
   app.post("/api/ai/get-hint", authMiddleware, handleGetHint);
 
-  // Interview routes
   app.post(
     "/api/interview/technical/start",
     authMiddleware,
@@ -252,7 +268,6 @@ export function createServer() {
     handleEndBehavioralInterview,
   );
 
-  // Audio analysis routes
   app.post("/api/audio/transcribe", authMiddleware, handleAudioTranscription);
   app.post("/api/audio/analyze-answer", authMiddleware, handleAnswerAnalysis);
   app.post(
@@ -261,7 +276,6 @@ export function createServer() {
     handleBatchAnswerAnalysis,
   );
 
-  // Professor routes
   app.get("/api/professor/students", authMiddleware, handleGetStudents);
   app.post(
     "/api/professor/assign-problem",
@@ -291,18 +305,20 @@ export function createServer() {
     handleDeleteAssignment,
   );
 
-  // Student routes
   app.get(
     "/api/student/assignments",
     authMiddleware,
     handleGetStudentAssignments,
   );
 
-  // Collaboration routes
   app.post("/api/collaboration/create", authMiddleware, createSession);
   app.post("/api/collaboration/join", authMiddleware, joinSession);
   app.get("/api/collaboration/:sessionId", authMiddleware, getSession);
-  app.get("/api/collaboration/validate/:sessionId", validateSession);
+  app.get(
+    "/api/collaboration/validate/:sessionId",
+    authMiddleware,
+    validateSession,
+  );
   app.post("/api/collaboration/update", authMiddleware, updateCode);
   app.post("/api/collaboration/message", authMiddleware, sendMessage);
   app.post("/api/collaboration/leave", authMiddleware, leaveSession);
@@ -310,21 +326,17 @@ export function createServer() {
   return { app, httpServer, io };
 }
 
-// Development-specific server that avoids body parsing conflicts with Vite
 export function createDevServer() {
   const app = express();
 
-  // Middleware - but avoid express.json() which conflicts with Vite
-  app.use(cors());
+  app.use(cors({ origin: false }));
 
-  // Custom body parser that works with Vite
   app.use("/api", (req, res, next) => {
     if (
       req.method === "POST" ||
       req.method === "PUT" ||
       req.method === "PATCH"
     ) {
-      // Skip if body already parsed or if content-type is not JSON
       if (
         req.body !== undefined ||
         req.body === null ||
@@ -333,14 +345,12 @@ export function createDevServer() {
         return next();
       }
 
-      // Check if content-type is JSON
       const contentType = req.headers["content-type"] || "";
       if (!contentType.includes("application/json")) {
         req.body = {};
         return next();
       }
 
-      // Mark as being parsed to prevent double parsing
       (req as any)._bodyParsed = true;
 
       let body = "";
@@ -364,13 +374,11 @@ export function createDevServer() {
         next();
       };
 
-      // Check if the request stream is already consumed
       if (req.readableEnded || req.complete) {
         req.body = {};
         return next();
       }
 
-      // Set up event listeners only if we haven't already
       if (!hasListeners) {
         hasListeners = true;
 
@@ -394,13 +402,12 @@ export function createDevServer() {
           }
         });
 
-        // Add timeout to prevent hanging
         const timeout = setTimeout(() => {
           if (!finished) {
             console.warn("Body parsing timeout");
             finish();
           }
-        }, 10000); // 10 second timeout
+        }, 10000);
 
         req.on("end", () => clearTimeout(timeout));
         req.on("error", () => clearTimeout(timeout));
@@ -410,7 +417,6 @@ export function createDevServer() {
     }
   });
 
-  // Routes
   app.get("/api/ping", (_req, res) => {
     const ping = process.env.PING_MESSAGE ?? "ping";
     res.json({ message: ping });
@@ -418,21 +424,18 @@ export function createDevServer() {
 
   app.get("/api/demo", handleDemo);
 
-  // Authentication routes
   app.post("/api/auth/register", handleRegister);
   app.post("/api/auth/student-register", handleStudentRegister);
   app.post("/api/auth/login", handleLogin);
   app.get("/api/auth/user", authMiddleware, handleGetUser);
   app.get("/api/auth/professor/:professorEmail", handleGetProfessor);
 
-  // Protected routes (require authentication)
   app.post("/api/execute-python", authMiddleware, handleExecutePython);
   app.post("/api/execute-javascript", authMiddleware, handleExecuteJavaScript);
   app.post("/api/ai/generate-question", authMiddleware, handleGenerateQuestion);
   app.post("/api/ai/analyze-code", authMiddleware, handleAnalyzeCode);
   app.post("/api/ai/get-hint", authMiddleware, handleGetHint);
 
-  // Interview routes
   app.post(
     "/api/interview/technical/start",
     authMiddleware,
@@ -464,7 +467,6 @@ export function createDevServer() {
     handleEndBehavioralInterview,
   );
 
-  // Audio analysis routes
   app.post("/api/audio/transcribe", authMiddleware, handleAudioTranscription);
   app.post("/api/audio/analyze-answer", authMiddleware, handleAnswerAnalysis);
   app.post(
@@ -473,7 +475,6 @@ export function createDevServer() {
     handleBatchAnswerAnalysis,
   );
 
-  // Professor routes
   app.get("/api/professor/students", authMiddleware, handleGetStudents);
   app.post(
     "/api/professor/assign-problem",
@@ -503,18 +504,20 @@ export function createDevServer() {
     handleDeleteAssignment,
   );
 
-  // Student routes
   app.get(
     "/api/student/assignments",
     authMiddleware,
     handleGetStudentAssignments,
   );
 
-  // Collaboration routes
   app.post("/api/collaboration/create", authMiddleware, createSession);
   app.post("/api/collaboration/join", authMiddleware, joinSession);
   app.get("/api/collaboration/:sessionId", authMiddleware, getSession);
-  app.get("/api/collaboration/validate/:sessionId", validateSession);
+  app.get(
+    "/api/collaboration/validate/:sessionId",
+    authMiddleware,
+    validateSession,
+  );
   app.post("/api/collaboration/update", authMiddleware, updateCode);
   app.post("/api/collaboration/message", authMiddleware, sendMessage);
   app.post("/api/collaboration/leave", authMiddleware, leaveSession);
